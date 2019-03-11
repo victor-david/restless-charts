@@ -1,0 +1,13 @@
+# ignore thumbnails / desktop.ini created by windows
+Thumbs.db
+desktop.ini
+# ignore custom folder icon
+git.icon.ico
+# ignore VS build files, etc.
+*.suo
+obj/
+bin/
+Docs/
+Help/
+packages/
+.vs/
