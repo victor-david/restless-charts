@@ -1,0 +1,86 @@
+﻿<Window 
+    x:Class="Application.Sample.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:conx="clr-namespace:Restless.Controls.Chart;assembly=Restless.Charts"
+    mc:Ignorable="d"
+    Title="Sample Charts" 
+    WindowStartupLocation="CenterScreen"
+    Height="900" Width="1400">
+
+    <Window.Resources>
+        <ResourceDictionary Source="Resources.xaml"/>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="132"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <StackPanel>
+            <HeaderedContentControl Header="X Axis">
+                <StackPanel>
+                    <Button 
+                        Click="ButtonClickXAxisPlacement"
+                        ToolTip="Toggle the placement of the X axis between bottom and top"
+                        Content="Toggle Placement"/>
+                    <Button 
+                        Click="ButtonClickXAxisTicks"
+                        ToolTip="Change tick display for the X axis between major and minor, major only, and none"
+                        Content="Change Ticks"/>
+                    <Button 
+                        Click="ButtonClickXAxisReverse"
+                        ToolTip="Reverse the direction of the X axis"
+                        Content="Reverse"/>
+
+                </StackPanel>
+            </HeaderedContentControl>
+
+            <HeaderedContentControl Header="Y Axis">
+                <StackPanel>
+                    <Button
+                        Click="ButtonClickYAxisPlacement"
+                        ToolTip="Toggle the placement of the Y axis between left and right"
+                        Content="Toggle Placement"/>
+                    <Button
+                        Click="ButtonClickYAxisTicks"
+                        ToolTip="Change tick display for the Y axis between major and minor, major only, and none"
+                        Content="Change Ticks"/>
+                    <Button 
+                        Click="ButtonClickYAxisReverse"
+                        ToolTip="Reverse the direction of the Y axis"
+                        Content="Reverse"/>
+                </StackPanel>
+            </HeaderedContentControl>
+            
+        </StackPanel>
+        <conx:Chart
+            Name="MainChart"
+            Grid.Column="1"
+            Grid.Row="1"
+            Margin="20"
+            DataRange="{Binding DataRange}"
+            BorderBrush="DarkBlue"
+            BorderThickness="1"
+            TopTitle="{Binding TopTitle}"
+            BottomTitle="{Binding BottomTitle}"
+            LeftTitle="{Binding LeftTitle}"
+            RightTitle="{Binding RightTitle}"
+            
+            XAxisPlacement="{Binding XAxisPlacement}"
+            XAxisTickVisibility="{Binding XAxisTickVisibility}"
+            XAxisTextFormat="{Binding XAxisTextFormat}"
+            XAxisTextProvider="{Binding XAxisTextProvider}"
+            IsXAxisReversed="{Binding IsXAxisReversed}"
+            
+            YAxisPlacement="{Binding YAxisPlacement}"
+            YAxisTickVisibility="{Binding YAxisTickVisibility}"
+            YAxisTextFormat="{Binding YAxisTextFormat}"
+            YAxisTextProvider="{Binding YAxisTextProvider}"
+            IsYAxisReversed="{Binding IsYAxisReversed}"
+            />
+
+    </Grid>
+</Window>
