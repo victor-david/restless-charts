@@ -12,13 +12,9 @@ namespace Restless.Controls.Chart
     public class AxisGrid : Panel
     {
         #region Private
+        private readonly ChartContainer owner;
         private readonly Path horzPath;
         private readonly Path vertPath;
-        private readonly Axis xAxis;
-        private readonly Axis yAxis;
-        private Range xAxisRange;
-        private Range yAxisRange;
-        private readonly Border gridBorder;
         private GeometryGroup vertGeometryGroup;
         private GeometryGroup horzGeometryGroup;
         #endregion
@@ -29,51 +25,41 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Gets the default brush for the grid lines.
         /// </summary>
-        public static readonly Brush GridDefaultBrush = Axis.MinorTickDefaultBrush;
+        public static readonly Brush DefaultGridBrush = Axis.DefaultMinorTickBrush;
 
         /// <summary>
         /// Gets the default brush for the border of the grid axis.
         /// </summary>
-        public static readonly Brush GridBorderDefaultBrush = Axis.MinorTickDefaultBrush;
+        public static readonly Brush DefaultBorderBrush = Axis.DefaultMinorTickBrush;
         #endregion
 
         /************************************************************************/
 
         #region Constructors
         /// <summary>
-        /// Initializes new instance of <see cref="AxisGrid"/> class.
+        /// Initializes new instance of the <see cref="AxisGrid"/> class.
         /// </summary>
-        internal AxisGrid(Axis xAxis, Axis yAxis)
+        internal AxisGrid(ChartContainer owner)
         {
-            this.xAxis = xAxis ?? throw new ArgumentNullException(nameof(xAxis));
-            this.yAxis = yAxis ?? throw new ArgumentNullException(nameof(yAxis));
+            this.owner = owner ?? throw new ArgumentNullException(nameof(owner));
 
-            xAxis.MajorTickGeometryCreated += XAxisMajorTickGeometryCreated;
-            yAxis.MajorTickGeometryCreated += YAxisMajorTickGeometryCreated;
+            owner.XAxis.MajorTickGeometryCreated += XAxisMajorTickGeometryCreated;
+            owner.YAxis.MajorTickGeometryCreated += YAxisMajorTickGeometryCreated;
 
             horzPath = new Path()
             {
-                Stroke = GridDefaultBrush,
+                Stroke = DefaultGridBrush,
                 StrokeThickness = 1.0
             };
 
             vertPath = new Path()
             {
-                Stroke = GridDefaultBrush,
+                Stroke = DefaultGridBrush,
                 StrokeThickness = 1.0
-            };
-
-            gridBorder = new Border()
-            {
-                BorderBrush = GridBorderDefaultBrush,
-                BorderThickness = new Thickness(1),
             };
 
             Children.Add(horzPath);
             Children.Add(vertPath);
-            Children.Add(gridBorder);
-
-            Background = Brushes.Transparent;
         }
         #endregion
 
@@ -92,48 +78,11 @@ namespace Restless.Controls.Chart
                 vertPath.Stroke = value;
             }
         }
-
-        /// <summary>
-        /// Gets or sets the brush for the axis grid lines.
-        /// </summary>
-        public Brush GridBorderBrush
-        {
-            get => gridBorder.BorderBrush;
-            internal set
-            {
-                gridBorder.BorderBrush = value;
-            }
-        }
         #endregion
 
         /************************************************************************/
 
         #region Protected Methods
-        ///// <summary>
-        ///// Measures the size in layout required for child elements and determines a size for the Figure. 
-        ///// </summary>
-        ///// <param name="availableSize">
-        ///// The available size that this element can give to child elements.
-        ///// Infinity can be specified as a value to indicate that the element will size to whatever content is available.
-        ///// </param>
-        ///// <returns>The size that this element determines it needs during layout, based on its calculations of child element sizes.</returns>
-        //protected override Size MeasureOverride(Size availableSize)
-        //{
-        //    Size desiredSize = new Size
-        //        (
-        //            availableSize.Width.IsFinite() ? availableSize.Width : 1,
-        //            availableSize.Height.IsFinite() ? availableSize.Height : 1
-        //        );
-
-        //    foreach (UIElement child in Children)
-        //    {
-        //        child.Measure(availableSize);
-        //    }
-
-        //    Debug.WriteLine($"AxisGrid Desired Size {desiredSize}");
-        //    return desiredSize;
-        //}
-
         /// <summary>
         /// Positions child elements and determines a size for a AxisGrid
         /// </summary>
@@ -161,31 +110,6 @@ namespace Restless.Controls.Chart
             }
             base.OnRenderSizeChanged(sizeInfo);
         }
-
-        protected override void OnMouseWheel(MouseWheelEventArgs e)
-        {
-            base.OnMouseWheel(e);
-            double factor = e.Delta < 0 ? 1.2 : 1 / 1.2;
-            if (xAxisRange == null) xAxisRange = xAxis.Range;
-            if (yAxisRange == null) yAxisRange = yAxis.Range;
-
-            xAxis.Range = xAxis.Range.Zoom(factor);
-            yAxis.Range = yAxis.Range.Zoom(factor);
-            e.Handled = true;
-        }
-
-        protected override void OnMouseDown(MouseButtonEventArgs e)
-        {
-            base.OnMouseDown(e);
-            if (e.LeftButton == MouseButtonState.Pressed && e.ClickCount == 2)
-            {
-                if (xAxisRange != null && yAxisRange != null)
-                {
-                    xAxis.Range = xAxisRange;
-                    yAxis.Range = yAxisRange;
-                }
-            }
-        }
         #endregion
 
         /************************************************************************/
@@ -211,10 +135,12 @@ namespace Restless.Controls.Chart
 
                 foreach (var item in group.Children.OfType<LineGeometry>())
                 {
+                    double x = item.StartPoint.X - owner.GridBorderSize;
+
                     LineGeometry line = new LineGeometry
                     {
-                        StartPoint = new Point(item.StartPoint.X, 0),
-                        EndPoint = new Point(item.StartPoint.X, ActualHeight)
+                        StartPoint = new Point(x, 0),
+                        EndPoint = new Point(x, ActualHeight)
                     };
                     vertGroup.Children.Add(line);
                 }
@@ -230,10 +156,12 @@ namespace Restless.Controls.Chart
 
                 foreach (var item in group.Children.OfType<LineGeometry>())
                 {
+                    double y = item.StartPoint.Y - owner.GridBorderSize;
+
                     LineGeometry line = new LineGeometry
                     {
-                        StartPoint = new Point(0, item.StartPoint.Y),
-                        EndPoint = new Point(ActualWidth, item.StartPoint.Y)
+                        StartPoint = new Point(0, y),
+                        EndPoint = new Point(ActualWidth, y)
                     };
                     horzGroup.Children.Add(line);
                 }

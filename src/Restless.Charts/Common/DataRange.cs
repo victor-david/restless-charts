@@ -49,21 +49,20 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
-        /// Gets or sets horizontal range
+        /// Gets the X range.
         /// </summary>
         public Range X
         {
             get;
-            set;
+            //set;
         }
 
         /// <summary>
-        /// Gets or sets vertical range
+        /// Gets the Y range.
         /// </summary>
         public Range Y
         {
             get;
-            set;
         }
 
         /// <summary>
@@ -98,30 +97,31 @@ namespace Restless.Controls.Chart
         /// <value><c>true</c> if this instance is empty; otherwise, <c>false</c>.</value>
         public bool IsEmpty
         {
-            get => X.IsEmpty || Y.IsEmpty;
+            get => X.IsEmpty && Y.IsEmpty;
         }
 
         /// <summary>
-        /// Updates current instance of <see cref="DataRange"/> with minimal DataRange 
-        /// which vertical range will contain current vertical range and x value and 
-        /// horizontal range will contain current horizontal range and y value
+        /// Expands <see cref="X"/>  and <see cref="Y"/> by increasing their <see cref="Range.Max"/>
+        /// or descreasing their <see cref="Range.Min"/> so that the ranges include the specified values.
         /// </summary>
-        /// <param name="x">Value, which will be used for surrond of horizontal range</param>
-        /// <param name="y">Value, which will be used for surrond of vertical range</param>
-        public void Surround(double x, double y)
+        /// <param name="x">The value to include in <see cref="X"/>.</param>
+        /// <param name="y">The value to include in <see cref="Y"/>.</param>
+        public void Include(double x, double y)
         {
-            X.Surround(x);
-            Y.Surround(y);
+            X.Include(x);
+            Y.Include(y);
         }
 
         /// <summary>
-        /// Updates current instance of <see cref="DataRange"/> with minimal DataRect which will contain current DataRect and specified DataRect
+        /// Expands <see cref="X"/> and <see cref="Y"/> by increasing their <see cref="Range.Max"/>
+        /// or descreasing their <see cref="Range.Min"/> so that the ranges include the minimum
+        /// and maximum of the specified range.
         /// </summary>
-        /// <param name="data">DataRect, which will be used for surrond of current instance of <see cref="DataRange"/></param>
-        public void Surround(DataRange data)
+        /// <param name="range">The range from which to get values to expand.</param>
+        public void Include(DataRange range)
         {
-            X.Surround(data.X);
-            Y.Surround(data.Y);
+            X.Include(range.X);
+            Y.Include(range.Y);
         }
 
         /// <summary>
@@ -134,5 +134,3 @@ namespace Restless.Controls.Chart
         }
     }
 }
-
-

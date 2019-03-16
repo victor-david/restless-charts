@@ -94,7 +94,6 @@ namespace Restless.Controls.Chart
             set;
         }
 
-
         /// <summary>
         /// Returns true of this range is considered empty. An empty range is when
         /// Min == PositiveInfinity and Max == NegativeInfinity
@@ -117,10 +116,20 @@ namespace Restless.Controls.Chart
 
         #region Methods
         /// <summary>
-        /// Updates current instance of <see cref="Range"/> with minimal range which contains current range and specified value
+        /// Changes the range into an empty range.
         /// </summary>
-        /// <param name="value">Value, which will be used for for current instance of range surrond</param>
-        public void Surround(double value)
+        public void MakeEmpty()
+        {
+            Min = double.PositiveInfinity;
+            Max = double.NegativeInfinity;
+        }
+
+        /// <summary>
+        /// Expands this instance by increasing <see cref="Max"/> or descreasing <see cref="Min"/>
+        /// so that the range includes the specified value.
+        /// </summary>
+        /// <param name="value">The value to include in range.</param>
+        public void Include(double value)
         {
             if (value.IsFinite())
             {
@@ -130,16 +139,35 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
-        /// Updates current instance of <see cref="Range"/> with minimal range which contains current range and specified range
+        /// Expands this instance by increasing <see cref="Max"/> or descreasing <see cref="Min"/>
+        /// so that the range includes the minimum and maximum of the specified range.
         /// </summary>
-        /// <param name="range">Range, which will be used for current instance of range surrond</param>
-        public void Surround(Range range)
+        /// <param name="range">The range from which to get values to expand.</param>
+        public void Include(Range range)
         {
             if (range != null && !range.IsEmpty)
             {
-                Surround(range.Min);
-                Surround(range.Max);
+                Include(range.Min);
+                Include(range.Max);
             }
+        }
+
+        /// <summary>
+        /// Decreases <see cref="Min"/> by the specified percentage.
+        /// </summary>
+        /// <param name="percentage">The percentage. Min will be decreased by this perecentage.</param>
+        public void DecreaseMinBy(double percentage)
+        {
+            Include(Min - Math.Abs(Min * Math.Abs(percentage)));
+        }
+
+        /// <summary>
+        /// Increases <see cref="Max"/> by the specified percentage.
+        /// </summary>
+        /// <param name="percentage">The percentage. Max will be increased by this perecentage.</param>
+        public void IncreaseMaxBy(double percentage)
+        {
+            Include(Max + Max * Math.Abs(percentage));
         }
 
         /// <summary>
@@ -153,10 +181,7 @@ namespace Restless.Controls.Chart
 
         /// <summary>
         /// Calculates and returns a new range object which will have its Min and Max
-        /// 
-        /// 
-        /// 
-        /// the same center and which size will be larger in factor times
+        /// zoomed or contracted by the specified factor.
         /// </summary>
         /// <param name="factor">Zoom factor</param>
         /// <returns>Zoomed with specified factor range</returns>
@@ -170,8 +195,6 @@ namespace Restless.Controls.Chart
 
             Range zoomed = new Range(center - delta * factor, center + delta * factor);
 
-            //if (zoomed.Min < 0) return zoomed.ZeroCentered();
-
             return zoomed;
         }
 
@@ -183,6 +206,16 @@ namespace Restless.Controls.Chart
         {
             double max = Math.Max(Math.Abs(Min), Math.Abs(Max));
             return new Range(-max, max);
+        }
+
+        /// <summary>
+        /// Modifies this range so that it is centered on zero.
+        /// </summary>
+        public void MakeZeroCentered()
+        {
+            double max = Math.Max(Math.Abs(Min), Math.Abs(Max));
+            Include(-max);
+            Include(max);
         }
 
         /// <summary>

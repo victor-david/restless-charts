@@ -17,9 +17,8 @@ namespace Restless.Controls.Chart
         #region Private
         private const double IncreaseRatio = 8.0;
         private const double DecreaseRatio = 8.0;
-        private const double LabelGapX = 0.0;
-        private const double LabelGapY = 2.0;
-
+        private const double LabelGapHorz = 0.0;
+        private const double LabelGapVert = 2.0;
 
         private Range range;
         private Path majorTickPath;
@@ -30,7 +29,6 @@ namespace Restless.Controls.Chart
         private TickVisibility tickVisibility;
         private DataTransform dataTransform;
         private bool isReversed;
-
         #endregion
 
         /************************************************************************/
@@ -39,12 +37,12 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Gets the default brush for major ticks and their corresponding labels.
         /// </summary>
-        public static readonly Brush MajorTickDefaultBrush = Brushes.DarkSlateBlue;
+        public static readonly Brush DefaultMajorTickBrush = Brushes.DarkSlateBlue;
 
         /// <summary>
         /// Gets the default brush for minor ticks.
         /// </summary>
-        public static readonly Brush MinorTickDefaultBrush = Brushes.LightGray;
+        public static readonly Brush DefaultMinorTickBrush = Brushes.LightGray;
         #endregion
 
         /************************************************************************/
@@ -67,13 +65,13 @@ namespace Restless.Controls.Chart
 
             majorTickPath = new Path()
             {
-                Stroke = MajorTickDefaultBrush,
+                Stroke = DefaultMajorTickBrush,
                 StrokeThickness = 1.0,
             };
 
             minorTickPath = new Path()
             {
-                Stroke = MinorTickDefaultBrush,
+                Stroke = DefaultMinorTickBrush,
                 StrokeThickness = 1.0,
             };
 
@@ -86,7 +84,7 @@ namespace Restless.Controls.Chart
 
         public event EventHandler<GeometryGroup> MajorTickGeometryCreated;
 
-        #region AxisBrush
+        #region Brushes
         /// <summary>
         /// Gets or sets the brush for major ticks and their corresponding labels.
         /// </summary>
@@ -156,7 +154,7 @@ namespace Restless.Controls.Chart
 
         #region Range
         /// <summary>
-        /// Gets or (from this assembly) sets the range of values on the axis in plot coordinates.
+        /// Gets or sets the range of values on the axis.
         /// </summary>
         public Range Range
         {
@@ -246,6 +244,22 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
+        #region Public methods
+        /// <summary>
+        /// 
+        /// Gets a screen coordinate from the specified tick value.
+        /// </summary>
+        /// <param name="tick">The tick value.</param>
+        /// <param name="layoutSize">The size of the layout used for the translation,</param>
+        /// <returns>The translated value.</returns>
+        public double GetCoordinateFromTick(double tick, Size layoutSize)
+        {
+            return ValueToScreen(DataTransform.DataToPlot(tick), layoutSize, Range);
+        }
+        #endregion
+
+        /************************************************************************/
+
         #region Protected methods
         /// <summary>
         /// Measures the size in layout required for child elements and determines a size for the Figure. 
@@ -278,11 +292,11 @@ namespace Restless.Controls.Chart
             // and between the label and the edge of the control.
             if (IsHorizontal)
             {
-                desiredSize.Height = majorTickPath.DesiredSize.Height + maxTextSize.Height + (LabelGapX * 2.0);
+                desiredSize.Height = majorTickPath.DesiredSize.Height + maxTextSize.Height + (LabelGapHorz * 2.0);
             }
             else
             {
-                desiredSize.Width = majorTickPath.DesiredSize.Width + maxTextSize.Width + (LabelGapY * 2.0);
+                desiredSize.Width = majorTickPath.DesiredSize.Width + maxTextSize.Width + (LabelGapVert * 2.0);
             }
 
             desiredSize.Width = Math.Min(desiredSize.Width, availableSize.Width);
@@ -327,12 +341,12 @@ namespace Restless.Controls.Chart
                 if (IsHorizontal)
                 {
                     double x = coordinate - tick.TextWidth / 2;
-                    double y = (AxisPlacement == AxisPlacement.Top) ? finalSize.Height - TickLength - maxTextSize.Height - LabelGapX : TickLength + LabelGapX;
+                    double y = (AxisPlacement == AxisPlacement.Top) ? finalSize.Height - TickLength - maxTextSize.Height - LabelGapHorz : TickLength + LabelGapHorz;
                     tick.Text.Arrange(new Rect(x, y, tick.TextWidth, tick.TextHeight));
                 }
                 else
                 {
-                    double x = (AxisPlacement == AxisPlacement.Left) ? LabelGapY + maxTextSize.Width - tick.TextWidth : TickLength + LabelGapY;
+                    double x = (AxisPlacement == AxisPlacement.Left) ? LabelGapVert + maxTextSize.Width - tick.TextWidth : TickLength + LabelGapVert;
                     double y = coordinate - tick.TextHeight / 2;
                     tick.Text.Arrange(new Rect(x, y, tick.TextWidth, tick.TextHeight));
                 }
@@ -378,15 +392,15 @@ namespace Restless.Controls.Chart
                 })
                 .OrderBy(item => item.Offset).ToArray();
 
-            if (IsHorizontal)
-            {
-                Debug.WriteLine("--------------------------------");
-                foreach (var info in sizeInfos)
-                {
-                    Debug.WriteLine($"SizeInfo. Label:{info.Label} Offset: {info.Offset} Size:{info.Size}");
-                }
-                Debug.WriteLine("--------------------------------");
-            }
+            //if (IsHorizontal)
+            //{
+            //    Debug.WriteLine("--------------------------------");
+            //    foreach (var info in sizeInfos)
+            //    {
+            //        Debug.WriteLine($"SizeInfo. Label:{info.Label} Offset: {info.Offset} Size:{info.Size}");
+            //    }
+            //    Debug.WriteLine("--------------------------------");
+            //}
 
             // If distance between labels if smaller than threshold for any of the labels - decrease
             for (int idx = 0; idx < sizeInfos.Length - 1; idx++)
@@ -472,11 +486,6 @@ namespace Restless.Controls.Chart
             }
 
             MajorTickGeometryCreated?.Invoke(this, majorTickGeometry);
-        }
-
-        private double GetCoordinateFromTick(double tick, Size axisSize)
-        {
-            return ValueToScreen(DataTransform.DataToPlot(tick), axisSize, Range);
         }
 
         private double ValueToScreen(double value, Size axisSize, Range range)

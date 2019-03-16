@@ -15,8 +15,7 @@ namespace Application.Sample
     {
         #region Private
         // data
-        private DataSeries data;
-        private DataRange dataRange;
+        private DataSeriesCollection data;
         // x
         private AxisPlacement xAxisPlacement;
         private TickVisibility xAxisTickVisibility;
@@ -60,25 +59,23 @@ namespace Application.Sample
         #endregion
 
         #region Data Properties
-
-
         /// <summary>
         /// Gets the chart data range.
         /// </summary>
-        public DataSeries Data
+        public DataSeriesCollection Data
         {
             get => data;
             private set => SetProperty(ref data, value);
         }
 
-        /// <summary>
-        /// Gets the chart data range.
-        /// </summary>
-        public DataRange DataRange
-        {
-            get => dataRange;
-            private set => SetProperty(ref dataRange, value);
-        }
+        ///// <summary>
+        ///// Gets the chart data range.
+        ///// </summary>
+        //public DataRange DataRange
+        //{
+        //    get => dataRange;
+        //    private set => SetProperty(ref dataRange, value);
+        //}
         #endregion
 
         #region X Axis properties
@@ -128,25 +125,6 @@ namespace Application.Sample
             get => isXAxisReversed;
             private set => SetProperty(ref isXAxisReversed, value);
         }
-
-        ///// <summary>
-        ///// Gets or sets the zoom for the X axis.
-        ///// </summary>
-        //public double XZoomFactor
-        //{
-        //    get => xZoomFactor;
-        //    set
-        //    {
-        //        if (SetProperty(ref xZoomFactor, value))
-        //        {
-        //            if (xRangeOriginal != null)
-        //            {
-        //                MainChart.XAxis.Range = xRangeOriginal.Zoom(xZoomFactor);
-        //            }
-        //        }
-        //    }
-        //}
-
 
         /// <summary>
         /// Gets the top title.
@@ -215,24 +193,6 @@ namespace Application.Sample
             private set => SetProperty(ref isYAxisReversed, value);
         }
 
-        ///// <summary>
-        ///// Gets or sets the zoom for the Y axis.
-        ///// </summary>
-        //public double YZoomFactor
-        //{
-        //    get => yZoomFactor;
-        //    set
-        //    {
-        //        if (SetProperty(ref yZoomFactor, value))
-        //        {
-        //            if (yRangeOriginal != null)
-        //            {
-        //                MainChart.YAxis.Range = yRangeOriginal.Zoom(yZoomFactor);
-        //            }
-        //        }
-        //    }
-        //}
-
         /// <summary>
         /// Gets the left title.
         /// </summary>
@@ -259,52 +219,72 @@ namespace Application.Sample
         #region Private methods
         private void MainWindowLoaded(object sender, RoutedEventArgs e)
         {
-            LoadViaDataRange();
-            //long min = DateTime.Now.AddMonths(-6).Ticks;
-            //long max = DateTime.Now.Ticks;
+            // CreateTestData1();
+            CreateTestData2();
+        }
 
-            //Range xRange = new Range(min, max);
-            //Range yRange = new Range(191685.94, 250611.08);
-            //Range yRange = new Range(0, 2);
+        private void CreateTestData1()
+        {
+            int max = 10;
+            Random rand = new Random();
 
-            //xRange = new Range(0, 5000);
-            //yRange = new Range(-100, 100);
+            DataSeriesCollection data = new DataSeriesCollection();
 
-            //DataRange = new DataRange(xRange, yRange);
+            DataSeries series = data.Add();
 
-            //Random rand = new Random();
-            //DateTime now = DateTime.Now;
-            DataSeries data = new DataSeries();
+            for (int x = 0; x <= max; x++)
+            {
+                int y = rand.Next(-50, 100);
+                series.Add(x, y);
+            }
 
-            //for (int k = 0; k <= 100; k++)
-            //{
-            //    data.Add(new DataPoint(k, k));
-            //}
+            data.MakeYZeroCentered();
+            data.ExpandX(0.75);
+            data.DataRange.Y.IncreaseMaxBy(0.05);
+            data.DataRange.Y.DecreaseMinBy(0.05);
+            Data = data;
+        }
 
-            //int min = 10000;
-            //int max = 20000;
-            //for (int k = -30; k <= 0; k++)
+        /// <summary>
+        /// This test data represents dates and amounts.
+        /// </summary>
+        private void CreateTestData2()
+        {
+            XAxisTextFormat = "dd-MMM-yy";
+            XAxisTextProvider = new DoubleToDateConverter();
+
+            DataSeriesCollection data = new DataSeriesCollection();
+            DataSeries series = data.Add();
+
+            DateTime now = DateTime.Now;
+            Random rand = new Random();
+
+            int min = 10000;
+            int max = 20000;
+            int y = 1000;
+            for (int k = -15; k <= 0; k++)
+            {
+                int value = rand.Next(min, max + 1);
+                series.Add(now.AddDays(k).Ticks, y);
+                y += 100;
+            }
+
+            //for (int k = -35; k <= -18; k++)
             //{
             //    int value = rand.Next(min, max + 1);
-            //    DataPoint point = new DataPoint(now.AddDays(k).Ticks, value);
-            //    data.Add(point);
+            //    series.Add(now.AddDays(k).Ticks, value);
+            //    y += 100;
             //}
 
-            //Data = data;
-        }
 
-        private void LoadViaData()
-        {
-        }
+            long ticksPerDay = now.Ticks - now.AddDays(-1).Ticks;
+            data.ExpandX(ticksPerDay);
+            data.DataRange.Y.Include(0);
+            data.DataRange.Y.IncreaseMaxBy(0.125);
 
-        private void LoadViaDataRange()
-        {
-            // XAxis[-129.15904, 229.15904]
-            // YAxis[-129.15904, 229.15904]
-            Range x = new Range(-129.15904, 229.15904);
-            Range y = new Range(-129.15904, 229.15904);
 
-            DataRange = new DataRange(x, y);
+            Data = data;
+
         }
 
         private bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
@@ -331,20 +311,7 @@ namespace Application.Sample
 
         private void ButtonClickXAxisPlacement(object sender, RoutedEventArgs e)
         {
-            switch (XAxisPlacement)
-            {
-                case AxisPlacement.Top:
-                    XAxisPlacement = AxisPlacement.Bottom;
-                    BottomTitle = TopTitle;
-                    TopTitle = null;
-                    break;
-
-                case AxisPlacement.Bottom:
-                    XAxisPlacement = AxisPlacement.Top;
-                    TopTitle = BottomTitle;
-                    BottomTitle = null;
-                    break;
-            }
+            XAxisPlacement = (XAxisPlacement == AxisPlacement.Bottom) ? AxisPlacement.Top : AxisPlacement.Bottom;
         }
 
         private void ButtonClickXAxisTicks(object sender, RoutedEventArgs e)
@@ -408,22 +375,5 @@ namespace Application.Sample
             IsYAxisReversed = !IsYAxisReversed;
         }
         #endregion
-
-        private void XZoomSliderValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            double factor = e.NewValue > e.OldValue ? 1.2 : 1 / 1.2;
-            if (MainChart != null)
-            MainChart.XAxis.Range = MainChart.XAxis.Range.Zoom(factor);
-
-            
-        }
-
-
-        private void YZoomSliderValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            double factor = e.NewValue > e.OldValue ? 1.2 : 1 / 1.2;
-            if (MainChart != null)
-            MainChart.YAxis.Range = MainChart.YAxis.Range.Zoom(factor);
-        }
     }
 }

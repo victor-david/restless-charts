@@ -11,7 +11,7 @@ namespace Restless.Controls.Chart
     /// </summary>
     public class DataPoint
     {
-        public DataPoint(double xValue, double yValue)
+        internal DataPoint(double xValue, double yValue)
         {
             XValue = xValue;
             YValue = yValue;

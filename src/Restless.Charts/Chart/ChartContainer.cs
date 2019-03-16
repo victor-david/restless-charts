@@ -1,31 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace Restless.Controls.Chart
 {
-    public class Chart : ContentControl
+    /// <summary>
+    /// Provides a container for chart controls. Provides titles, axis, axis grid and navigation.
+    /// </summary>
+    public class ChartContainer : ContentControl
     {
         #region Public fields
         /// <summary>
         /// Gets the default orientation
         /// </summary>
         public const Orientation DefaultOrientation = Orientation.Vertical;
+        /// <summary>
+        /// Gets the default grid border size.
+        /// </summary>
+        public const double DefaultGridBorderSize = 1.0;
         #endregion
 
         /************************************************************************/
 
         #region Constructors
         /// <summary>
-        /// Initializes a new instance of the <see cref="Chart"/> class.
+        /// Initializes a new instance of the <see cref="ChartContainer"/> class.
         /// </summary>
-        public Chart()
+        public ChartContainer()
         {
             XAxis = new Axis()
             {
@@ -38,71 +39,17 @@ namespace Restless.Controls.Chart
                 AxisPlacement = AxisPlacement.DefaultY,
             };
 
-            AxisGrid = new AxisGrid(XAxis, YAxis);
+            AxisGrid = new AxisGrid(this);
+            Navigation = new ChartNavigation(this);
 
             Padding = new Thickness(10);
-            SetValue(RenderOptions.EdgeModeProperty, EdgeMode.Aliased);
+            // This can cause a grid line to not display, depending on its exact coordinates
+            // SetValue(RenderOptions.EdgeModeProperty, EdgeMode.Aliased);
         }
 
-        static Chart()
+        static ChartContainer()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(Chart), new FrameworkPropertyMetadata(typeof(Chart)));
-        }
-        #endregion
-
-        /************************************************************************/
-
-        #region Data / DataRange
-        /// <summary>
-        /// Gets or sets the data for this chart
-        /// </summary>
-        public DataRange DataRange
-        {
-            get => (DataRange)GetValue(DataRangeProperty);
-            set => SetValue(DataRangeProperty, value);
-        }
-
-        /// <summary>
-        /// Identifies the <see cref="DataRange"/> dependency property.
-        /// </summary>
-        public static readonly DependencyProperty DataRangeProperty = DependencyProperty.Register
-            (
-                nameof(DataRange), typeof(DataRange), typeof(Chart), new PropertyMetadata(null, OnDataRangeChanged)
-            );
-
-        private static void OnDataRangeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is Chart c && c.DataRange != null)
-            {
-                c.XAxis.Range = c.DataRange.X;
-                c.YAxis.Range = c.DataRange.Y;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the data series
-        /// </summary>
-        public DataSeries Data
-        {
-            get => (DataSeries)GetValue(DataProperty);
-            set => SetValue(DataProperty, value);
-        }
-
-        /// <summary>
-        /// Identifies the <see cref="Data"/> dependency property.
-        /// </summary>
-        public static readonly DependencyProperty DataProperty = DependencyProperty.Register
-            (
-                nameof(Data), typeof(DataSeries), typeof(Chart), new PropertyMetadata(null, OnDataChanged)
-            );
-
-        private static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is Chart c && c.Data != null)
-            {
-                c.XAxis.Range = c.Data.DataRange.X;
-                c.YAxis.Range = c.Data.DataRange.Y;
-            }
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(ChartContainer), new FrameworkPropertyMetadata(typeof(ChartContainer)));
         }
         #endregion
 
@@ -123,12 +70,12 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty OrientationProperty = DependencyProperty.Register
             (
-                nameof(Orientation), typeof(Orientation), typeof(Chart), new PropertyMetadata(DefaultOrientation, OnOrientationChanged)
+                nameof(Orientation), typeof(Orientation), typeof(ChartContainer), new PropertyMetadata(DefaultOrientation, OnOrientationChanged)
             );
 
         private static void OnOrientationChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is Chart c)
+            if (d is ChartContainer c)
             {
             }
         }
@@ -153,7 +100,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty TopTitleProperty = DependencyProperty.Register
             (
-                nameof(TopTitle), typeof(object), typeof(Chart), new PropertyMetadata(null)
+                nameof(TopTitle), typeof(object), typeof(ChartContainer), new PropertyMetadata(null)
             );
         #endregion
 
@@ -176,7 +123,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty BottomTitleProperty = DependencyProperty.Register
             (
-                nameof(BottomTitle), typeof(object), typeof(Chart), new PropertyMetadata(null)
+                nameof(BottomTitle), typeof(object), typeof(ChartContainer), new PropertyMetadata(null)
             );
         #endregion
 
@@ -198,7 +145,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty RightTitleProperty = DependencyProperty.Register
             (
-                nameof(RightTitle), typeof(object), typeof(Chart), new PropertyMetadata(null)
+                nameof(RightTitle), typeof(object), typeof(ChartContainer), new PropertyMetadata(null)
             );
         #endregion
 
@@ -221,7 +168,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty LeftTitleProperty = DependencyProperty.Register
             (
-                nameof(LeftTitle), typeof(object), typeof(Chart), new PropertyMetadata(null)
+                nameof(LeftTitle), typeof(object), typeof(ChartContainer), new PropertyMetadata(null)
             );
         #endregion
 
@@ -239,7 +186,7 @@ namespace Restless.Controls.Chart
 
         private static readonly DependencyPropertyKey XAxisPropertyKey = DependencyProperty.RegisterReadOnly
             (
-                nameof(XAxis), typeof(Axis), typeof(Chart), new PropertyMetadata(null)
+                nameof(XAxis), typeof(Axis), typeof(ChartContainer), new PropertyMetadata(null)
             );
 
         /// <summary>
@@ -262,7 +209,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty XAxisPlacementProperty = DependencyProperty.Register
             (
-                nameof(XAxisPlacement), typeof(AxisPlacement), typeof(Chart), new PropertyMetadata(AxisPlacement.DefaultX, OnXAxisPropertyChanged, OnCoerceXPlacement)
+                nameof(XAxisPlacement), typeof(AxisPlacement), typeof(ChartContainer), new PropertyMetadata(AxisPlacement.DefaultX, OnXAxisPropertyChanged, OnCoerceXPlacement)
             );
 
         private static object OnCoerceXPlacement(DependencyObject d, object value)
@@ -292,7 +239,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty XAxisTextProviderProperty = DependencyProperty.Register
             (
-                nameof(XAxisTextProvider), typeof(IDoubleConverter), typeof(Chart), new PropertyMetadata(null, OnXAxisPropertyChanged)
+                nameof(XAxisTextProvider), typeof(IDoubleConverter), typeof(ChartContainer), new PropertyMetadata(null, OnXAxisPropertyChanged)
             );
 
         /// <summary>
@@ -310,7 +257,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty XAxisTextFormatProperty = DependencyProperty.Register
             (
-                nameof(XAxisTextFormat), typeof(string), typeof(Chart), new PropertyMetadata(null, OnXAxisPropertyChanged)
+                nameof(XAxisTextFormat), typeof(string), typeof(ChartContainer), new PropertyMetadata(null, OnXAxisPropertyChanged)
             );
 
         /// <summary>
@@ -327,7 +274,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty XAxisTickVisibilityProperty = DependencyProperty.Register
             (
-                nameof(XAxisTickVisibility), typeof(TickVisibility), typeof(Chart), new PropertyMetadata(TickVisibility.Default, OnXAxisPropertyChanged)
+                nameof(XAxisTickVisibility), typeof(TickVisibility), typeof(ChartContainer), new PropertyMetadata(TickVisibility.Default, OnXAxisPropertyChanged)
             );
 
         /// <summary>
@@ -344,12 +291,12 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty IsXAxisReversedProperty = DependencyProperty.Register
             (
-                nameof(IsXAxisReversed), typeof(bool), typeof(Chart), new PropertyMetadata(false, OnXAxisPropertyChanged)
+                nameof(IsXAxisReversed), typeof(bool), typeof(ChartContainer), new PropertyMetadata(false, OnXAxisPropertyChanged)
             );
 
         private static void OnXAxisPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is Chart c)
+            if (d is ChartContainer c)
             {
                 switch (e.Property.Name)
                 {
@@ -369,6 +316,7 @@ namespace Restless.Controls.Chart
                         break;
                     case nameof(IsXAxisReversed):
                         c.XAxis.IsReversed = c.IsXAxisReversed;
+                        c.InvalidateChart();
                         break;
                 }
             }
@@ -389,7 +337,7 @@ namespace Restless.Controls.Chart
         
         private static readonly DependencyPropertyKey YAxisPropertyKey = DependencyProperty.RegisterReadOnly
             (
-                nameof(YAxis), typeof(Axis), typeof(Chart), new PropertyMetadata(null)
+                nameof(YAxis), typeof(Axis), typeof(ChartContainer), new PropertyMetadata(null)
             );
 
         /// <summary>
@@ -412,7 +360,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty YAxisPlacementProperty = DependencyProperty.Register
             (
-                nameof(YAxisPlacement), typeof(AxisPlacement), typeof(Chart), new PropertyMetadata(AxisPlacement.DefaultY, OnYAxisPropertyChanged, OnCoerceYPlacement)
+                nameof(YAxisPlacement), typeof(AxisPlacement), typeof(ChartContainer), new PropertyMetadata(AxisPlacement.DefaultY, OnYAxisPropertyChanged, OnCoerceYPlacement)
             );
 
         private static object OnCoerceYPlacement(DependencyObject d, object value)
@@ -442,7 +390,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty YAxisTextProviderProperty = DependencyProperty.Register
             (
-                nameof(YAxisTextProvider), typeof(IDoubleConverter), typeof(Chart), new PropertyMetadata(null, OnYAxisPropertyChanged)
+                nameof(YAxisTextProvider), typeof(IDoubleConverter), typeof(ChartContainer), new PropertyMetadata(null, OnYAxisPropertyChanged)
             );
 
         /// <summary>
@@ -460,7 +408,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty YAxisTextFormatProperty = DependencyProperty.Register
             (
-                nameof(YAxisTextFormat), typeof(string), typeof(Chart), new PropertyMetadata(null, OnYAxisPropertyChanged)
+                nameof(YAxisTextFormat), typeof(string), typeof(ChartContainer), new PropertyMetadata(null, OnYAxisPropertyChanged)
             );
 
         /// <summary>
@@ -477,7 +425,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty YAxisTickVisibilityProperty = DependencyProperty.Register
             (
-                nameof(YAxisTickVisibility), typeof(TickVisibility), typeof(Chart), new PropertyMetadata(TickVisibility.Default, OnYAxisPropertyChanged)
+                nameof(YAxisTickVisibility), typeof(TickVisibility), typeof(ChartContainer), new PropertyMetadata(TickVisibility.Default, OnYAxisPropertyChanged)
             );
 
         /// <summary>
@@ -494,14 +442,12 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty IsYAxisReversedProperty = DependencyProperty.Register
             (
-                nameof(IsYAxisReversed), typeof(bool), typeof(Chart), new PropertyMetadata(false, OnYAxisPropertyChanged)
+                nameof(IsYAxisReversed), typeof(bool), typeof(ChartContainer), new PropertyMetadata(false, OnYAxisPropertyChanged)
             );
-
-
 
         private static void OnYAxisPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is Chart c)
+            if (d is ChartContainer c)
             {
                 switch (e.Property.Name)
                 {
@@ -521,6 +467,7 @@ namespace Restless.Controls.Chart
                         break;
                     case nameof(IsYAxisReversed):
                         c.YAxis.IsReversed = c.IsYAxisReversed;
+                        c.InvalidateChart();
                         break;
                 }
             }
@@ -547,7 +494,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty MajorTickBrushProperty = DependencyProperty.Register
             (
-                nameof(MajorTickBrush), typeof(Brush), typeof(Chart), new PropertyMetadata(Axis.MajorTickDefaultBrush, OnBrushChanged)
+                nameof(MajorTickBrush), typeof(Brush), typeof(ChartContainer), new PropertyMetadata(Axis.DefaultMajorTickBrush, OnBrushChanged)
             );
 
         /// <summary>
@@ -564,7 +511,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty MinorTickBrushProperty = DependencyProperty.Register
             (
-                nameof(MinorTickBrush), typeof(Brush), typeof(Chart), new PropertyMetadata(Axis.MinorTickDefaultBrush, OnBrushChanged)
+                nameof(MinorTickBrush), typeof(Brush), typeof(ChartContainer), new PropertyMetadata(Axis.DefaultMinorTickBrush, OnBrushChanged)
             );
 
         /// <summary>
@@ -581,7 +528,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty AxisGridBrushProperty = DependencyProperty.Register
             (
-                nameof(GridBrush), typeof(Brush), typeof(Chart), new PropertyMetadata(AxisGrid.GridDefaultBrush, OnBrushChanged)
+                nameof(GridBrush), typeof(Brush), typeof(ChartContainer), new PropertyMetadata(AxisGrid.DefaultGridBrush, OnBrushChanged)
             );
 
         /// <summary>
@@ -598,12 +545,12 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty GridBorderBrushProperty = DependencyProperty.Register
             (
-                nameof(GridBorderBrush), typeof(Brush), typeof(Chart), new PropertyMetadata(AxisGrid.GridBorderDefaultBrush, OnBrushChanged)
+                nameof(GridBorderBrush), typeof(Brush), typeof(ChartContainer), new PropertyMetadata(AxisGrid.DefaultBorderBrush)
             );
 
         private static void OnBrushChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is Chart c)
+            if (d is ChartContainer c)
             {
                 switch (e.Property.Name)
                 {
@@ -618,12 +565,63 @@ namespace Restless.Controls.Chart
                     case nameof(GridBrush):
                         c.AxisGrid.GridBrush = c.GridBrush;
                         break;
-                    case nameof(GridBorderBrush):
-                        c.AxisGrid.GridBorderBrush = c.GridBorderBrush;
-                        break;
                 }
             }
         }
+        #endregion
+
+        /************************************************************************/
+
+        #region GridBorderSize
+        /// <summary>
+        /// Gets or sets the thickness of the border that surrounds the chart grid lines.
+        /// This value is clamped between 0 and 4 inclusive. The default is 1.0
+        /// </summary>
+        public double GridBorderSize
+        {
+            get => (double)GetValue(GridBorderSizeProperty);
+            set => SetValue(GridBorderSizeProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="GridBorderSize"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty GridBorderSizeProperty = DependencyProperty.Register
+            (
+                nameof(GridBorderSize), typeof(double), typeof(ChartContainer), new PropertyMetadata(DefaultGridBorderSize, OnGridBorderSizeChanged, OnCoerceGridBorderSize)
+            );
+
+        private static object OnCoerceGridBorderSize(DependencyObject d, object value)
+        {
+            return ((double)value).Clamp(0, 4);
+        }
+
+        private static void OnGridBorderSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is ChartContainer c)
+            {
+                c.GridBorderThickness = new Thickness(c.GridBorderSize);
+            }
+        }
+
+        /// <summary>
+        /// Gets the grid border thickness
+        /// </summary>
+        public Thickness GridBorderThickness
+        {
+            get => (Thickness)GetValue(GridBorderThicknessProperty);
+            private set => SetValue(GridBorderThicknessPropertyKey, value);
+        }
+        
+        private static readonly DependencyPropertyKey GridBorderThicknessPropertyKey = DependencyProperty.RegisterReadOnly
+            (
+                nameof(GridBorderThickness), typeof(Thickness), typeof(ChartContainer), new PropertyMetadata(new Thickness(DefaultGridBorderSize))
+            );
+
+        /// <summary>
+        /// Identifies the <see cref="GridBorderThickness"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty GridBorderThicknessProperty = GridBorderThicknessPropertyKey.DependencyProperty;
         #endregion
 
         /************************************************************************/
@@ -640,7 +638,7 @@ namespace Restless.Controls.Chart
 
         private static readonly DependencyPropertyKey AxisGridPropertyKey = DependencyProperty.RegisterReadOnly
             (
-                nameof(AxisGrid), typeof(AxisGrid), typeof(Chart), new PropertyMetadata(null)
+                nameof(AxisGrid), typeof(AxisGrid), typeof(ChartContainer), new PropertyMetadata(null)
             );
 
         /// <summary>
@@ -649,5 +647,44 @@ namespace Restless.Controls.Chart
         public static readonly DependencyProperty AxisGridProperty = AxisGridPropertyKey.DependencyProperty;
         #endregion
 
+        /************************************************************************/
+
+        #region Navigation (read only)
+        /// <summary>
+        /// Gets the chart navigation object.
+        /// </summary>
+        public ChartNavigation Navigation
+        {
+            get => (ChartNavigation)GetValue(NavigationProperty);
+            private set => SetValue(NavigationPropertyKey, value);
+        }
+        
+        private static readonly DependencyPropertyKey NavigationPropertyKey = DependencyProperty.RegisterReadOnly
+            (
+                nameof(Navigation), typeof(ChartNavigation), typeof(ChartContainer), new PropertyMetadata(null)
+            );
+
+        /// <summary>
+        /// Identifies the <see cref="Navigation"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty NavigationProperty = NavigationPropertyKey.DependencyProperty;
+        #endregion
+
+        /************************************************************************/
+
+        #region Private methods
+        /// <summary>
+        /// Causes the chart (if one is inside the container) to redraw itself.
+        /// This method is called from property change handlers to allow the 
+        /// embedded chart to update itself.
+        /// </summary>
+        private void InvalidateChart()
+        {
+            if (Content is UIElement element)
+            {
+                element.InvalidateMeasure();
+            }
+        }
+        #endregion
     }
 }

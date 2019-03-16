@@ -17,8 +17,13 @@ namespace Application.Sample
             {
                 format = "dd-MMM-yyyy";
             }
-            DateTime dt = new DateTime((long)value);
-            return dt.ToString(format);
+            long ticks = (long)value;
+            if (ticks >= DateTime.MinValue.Ticks && ticks <= DateTime.MaxValue.Ticks)
+            {
+                DateTime dt = new DateTime((long)value);
+                return dt.ToString(format);
+            }
+            return "--";
         }
     }
 }

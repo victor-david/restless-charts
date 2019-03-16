@@ -56,12 +56,11 @@
             </HeaderedContentControl>
             
         </StackPanel>
-        <conx:Chart
+        <conx:ChartContainer
             Name="MainChart"
             Grid.Column="1"
             Grid.Row="1"
             Margin="20"
-            DataRange="{Binding DataRange}"
             BorderBrush="DarkBlue"
             BorderThickness="1"
             TopTitle="{Binding TopTitle}"
@@ -79,8 +78,11 @@
             YAxisTickVisibility="{Binding YAxisTickVisibility}"
             YAxisTextFormat="{Binding YAxisTextFormat}"
             YAxisTextProvider="{Binding YAxisTextProvider}"
-            IsYAxisReversed="{Binding IsYAxisReversed}"
-            />
+            IsYAxisReversed="{Binding IsYAxisReversed}">
+            
+            <conx:BarChart Data="{Binding Data}" BarThickness="60"/>
+            
+        </conx:ChartContainer>
 
     </Grid>
 </Window>
