@@ -270,7 +270,7 @@ namespace Restless.Controls.Chart
         /// Returns a value that indicates whether two specified ranges values are not equal.
         /// </summary>
         /// <param name="leftSide">The first value to compare.</param>
-        /// <param name="second">The second value to compare.</param>
+        /// <param name="rightSide">The second value to compare.</param>
         /// <returns>True if values are not equal, false otherwise.</returns>
         public static bool operator != (Range leftSide, Range rightSide)
         {

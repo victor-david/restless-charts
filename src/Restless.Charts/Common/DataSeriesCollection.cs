@@ -112,7 +112,10 @@ namespace Restless.Controls.Chart
             DataRange.X.MakeZeroCentered();
         }
 
-
+        /// <summary>
+        /// Expands the X range by both increasing Max and decreasing Min by the specified amount.
+        /// </summary>
+        /// <param name="amount">The amount to expand.</param>
         public void ExpandX(double amount)
         {
             double min = DataRange.X.Min - Math.Abs(amount);
@@ -121,6 +124,10 @@ namespace Restless.Controls.Chart
             DataRange.X.Include(max);
         }
 
+        /// <summary>
+        /// Expands the Y range by both increasing Max and decreasing Min by the specified amount.
+        /// </summary>
+        /// <param name="amount">The amount to expand.</param>
         public void ExpandY(double amount)
         {
             double min = DataRange.Y.Min - Math.Abs(amount);

@@ -1,6 +1,8 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace Restless.Controls.Chart
 {
@@ -77,6 +79,18 @@ namespace Restless.Controls.Chart
         {
             if (d is ChartContainer c)
             {
+                switch (c.Orientation)
+                {
+                    case Orientation.Vertical:
+                        c.XAxisPlacement = c.IsXAxisPlacementReversed ? AxisPlacement.Top : AxisPlacement.Bottom;
+                        c.YAxisPlacement = c.IsYAxisPlacementReversed ? AxisPlacement.Right : AxisPlacement.Left;
+                        break;
+                    case Orientation.Horizontal:
+                        c.XAxisPlacement = c.IsXAxisPlacementReversed ? AxisPlacement.Right : AxisPlacement.Left;
+                        c.YAxisPlacement = c.IsYAxisPlacementReversed ? AxisPlacement.Top : AxisPlacement.Bottom;
+                        break;
+                }
+                c.InvokeInvalidateAxisGrid();
             }
         }
         #endregion
@@ -195,35 +209,49 @@ namespace Restless.Controls.Chart
         public static readonly DependencyProperty XAxisProperty = XAxisPropertyKey.DependencyProperty;
 
         /// <summary>
-        /// Gets or sets the x-axis placement. This property is clamped to Bottom or Top.
-        /// The default is Bottom.
+        /// Gets or sets a value that determines if the placement of the X axis is reversed
+        /// from its default placement position. When <see cref="Orientation"/> is vertical
+        /// (the default), toggling this property changes the X axis from top to bottom.
+        /// When <see cref="Orientation"/> is horizontal, this property changes the X axis
+        /// from left to right.
+        /// </summary>
+        public bool IsXAxisPlacementReversed
+        {
+            get => (bool)GetValue(IsXAxisPlacementReversedProperty);
+            set => SetValue(IsXAxisPlacementReversedProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="IsXAxisPlacementReversed"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IsXAxisPlacementReversedProperty = DependencyProperty.Register
+            (
+                nameof(IsXAxisPlacementReversed), typeof(bool), typeof(ChartContainer), new PropertyMetadata(false, OnXAxisPropertyChanged)
+            );
+
+        /// <summary>
+        /// Gets the X axis placement. The value of this property depends on the value of <see cref="Orientation"/>.
+        /// When <see cref="Orientation"/> is vertical (the default), this property can be Top or Bottom.
+        /// When <see cref="Orientation"/> is horizontal, this property can be Left or Right.
         /// </summary>
         public AxisPlacement XAxisPlacement
         {
             get => (AxisPlacement)GetValue(XAxisPlacementProperty);
-            set => SetValue(XAxisPlacementProperty, value);
+            private set => SetValue(XAxisPlacementPropertyKey, value);
         }
 
         /// <summary>
         /// Identifies the <see cref="XAxisPlacement"/> dependency property.
         /// </summary>
-        public static readonly DependencyProperty XAxisPlacementProperty = DependencyProperty.Register
+        private static readonly DependencyPropertyKey XAxisPlacementPropertyKey = DependencyProperty.RegisterReadOnly
             (
-                nameof(XAxisPlacement), typeof(AxisPlacement), typeof(ChartContainer), new PropertyMetadata(AxisPlacement.DefaultX, OnXAxisPropertyChanged, OnCoerceXPlacement)
+                nameof(XAxisPlacement), typeof(AxisPlacement), typeof(ChartContainer), new PropertyMetadata(AxisPlacement.DefaultX, OnXAxisPropertyChanged)
             );
 
-        private static object OnCoerceXPlacement(DependencyObject d, object value)
-        {
-            AxisPlacement proposed = (AxisPlacement)value;
-            switch(proposed)
-            {
-                case AxisPlacement.Bottom:
-                case AxisPlacement.Top:
-                    return proposed;
-                default:
-                    return AxisPlacement.DefaultX;
-            }
-        }
+        /// <summary>
+        /// Identifies the <see cref="XAxisPlacement"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty XAxisPlacementProperty = XAxisPlacementPropertyKey.DependencyProperty;
 
         /// <summary>
         /// Gets or sets a converter for tick values on the X axis.
@@ -300,6 +328,16 @@ namespace Restless.Controls.Chart
             {
                 switch (e.Property.Name)
                 {
+                    case nameof(IsXAxisPlacementReversed):
+                        if (c.Orientation == Orientation.Vertical)
+                        {
+                            c.XAxisPlacement = c.IsXAxisPlacementReversed ? AxisPlacement.Top : AxisPlacement.Bottom;
+                        }
+                        else
+                        {
+                            c.XAxisPlacement = c.IsXAxisPlacementReversed ? AxisPlacement.Right : AxisPlacement.Left;
+                        }
+                        break;
                     case nameof(XAxisPlacement):
                         c.XAxis.AxisPlacement = c.XAxisPlacement;
                         break;
@@ -317,6 +355,7 @@ namespace Restless.Controls.Chart
                     case nameof(IsXAxisReversed):
                         c.XAxis.IsReversed = c.IsXAxisReversed;
                         c.InvalidateChart();
+                        c.InvokeInvalidateAxisGrid();
                         break;
                 }
             }
@@ -346,22 +385,46 @@ namespace Restless.Controls.Chart
         public static readonly DependencyProperty YAxisProperty = YAxisPropertyKey.DependencyProperty;
 
         /// <summary>
-        /// Gets or sets the y-axis placement. This property is clamped to Left or Right.
-        /// The default is Left.
+        /// Gets or sets a value that determines if the placement of the Y axis is reversed
+        /// from its default placement position. When <see cref="Orientation"/> is vertical
+        /// (the default), toggling this property changes the Y axis from left to right.
+        /// When <see cref="Orientation"/> is horizontal, this property changes the Y axis
+        /// from top to bottom.
+        /// </summary>
+        public bool IsYAxisPlacementReversed
+        {
+            get => (bool)GetValue(IsYAxisPlacementReversedProperty);
+            set => SetValue(IsYAxisPlacementReversedProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="IsYAxisPlacementReversed"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IsYAxisPlacementReversedProperty = DependencyProperty.Register
+            (
+                nameof(IsYAxisPlacementReversed), typeof(bool), typeof(ChartContainer), new PropertyMetadata(false, OnYAxisPropertyChanged)
+            );
+
+        /// <summary>
+        /// Gets the Y axis placement. The value of this property depends on the value of <see cref="Orientation"/>.
+        /// When <see cref="Orientation"/> is vertical (the default), this property can be Left or Right.
+        /// When <see cref="Orientation"/> is horizontal, this property can be Top or Bottom.
         /// </summary>
         public AxisPlacement YAxisPlacement
         {
             get => (AxisPlacement)GetValue(YAxisPlacementProperty);
-            set => SetValue(YAxisPlacementProperty, value);
+            private set => SetValue(YAxisPlacementPropertyKey, value);
         }
+
+        private static readonly DependencyPropertyKey YAxisPlacementPropertyKey = DependencyProperty.RegisterReadOnly
+            (
+                nameof(YAxisPlacement), typeof(AxisPlacement), typeof(ChartContainer), new PropertyMetadata(AxisPlacement.DefaultY, OnYAxisPropertyChanged)
+            );
 
         /// <summary>
         /// Identifies the <see cref="YAxisPlacement"/> dependency property.
         /// </summary>
-        public static readonly DependencyProperty YAxisPlacementProperty = DependencyProperty.Register
-            (
-                nameof(YAxisPlacement), typeof(AxisPlacement), typeof(ChartContainer), new PropertyMetadata(AxisPlacement.DefaultY, OnYAxisPropertyChanged, OnCoerceYPlacement)
-            );
+        public static readonly DependencyProperty YAxisPlacementProperty = YAxisPlacementPropertyKey.DependencyProperty;
 
         private static object OnCoerceYPlacement(DependencyObject d, object value)
         {
@@ -451,6 +514,16 @@ namespace Restless.Controls.Chart
             {
                 switch (e.Property.Name)
                 {
+                    case nameof(IsYAxisPlacementReversed):
+                        if (c.Orientation == Orientation.Vertical)
+                        {
+                            c.YAxisPlacement = c.IsYAxisPlacementReversed ? AxisPlacement.Right : AxisPlacement.Left;
+                        }
+                        else
+                        {
+                            c.YAxisPlacement = c.IsYAxisPlacementReversed ? AxisPlacement.Top : AxisPlacement.Bottom;
+                        }
+                        break;
                     case nameof(YAxisPlacement):
                         c.YAxis.AxisPlacement = c.YAxisPlacement;
                         break;
@@ -468,13 +541,11 @@ namespace Restless.Controls.Chart
                     case nameof(IsYAxisReversed):
                         c.YAxis.IsReversed = c.IsYAxisReversed;
                         c.InvalidateChart();
+                        c.InvokeInvalidateAxisGrid();
                         break;
                 }
             }
         }
-
-
-
         #endregion
 
         /************************************************************************/
@@ -499,7 +570,7 @@ namespace Restless.Controls.Chart
 
         /// <summary>
         /// Gets or sets the brush that is used to draw minor ticks.
-        /// </summary
+        /// </summary>
         public Brush MinorTickBrush
         {
             get => (Brush)GetValue(MinorTickBrushProperty);
@@ -672,6 +743,49 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
+        #region Public methods
+        /// <summary>
+        /// Zooms in (both X and Y) by a specified factor (1.0 / 1.2)
+        /// </summary>
+        public void ZoomIn()
+        {
+            Zoom(1.0 / 1.2);
+        }
+
+        /// <summary>
+        /// Zooms out (both X and Y) by a specified factor (1.2)
+        /// </summary>
+        public void ZoomOut()
+        {
+            Zoom(1.2);
+        }
+
+        /// <summary>
+        /// Zooms the chart (both X and Y) by the specified factor.
+        /// </summary>
+        /// <param name="factor">The factor</param>
+        public void Zoom(double factor)
+        {
+            ZoomToRange(XAxis.Range.Zoom(factor), YAxis.Range.Zoom(factor));
+        }
+
+        /// <summary>
+        /// Zooms to the specified ranges.
+        /// </summary>
+        /// <param name="xRange">The X range.</param>
+        /// <param name="yRange">The Y range.</param>
+        public void ZoomToRange(Range xRange, Range yRange)
+        {
+            if (xRange != null && yRange != null)
+            {
+                XAxis.Range = xRange;
+                YAxis.Range = yRange;
+                InvalidateChart();
+                InvokeInvalidateAxisGrid();
+            }
+        }
+        #endregion
+
         #region Private methods
         /// <summary>
         /// Causes the chart (if one is inside the container) to redraw itself.
@@ -684,6 +798,16 @@ namespace Restless.Controls.Chart
             {
                 element.InvalidateMeasure();
             }
+        }
+
+        private void InvokeInvalidateAxisGrid()
+        {
+            //// Without this invoke, AxisGrid.ActualWidth isn't fully updated when the lines
+            //// are generated and they therefore fall short. This solves it.
+            Dispatcher.Invoke(new Action(() =>
+            {
+                AxisGrid.InvalidateMeasure();
+            }), DispatcherPriority.Loaded);
         }
         #endregion
     }

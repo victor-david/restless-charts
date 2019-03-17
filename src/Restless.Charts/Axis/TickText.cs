@@ -14,6 +14,9 @@ namespace Restless.Controls.Chart
     /// </summary>
     public class TickText : TextBlock
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TickText"/> class.
+        /// </summary>
         public TickText()
         {
         }

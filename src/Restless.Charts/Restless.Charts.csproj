@@ -29,6 +29,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\Restless.Charts.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="PresentationCore" />
@@ -48,6 +49,7 @@
     <Compile Include="Axis\Axis.cs" />
     <Compile Include="Axis\AxisGrid.cs" />
     <Compile Include="Axis\AxisPlacement.cs" />
+    <Compile Include="Axis\TickCoordinateCollection.cs" />
     <Compile Include="Axis\TickEvaluationResult.cs" />
     <Compile Include="Axis\IDoubleConverter.cs" />
     <Compile Include="Axis\MajorTick.cs" />

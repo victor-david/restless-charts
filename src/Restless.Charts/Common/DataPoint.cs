@@ -17,11 +17,17 @@ namespace Restless.Controls.Chart
             YValue = yValue;
         }
 
+        /// <summary>
+        /// Gets the X value for this data point.
+        /// </summary>
         public double XValue
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the Y value for this data point.
+        /// </summary>
         public double YValue
         {
             get;

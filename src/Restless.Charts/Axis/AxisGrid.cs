@@ -1,22 +1,21 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
 namespace Restless.Controls.Chart
 {
+    /// <summary>
+    /// Represents a panel that displays horizontal and vertical grid lines
+    /// inside the chart area.
+    /// </summary>
     public class AxisGrid : Panel
     {
         #region Private
         private readonly ChartContainer owner;
         private readonly Path horzPath;
         private readonly Path vertPath;
-        private GeometryGroup vertGeometryGroup;
-        private GeometryGroup horzGeometryGroup;
         #endregion
 
         /************************************************************************/
@@ -42,9 +41,6 @@ namespace Restless.Controls.Chart
         internal AxisGrid(ChartContainer owner)
         {
             this.owner = owner ?? throw new ArgumentNullException(nameof(owner));
-
-            owner.XAxis.MajorTickGeometryCreated += XAxisMajorTickGeometryCreated;
-            owner.YAxis.MajorTickGeometryCreated += YAxisMajorTickGeometryCreated;
 
             horzPath = new Path()
             {
@@ -84,10 +80,45 @@ namespace Restless.Controls.Chart
 
         #region Protected Methods
         /// <summary>
-        /// Positions child elements and determines a size for a AxisGrid
+        /// Measures the size in layout required for child elements and determines a size this element.
         /// </summary>
-        /// <param name="finalSize">The final area within the parent that AxisGrid should use to arrange itself and its children</param>
-        /// <returns>The actual size used</returns>
+        /// <param name="availableSize">
+        /// The available size that this element can give to child elements.
+        /// Infinity can be specified as a value to indicate that the element will size to whatever content is available.
+        /// </param>
+        /// <returns>The size that this element determines it needs during layout, based on its calculations of child element sizes.</returns>
+        protected override Size MeasureOverride(Size availableSize)
+        {
+            Size desiredSize = new Size
+                (
+                    availableSize.Width.IsFinite() ? availableSize.Width : 128,
+                    availableSize.Height.IsFinite() ? availableSize.Height : 128
+                );
+
+            if (owner.Orientation == Orientation.Vertical)
+            {
+                CreateVerticalGeometry(owner.XAxis.MajorTickCoordinates);
+                CreateHorizontalGeometry(owner.YAxis.MajorTickCoordinates);
+            }
+            else
+            {
+                CreateVerticalGeometry(owner.YAxis.MajorTickCoordinates);
+                CreateHorizontalGeometry(owner.XAxis.MajorTickCoordinates);
+            }
+
+            foreach (UIElement child in Children)
+            {
+                child.Measure(desiredSize);
+            }
+
+            return desiredSize;
+        }
+
+        /// <summary>
+        /// Positions children of this element.
+        /// </summary>
+        /// <param name="finalSize">The final area within the parent this element should use to arrange itself and its children.</param>
+        /// <returns>The actual size used.</returns>
         protected override Size ArrangeOverride(Size finalSize)
         {
             foreach (UIElement child in Children)
@@ -96,77 +127,47 @@ namespace Restless.Controls.Chart
             }
             return finalSize;
         }
-
-        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
-        {
-            if (sizeInfo.WidthChanged)
-            {
-                CreateHorizontalGeometry(horzGeometryGroup);
-            }
-
-            if (sizeInfo.HeightChanged)
-            {
-                CreateVerticalGeometry(vertGeometryGroup);
-            }
-            base.OnRenderSizeChanged(sizeInfo);
-        }
         #endregion
 
         /************************************************************************/
 
         #region Private methods
-        private void XAxisMajorTickGeometryCreated(object sender, GeometryGroup group)
-        {
-            vertGeometryGroup = group;
-            CreateVerticalGeometry(group);
-        }
 
-        private void YAxisMajorTickGeometryCreated(object sender, GeometryGroup group)
+        private void CreateVerticalGeometry(TickCoordinateCollection tickCoordinates)
         {
-            horzGeometryGroup = group;
-            CreateHorizontalGeometry(group);
-        }
+            GeometryGroup vertGroup = new GeometryGroup();
 
-        private void CreateVerticalGeometry(GeometryGroup group)
-        {
-            if (group != null)
+            foreach (double tickCoordinate in tickCoordinates)
             {
-                GeometryGroup vertGroup = new GeometryGroup();
+                double x = tickCoordinate - owner.GridBorderSize;
 
-                foreach (var item in group.Children.OfType<LineGeometry>())
+                LineGeometry line = new LineGeometry
                 {
-                    double x = item.StartPoint.X - owner.GridBorderSize;
-
-                    LineGeometry line = new LineGeometry
-                    {
-                        StartPoint = new Point(x, 0),
-                        EndPoint = new Point(x, ActualHeight)
-                    };
-                    vertGroup.Children.Add(line);
-                }
-                vertPath.Data = vertGroup;
+                    StartPoint = new Point(x, 0),
+                    EndPoint = new Point(x, ActualHeight)
+                };
+                vertGroup.Children.Add(line);
             }
+            vertPath.Data = vertGroup;
         }
 
-        private void CreateHorizontalGeometry(GeometryGroup group)
+        private void CreateHorizontalGeometry(TickCoordinateCollection tickCoordinates)
         {
-            if (group != null)
+            GeometryGroup horzGroup = new GeometryGroup();
+
+            foreach (double tickCoordinate in tickCoordinates)
             {
-                GeometryGroup horzGroup = new GeometryGroup();
+                double y = tickCoordinate - owner.GridBorderSize;
 
-                foreach (var item in group.Children.OfType<LineGeometry>())
+                LineGeometry line = new LineGeometry
                 {
-                    double y = item.StartPoint.Y - owner.GridBorderSize;
+                    StartPoint = new Point(0, y),
+                    EndPoint = new Point(ActualWidth, y)
+                };
 
-                    LineGeometry line = new LineGeometry
-                    {
-                        StartPoint = new Point(0, y),
-                        EndPoint = new Point(ActualWidth, y)
-                    };
-                    horzGroup.Children.Add(line);
-                }
-                horzPath.Data = horzGroup;
+                horzGroup.Children.Add(line);
             }
+            horzPath.Data = horzGroup;
         }
         #endregion
     }

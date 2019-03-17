@@ -12,7 +12,7 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Initializes a new instance of the <see cref="MajorTick"/> class.
         /// </summary>
-        /// <param name="tickValue">The tick value.</param>
+        /// <param name="value">The tick value.</param>
         /// <param name="text">The label element for the tick.</param>
         internal MajorTick(double value, TickText text)
         {

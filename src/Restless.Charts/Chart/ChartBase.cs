@@ -77,6 +77,14 @@ namespace Restless.Controls.Chart
         /************************************************************************/
 
         #region Protected methods
+        /// <summary>
+        /// Measures the size in layout required for child elements and determines a size this element.
+        /// </summary>
+        /// <param name="availableSize">
+        /// The available size that this element can give to child elements.
+        /// Infinity can be specified as a value to indicate that the element will size to whatever content is available.
+        /// </param>
+        /// <returns>The size that this element determines it needs during layout, based on its calculations of child element sizes.</returns>
         protected override Size MeasureOverride(Size availableSize)
         {
             Size desiredSize = new Size

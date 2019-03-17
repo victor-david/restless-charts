@@ -72,6 +72,12 @@ namespace Restless.Controls.Chart
             return Math.Max(min, Math.Min(value, max));
         }
 
+        /// <summary>
+        /// Floor
+        /// </summary>
+        /// <param name="number">The number</param>
+        /// <param name="rem">The rem</param>
+        /// <returns>The value</returns>
         public static double Floor(double number, int rem)
         {
             if (rem <= 0)
@@ -83,6 +89,12 @@ namespace Restless.Controls.Chart
             return val;
         }
 
+        /// <summary>
+        /// Round
+        /// </summary>
+        /// <param name="number">The number</param>
+        /// <param name="rem">The rem</param>
+        /// <returns>The value</returns>
         public static double Round(double number, int rem)
         {
             if (rem <= 0)

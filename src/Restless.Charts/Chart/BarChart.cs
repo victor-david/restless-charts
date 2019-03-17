@@ -109,6 +109,11 @@ namespace Restless.Controls.Chart
         }
         #endregion
 
+        /// <summary>
+        /// Positions children of this element.
+        /// </summary>
+        /// <param name="finalSize">The final area within the parent this element should use to arrange itself and its children.</param>
+        /// <returns>The actual size used.</returns>
         protected override Size ArrangeOverride(Size finalSize)
         {
             foreach (UIElement child in Children)
@@ -118,12 +123,15 @@ namespace Restless.Controls.Chart
             return finalSize;
         }
 
+        /// <summary>
+        /// Called during the measuring phase to create the geometry for this control.
+        /// </summary>
+        /// <param name="desiredSize">The desired size.</param>
         protected override void CreateChildGeometry(Size desiredSize)
         {
             GeometryGroup group = new GeometryGroup();
 
             int seriesCount = Data.Count;
-
 
             foreach (DataSeries series in Data)
             {
@@ -136,21 +144,52 @@ namespace Restless.Controls.Chart
                 foreach (DataPoint point in series)
                 {
                     LineGeometry line = new LineGeometry();
-                    double xc = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
-                    double yc = Owner.YAxis.GetCoordinateFromTick(point.YValue, desiredSize);
-                    double ycz = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
+                    if (Owner.Orientation == Orientation.Vertical)
+                    {
+                        SetLineGeometryVertical(point, line, desiredSize);
+                    }
+                    else
+                    {
+                        SetLineGeometryHorizontal(point, line, desiredSize);
 
-                    line.StartPoint = new Point(xc, ycz);
-                    line.EndPoint = new Point(xc, yc);
+                    }
                     group.Children.Add(line);
                 }
                 path.Data = group;
                 Children.Add(path);
             }
+        }
 
-            //geometryPath.Data = group;
-            // Children.Add(group);
+        /// <summary>
+        /// Sets line geometry when the chart container is in vertical orientation.
+        /// </summary>
+        /// <param name="point">The data point</param>
+        /// <param name="line">The line object</param>
+        /// <param name="desiredSize">The desired size</param>
+        private void SetLineGeometryVertical(DataPoint point, LineGeometry line, Size desiredSize)
+        {
+            double xc = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
+            double yc = Owner.YAxis.GetCoordinateFromTick(point.YValue, desiredSize);
+            double ycz = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
 
+            line.StartPoint = new Point(xc, ycz);
+            line.EndPoint = new Point(xc, yc);
+        }
+
+        /// <summary>
+        /// Sets line geometry when the chart container is in horizontal orientation.
+        /// </summary>
+        /// <param name="point">The data point</param>
+        /// <param name="line">The line object</param>
+        /// <param name="desiredSize">The desired size</param>
+        private void SetLineGeometryHorizontal(DataPoint point, LineGeometry line, Size desiredSize)
+        {
+            double xc = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
+            double yc = Owner.YAxis.GetCoordinateFromTick(point.YValue, desiredSize);
+            double ycz = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
+
+            line.StartPoint = new Point(ycz, xc);
+            line.EndPoint = new Point(yc, xc);
         }
     }
 }

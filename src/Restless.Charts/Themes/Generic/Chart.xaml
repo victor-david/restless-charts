@@ -67,12 +67,40 @@
         </Border>
 
         <ControlTemplate.Triggers>
+            <Trigger Property="XAxisPlacement" Value="Bottom">
+                <Setter TargetName="XAxis" Property="Grid.Column" Value="2"/>
+                <Setter TargetName="XAxis" Property="Grid.Row" Value="3"/>
+            </Trigger>
             <Trigger Property="XAxisPlacement" Value="Top">
+                <Setter TargetName="XAxis" Property="Grid.Column" Value="2"/>
                 <Setter TargetName="XAxis" Property="Grid.Row" Value="1"/>
+            </Trigger>
+            <Trigger Property="XAxisPlacement" Value="Left">
+                <Setter TargetName="XAxis" Property="Grid.Column" Value="1"/>
+                <Setter TargetName="XAxis" Property="Grid.Row" Value="2"/>
+            </Trigger>
+            <Trigger Property="XAxisPlacement" Value="Right">
+                <Setter TargetName="XAxis" Property="Grid.Column" Value="3"/>
+                <Setter TargetName="XAxis" Property="Grid.Row" Value="2"/>
+            </Trigger>
+            
+            <Trigger Property="YAxisPlacement" Value="Left">
+                <Setter TargetName="YAxis" Property="Grid.Column" Value="1"/>
+                <Setter TargetName="YAxis" Property="Grid.Row" Value="2"/>
             </Trigger>
             <Trigger Property="YAxisPlacement" Value="Right">
                 <Setter TargetName="YAxis" Property="Grid.Column" Value="3"/>
+                <Setter TargetName="YAxis" Property="Grid.Row" Value="2"/>
             </Trigger>
+            <Trigger Property="YAxisPlacement" Value="Top">
+                <Setter TargetName="YAxis" Property="Grid.Column" Value="2"/>
+                <Setter TargetName="YAxis" Property="Grid.Row" Value="1"/>
+            </Trigger>
+            <Trigger Property="YAxisPlacement" Value="Bottom">
+                <Setter TargetName="YAxis" Property="Grid.Column" Value="2"/>
+                <Setter TargetName="YAxis" Property="Grid.Row" Value="3"/>
+            </Trigger>
+
         </ControlTemplate.Triggers>
 
     </ControlTemplate>

@@ -16,8 +16,11 @@ namespace Application.Sample
         #region Private
         // data
         private DataSeriesCollection data;
+        // chart
+        private Orientation chartOrientation;
+
         // x
-        private AxisPlacement xAxisPlacement;
+        private bool isXAxisPlacementReversed;
         private TickVisibility xAxisTickVisibility;
         private string xAxisTextFormat;
         private IDoubleConverter xAxisTextProvider;
@@ -25,7 +28,7 @@ namespace Application.Sample
         private object topTitle;
         private object bottomTitle;
         // y
-        private AxisPlacement yAxisPlacement;
+        private bool isYAxisPlacementReversed;
         private TickVisibility yAxisTickVisibility;
         private string yAxisTextFormat;
         private IDoubleConverter yAxisTextProvider;
@@ -42,20 +45,31 @@ namespace Application.Sample
             TopTitle = TryFindResource("TopTitle");
             //LeftTitle = TryFindResource("LeftTitle");
             //RightTitle = TryFindResource("LeftTitle");
-
-            XAxisPlacement = AxisPlacement.Top;
+            //IsXAxisPlacementReversed = true;
             XAxisTickVisibility = TickVisibility.Default;
             // XAxisTextFormat = "dd-MMM-yy";
             //XAxisTextFormat = "N1";
             //XAxisTextProvider = new DoubleToDateConverter();
-
-            YAxisPlacement = AxisPlacement.DefaultY;
-            
+           
             YAxisTickVisibility = TickVisibility.Default;
             //YAxisTextFormat = "N1";
 
+            ChartOrientation = Orientation.Vertical;
+
             Loaded += MainWindowLoaded;
         }
+        #endregion
+
+        #region Chart properties
+        /// <summary>
+        /// Gets the orientation of the chart
+        /// </summary>
+        public Orientation ChartOrientation
+        {
+            get => chartOrientation;
+            private set => SetProperty(ref chartOrientation, value);
+        }
+
         #endregion
 
         #region Data Properties
@@ -80,12 +94,12 @@ namespace Application.Sample
 
         #region X Axis properties
         /// <summary>
-        /// Gets the placement of the X axis
+        /// Gets a value that determines if the placement of the X axis is reversed from its default.
         /// </summary>
-        public AxisPlacement XAxisPlacement
+        public bool IsXAxisPlacementReversed
         {
-            get => xAxisPlacement;
-            private set => SetProperty(ref xAxisPlacement, value);
+            get => isXAxisPlacementReversed;
+            private set => SetProperty(ref isXAxisPlacementReversed, value);
         }
 
         /// <summary>
@@ -147,12 +161,12 @@ namespace Application.Sample
 
         #region Y Axis properties
         /// <summary>
-        /// Gets the placement of the X axis
+        /// Gets a value that determines if the placement of the Y axis is reversed from its default.
         /// </summary>
-        public AxisPlacement YAxisPlacement
+        public bool IsYAxisPlacementReversed
         {
-            get => yAxisPlacement;
-            private set => SetProperty(ref yAxisPlacement, value);
+            get => isYAxisPlacementReversed;
+            private set => SetProperty(ref isYAxisPlacementReversed, value);
         }
 
         /// <summary>
@@ -216,7 +230,7 @@ namespace Application.Sample
         public event PropertyChangedEventHandler PropertyChanged;
         #endregion
 
-        #region Private methods
+        #region Create Data
         private void MainWindowLoaded(object sender, RoutedEventArgs e)
         {
             // CreateTestData1();
@@ -257,15 +271,15 @@ namespace Application.Sample
             DataSeries series = data.Add();
 
             DateTime now = DateTime.Now;
-            Random rand = new Random();
+            //Random rand = new Random();
 
-            int min = 10000;
-            int max = 20000;
-            int y = 1000;
-            for (int k = -15; k <= 0; k++)
+            //int min = 10000;
+            //int max = 20000;
+            int y = -750;
+            for (int daysAgo = -15; daysAgo <= 0; daysAgo++)
             {
-                int value = rand.Next(min, max + 1);
-                series.Add(now.AddDays(k).Ticks, y);
+                //int value = rand.Next(min, max + 1);
+                series.Add(now.AddDays(daysAgo).Ticks, y);
                 y += 100;
             }
 
@@ -311,7 +325,7 @@ namespace Application.Sample
 
         private void ButtonClickXAxisPlacement(object sender, RoutedEventArgs e)
         {
-            XAxisPlacement = (XAxisPlacement == AxisPlacement.Bottom) ? AxisPlacement.Top : AxisPlacement.Bottom;
+            IsXAxisPlacementReversed = !IsXAxisPlacementReversed;
         }
 
         private void ButtonClickXAxisTicks(object sender, RoutedEventArgs e)
@@ -339,19 +353,20 @@ namespace Application.Sample
         #region Y axis click handlers
         private void ButtonClickYAxisPlacement(object sender, RoutedEventArgs e)
         {
-            switch (YAxisPlacement)
-            {
-                case AxisPlacement.Left:
-                    YAxisPlacement = AxisPlacement.Right;
-                    RightTitle = LeftTitle;
-                    LeftTitle = null;
-                    break;
-                case AxisPlacement.Right:
-                    YAxisPlacement = AxisPlacement.Left;
-                    LeftTitle = RightTitle;
-                    RightTitle = null;
-                    break;
-            }
+            IsYAxisPlacementReversed = !IsYAxisPlacementReversed;
+            //switch (YAxisPlacement)
+            //{
+            //    case AxisPlacement.Left:
+            //        YAxisPlacement = AxisPlacement.Right;
+            //        RightTitle = LeftTitle;
+            //        LeftTitle = null;
+            //        break;
+            //    case AxisPlacement.Right:
+            //        YAxisPlacement = AxisPlacement.Left;
+            //        LeftTitle = RightTitle;
+            //        RightTitle = null;
+            //        break;
+            //}
         }
 
         private void ButtonClickYAxisTicks(object sender, RoutedEventArgs e)
@@ -373,6 +388,13 @@ namespace Application.Sample
         private void ButtonClickYAxisReverse(object sender, RoutedEventArgs e)
         {
             IsYAxisReversed = !IsYAxisReversed;
+        }
+        #endregion
+
+        #region Chart click handlers
+        private void ButtonClickChartOrientation(object sender, RoutedEventArgs e)
+        {
+            ChartOrientation = ChartOrientation == Orientation.Vertical ? Orientation.Horizontal : Orientation.Vertical;
         }
         #endregion
     }

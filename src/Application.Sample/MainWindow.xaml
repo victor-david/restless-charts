@@ -20,6 +20,15 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <StackPanel>
+            <HeaderedContentControl Header="Chart">
+                <StackPanel>
+                    <Button
+                        Click="ButtonClickChartOrientation"
+                        ToolTip="Toggle the orientation of the chart"
+                        Content="Toggle Orientation"/>
+                </StackPanel>
+            </HeaderedContentControl>
+            
             <HeaderedContentControl Header="X Axis">
                 <StackPanel>
                     <Button 
@@ -67,20 +76,19 @@
             BottomTitle="{Binding BottomTitle}"
             LeftTitle="{Binding LeftTitle}"
             RightTitle="{Binding RightTitle}"
-            
-            XAxisPlacement="{Binding XAxisPlacement}"
+            Orientation="{Binding ChartOrientation}"
+            IsXAxisPlacementReversed="{Binding IsXAxisPlacementReversed}"
             XAxisTickVisibility="{Binding XAxisTickVisibility}"
             XAxisTextFormat="{Binding XAxisTextFormat}"
             XAxisTextProvider="{Binding XAxisTextProvider}"
             IsXAxisReversed="{Binding IsXAxisReversed}"
-            
-            YAxisPlacement="{Binding YAxisPlacement}"
+            IsYAxisPlacementReversed="{Binding IsYAxisPlacementReversed}"
             YAxisTickVisibility="{Binding YAxisTickVisibility}"
             YAxisTextFormat="{Binding YAxisTextFormat}"
             YAxisTextProvider="{Binding YAxisTextProvider}"
             IsYAxisReversed="{Binding IsYAxisReversed}">
             
-            <conx:BarChart Data="{Binding Data}" BarThickness="60"/>
+            <conx:BarChart Data="{Binding Data}" BarThickness="20"/>
             
         </conx:ChartContainer>
 

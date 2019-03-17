@@ -36,59 +36,39 @@ namespace Restless.Controls.Chart
         }
         #endregion
 
-        //protected override Size ArrangeOverride(Size finalSize)
-        //{
-        //    return base.ArrangeOverride(finalSize);
-        //}
-
+        /// <summary>
+        /// Called when the mouse wheel moves.
+        /// </summary>
+        /// <param name="e">The event parameters.</param>
         protected override void OnMouseWheel(MouseWheelEventArgs e)
         {
             base.OnMouseWheel(e);
 
-            double factor = e.Delta < 0 ? 1.2 : 1 / 1.2;
-
             if (xAxisRange == null) xAxisRange = owner.XAxis.Range;
             if (yAxisRange == null) yAxisRange = owner.YAxis.Range;
 
-            ZoomToRange(owner.XAxis.Range.Zoom(factor), owner.YAxis.Range.Zoom(factor));
-            //owner.XAxis.Range = owner.XAxis.Range.Zoom(factor);
-            //owner.YAxis.Range = owner.YAxis.Range.Zoom(factor);
-            
-            //if (owner.Content is UIElement element)
-            //{
-            //    element.InvalidateMeasure();
-            //}
-
+            if (e.Delta < 0)
+            {
+                owner.ZoomOut();
+            }
+            else
+            {
+                owner.ZoomIn();
+            }
             e.Handled = true;
         }
 
+        /// <summary>
+        /// Called when a mouse button goes down.
+        /// </summary>
+        /// <param name="e">The event parameters.</param>
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
             base.OnMouseDown(e);
             if (e.LeftButton == MouseButtonState.Pressed && e.ClickCount == 2)
             {
-                ZoomToRange(xAxisRange, yAxisRange);
-                //if (xAxisRange != null && yAxisRange != null)
-                //{
-                //    owner.XAxis.Range = xAxisRange;
-                //    owner.YAxis.Range = yAxisRange;
-                //}
+                owner.ZoomToRange(xAxisRange, yAxisRange);
             }
-        }
-
-        private void ZoomToRange(Range xRange, Range yRange)
-        {
-            if (xRange != null && yRange != null)
-            {
-                owner.XAxis.Range = xRange;
-                owner.YAxis.Range = yRange;
-
-                if (owner.Content is UIElement element)
-                {
-                    element.InvalidateMeasure();
-                }
-            }
-
         }
     }
 }

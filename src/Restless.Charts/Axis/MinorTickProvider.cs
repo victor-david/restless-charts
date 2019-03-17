@@ -18,7 +18,7 @@ namespace Restless.Controls.Chart
 
         #region Constructor
         /// <summary>
-        /// Initializes a new instance of <see cref="MinorTicksProvider"/> class with default ticks count.
+        /// Initializes a new instance of the <see cref="MinorTickProvider"/> class.
         /// </summary>
         internal MinorTickProvider()
         {
