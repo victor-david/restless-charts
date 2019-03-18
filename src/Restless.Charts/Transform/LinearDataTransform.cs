@@ -16,7 +16,7 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Initializes a new instance of the <see cref="LinearDataTransform"/> class.
         /// </summary>
-        public LinearDataTransform() : base(new Range(double.MinValue, double.MaxValue))
+        public LinearDataTransform()
         {
         }
         #endregion

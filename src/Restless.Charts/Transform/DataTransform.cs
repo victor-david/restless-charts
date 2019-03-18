@@ -15,9 +15,8 @@ namespace Restless.Controls.Chart
     {
         /// <summary>
         /// Gets range of valid data values.
-        /// <see cref="DataToPlot"/> method returns NaN for values outside this range. 
         /// </summary>
-        public Range Domain
+        public Range Range
         {
             get;
         }
@@ -25,10 +24,17 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Initializes a new instance of <see cref="DataTransform"/> class.
         /// </summary>
-        /// <param name="domain">A range of valid data.</param>
-        protected DataTransform(Range domain)
+        protected DataTransform() : this(Range.FullRange())
         {
-            Domain = domain;
+
+        }
+        /// <summary>
+        /// Initializes a new instance of <see cref="DataTransform"/> class.
+        /// </summary>
+        /// <param name="range">A range of valid data.</param>
+        protected DataTransform(Range range)
+        {
+            Range = range ?? throw new ArgumentNullException(nameof(range));
         }
 
         /// <summary>
@@ -37,7 +43,7 @@ namespace Restless.Controls.Chart
         /// <param name="dataValue">A value in data coordinates.</param>
         /// <returns>
         /// Value converted to plot coordinates or NaN if <paramref name="dataValue"/>
-        /// falls outside of <see cref="Domain"/>.
+        /// falls outside of <see cref="Range"/>.
         /// </returns>
         public abstract double DataToPlot(double dataValue);
 

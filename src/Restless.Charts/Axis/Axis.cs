@@ -20,7 +20,6 @@ namespace Restless.Controls.Chart
         private const double LabelGapHorz = 0.0;
         private const double LabelGapVert = 2.0;
 
-        private Range range;
         private Path majorTickPath;
         private Path minorTickPath;
 
@@ -28,7 +27,7 @@ namespace Restless.Controls.Chart
         private AxisPlacement axisPlacement;
         private TickVisibility tickVisibility;
         private DataTransform dataTransform;
-        private bool isReversed;
+        private bool isValueReversed;
         #endregion
 
         /************************************************************************/
@@ -60,7 +59,8 @@ namespace Restless.Controls.Chart
             tickLength = 12;
             tickVisibility = TickVisibility.Default;
 
-            range = Range.EmptyRange();
+            SetRange(Range.EmptyRange());
+
             dataTransform = new IdentityDataTransform();
 
             majorTickPath = new Path()
@@ -77,6 +77,9 @@ namespace Restless.Controls.Chart
 
             Children.Add(majorTickPath);
             Children.Add(minorTickPath);
+            //UseLayoutRounding = true;
+            //SetValue(RenderOptions.EdgeModeProperty, EdgeMode.Aliased);
+            //ClipToBounds = true;
         }
         #endregion
 
@@ -166,15 +169,8 @@ namespace Restless.Controls.Chart
         /// </summary>
         public Range Range
         {
-            get => range;
-            set
-            {
-                if (value != range)
-                {
-                    range = value;
-                    InvalidateMeasure();
-                }
-            }
+            get;
+            private set;
         }
         #endregion
 
@@ -212,14 +208,14 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Gets or sets a flag that determines whether the axis is reversed or not.
         /// </summary>
-        public bool IsReversed
+        public bool IsValueReversed
         {
-            get => isReversed;
+            get => isValueReversed;
             set
             {
-                if (value != isReversed)
+                if (value != isValueReversed)
                 {
-                    isReversed = value;
+                    isValueReversed = value;
                     InvalidateMeasure();
                 }
             }
@@ -254,7 +250,34 @@ namespace Restless.Controls.Chart
 
         #region Public methods
         /// <summary>
-        /// 
+        /// Sets the range of this axis.
+        /// </summary>
+        /// <param name="range">The range to set.</param>
+        /// <exception cref="ArgumentNullException"/>
+        public void SetRange(Range range)
+        {
+            Range = range ?? throw new ArgumentNullException(nameof(range));
+        }
+
+        /// <summary>
+        /// Shifts the range of the axis by the specified percentage.
+        /// </summary>
+        /// <param name="perecentage">The percentage to shift.</param>
+        public void Shift(double perecentage)
+        {
+            if (perecentage == 0) return;
+
+            if (IsHorizontal)
+            {
+                Range.Shift(IsValueReversed ? -perecentage : perecentage);
+            }
+            else
+            {
+                Range.Shift(IsValueReversed ? perecentage : -perecentage);
+            }
+        }
+
+        /// <summary>
         /// Gets a screen coordinate from the specified tick value.
         /// </summary>
         /// <param name="tick">The tick value.</param>
@@ -383,7 +406,7 @@ namespace Restless.Controls.Chart
         {
             double min = DataTransform.PlotToData(Range.Min.IsFinite() ? Range.Min : 0);
             double max = DataTransform.PlotToData(Range.Max.IsFinite() ? Range.Max : 1);
-            Range range = new Range(min, max);
+            Range range = Range.SpecifiedRange(min, max);
             TickProvider.CreateTicks(desiredSize, range, ValidateLabelArrangement);
         }
 
@@ -490,8 +513,8 @@ namespace Restless.Controls.Chart
         private double ValueToScreen(double value, Size axisSize, Range range)
         {
             double result;
-            double rangeMin = IsReversed ? range.Max : range.Min;
-            double rangeMax = IsReversed ? range.Min : range.Max;
+            double rangeMin = IsValueReversed ? range.Max : range.Min;
+            double rangeMax = IsValueReversed ? range.Min : range.Max;
 
             if (IsHorizontal)
             {

@@ -8,7 +8,7 @@
         /// <summary>
         /// Initializes a new instance of <see cref="IdentityDataTransform"/> class.
         /// </summary>
-        public IdentityDataTransform() : base(new Range(double.MinValue, double.MaxValue))
+        public IdentityDataTransform()
         {
         }
 

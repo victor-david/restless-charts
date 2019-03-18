@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace Restless.Controls.Chart
@@ -62,8 +63,11 @@ namespace Restless.Controls.Chart
             {
                 if (TreeHelper.TrySetParent(c, ref c.owner))
                 {
-                    c.Owner.XAxis.Range = c.Data.DataRange.X;
-                    c.Owner.YAxis.Range = c.Data.DataRange.Y;
+                    c.Owner.XAxis.SetRange(c.Data.DataRange.X);
+                    c.Owner.YAxis.SetRange(c.Data.DataRange.Y);
+                    c.Owner.XAxis.Range.CreateSnapshot();
+                    c.Owner.YAxis.Range.CreateSnapshot();
+                    c.Owner.InvalidateMeasure();
                 }
             }
         }

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -17,7 +14,6 @@ namespace Restless.Controls.Chart
     public class BarChart : ChartBase
     {
         #region Private
-        //private Path geometryPath;
         #endregion
 
         /************************************************************************/
@@ -28,9 +24,9 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly Brush DefaultBarBrush = Brushes.Gray;
         /// <summary>
-        /// Gets the default bar thickness.
+        /// Gets the default bar thickness. This value (zero) signifies that bars will be auto sized.
         /// </summary>
-        public const double DefaultBarThickness = 8.0;
+        public const double DefaultBarThickness = 30.0;
         #endregion
 
         /************************************************************************/
@@ -52,33 +48,8 @@ namespace Restless.Controls.Chart
         /************************************************************************/
 
         #region Brush
-        ///// <summary>
-        ///// Gets or sets the brush to use to draw the bars
-        ///// </summary>
-        //public Brush BarBrush
-        //{
-        //    get => (Brush)GetValue(BarBrushProperty);
-        //    set => SetValue(BarBrushProperty, value);
-        //}
-
-        ///// <summary>
-        ///// Identifies the <see cref="BarBrush"/> dependency property.
-        ///// </summary>
-        //public static readonly DependencyProperty BarBrushProperty = DependencyProperty.Register
-        //    (
-        //        nameof(BarBrush), typeof(Brush), typeof(BarChart), new PropertyMetadata(DefaultBarBrush, OnBarBrushChanged)
-        //    );
-
-        //private static void OnBarBrushChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        //{
-        //    if (d is BarChart c)
-        //    {
-        //        c.geometryPath.Stroke = c.BarBrush;
-        //    }
-        //}
-
         /// <summary>
-        /// Gets or sets the thickness of the bars
+        /// Gets or sets the thickness of the bars. Zero signifies auto size. This is a dependency property.
         /// </summary>
         public double BarThickness
         {
@@ -97,18 +68,21 @@ namespace Restless.Controls.Chart
         private static object OnCoerceBarThickness(DependencyObject d, object value)
         {
             double dval = (double)value;
-            return dval.Clamp(1, 100);
+            return dval.Clamp(0, 100);
         }
 
         private static void OnBarThicknessPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is BarChart c)
             {
-                //c.geometryPath.StrokeThickness = c.BarThickness;
+                c.InvalidateMeasure();
             }
         }
         #endregion
 
+        /************************************************************************/
+
+        #region Protected methods
         /// <summary>
         /// Positions children of this element.
         /// </summary>
@@ -131,14 +105,15 @@ namespace Restless.Controls.Chart
         {
             GeometryGroup group = new GeometryGroup();
 
-            int seriesCount = Data.Count;
+            double barThickness = BarThickness > 0 ? BarThickness : GetAutoBarThickness(Data, desiredSize);
 
             foreach (DataSeries series in Data)
             {
                 Path path = new Path()
                 {
                     Stroke = series.Brush,
-                    StrokeThickness = BarThickness,
+                    StrokeThickness = barThickness,
+                    ClipToBounds = true,
                 };
 
                 foreach (DataPoint point in series)
@@ -155,9 +130,41 @@ namespace Restless.Controls.Chart
                     }
                     group.Children.Add(line);
                 }
+
                 path.Data = group;
                 Children.Add(path);
             }
+        }
+        #endregion
+
+        /************************************************************************/
+
+        #region Private methods
+
+        private double GetAutoBarThickness(DataSeriesCollection seriesCollection, Size desiredSize)
+        {
+            double result = double.PositiveInfinity;
+            foreach(DataSeries series in seriesCollection)
+            {
+                double autoSeries = Math.Abs(GetAutoBarThickness(series, desiredSize));
+                result = (autoSeries > 0) ? Math.Min(result, autoSeries) : result;
+            }
+            return result.IsFinite() ? result : 10.0;
+        }
+
+        private double GetAutoBarThickness(DataSeries series, Size desiredSize)
+        {
+            if (series.Count == 0) return 0;
+            double s1 = Owner.XAxis.GetCoordinateFromTick(series[0].XValue, desiredSize);
+            double sx = Owner.XAxis.GetCoordinateFromTick(series[series.Count - 1].XValue, desiredSize);
+            double distance = sx - s1;
+
+            if (distance == 0.0) return Owner.XAxis.IsHorizontal ? desiredSize.Width / 2.0 : desiredSize.Height / 2.0;
+
+            double result = distance / series.Count;
+            //Debug.WriteLine("-----------------------------------");
+            //Debug.WriteLine($"S1 {s1} SX {sx} Distance {distance} Count {series.Count} Result {result} DesiredSize {desiredSize}");
+            return result;
         }
 
         /// <summary>
@@ -191,5 +198,6 @@ namespace Restless.Controls.Chart
             line.StartPoint = new Point(ycz, xc);
             line.EndPoint = new Point(yc, xc);
         }
+        #endregion
     }
 }

@@ -24,7 +24,7 @@ namespace Application.Sample
         private TickVisibility xAxisTickVisibility;
         private string xAxisTextFormat;
         private IDoubleConverter xAxisTextProvider;
-        private bool isXAxisReversed;
+        private bool isXAxisValueReversed;
         private object topTitle;
         private object bottomTitle;
         // y
@@ -32,7 +32,7 @@ namespace Application.Sample
         private TickVisibility yAxisTickVisibility;
         private string yAxisTextFormat;
         private IDoubleConverter yAxisTextProvider;
-        private bool isYAxisReversed;
+        private bool isYAxisValueReversed;
         private object leftTitle;
         private object rightTitle;
         #endregion
@@ -45,14 +45,10 @@ namespace Application.Sample
             TopTitle = TryFindResource("TopTitle");
             //LeftTitle = TryFindResource("LeftTitle");
             //RightTitle = TryFindResource("LeftTitle");
-            //IsXAxisPlacementReversed = true;
+
+            IsXAxisPlacementReversed = true;
             XAxisTickVisibility = TickVisibility.Default;
-            // XAxisTextFormat = "dd-MMM-yy";
-            //XAxisTextFormat = "N1";
-            //XAxisTextProvider = new DoubleToDateConverter();
-           
             YAxisTickVisibility = TickVisibility.Default;
-            //YAxisTextFormat = "N1";
 
             ChartOrientation = Orientation.Vertical;
 
@@ -69,7 +65,6 @@ namespace Application.Sample
             get => chartOrientation;
             private set => SetProperty(ref chartOrientation, value);
         }
-
         #endregion
 
         #region Data Properties
@@ -132,12 +127,12 @@ namespace Application.Sample
         }
 
         /// <summary>
-        /// Gets a value that indicates if the X axis is reversed.
+        /// Gets a value that indicates if the values on the X axis are reversed.
         /// </summary>
-        public bool IsXAxisReversed
+        public bool IsXAxisValueReversed
         {
-            get => isXAxisReversed;
-            private set => SetProperty(ref isXAxisReversed, value);
+            get => isXAxisValueReversed;
+            private set => SetProperty(ref isXAxisValueReversed, value);
         }
 
         /// <summary>
@@ -199,12 +194,12 @@ namespace Application.Sample
         }
 
         /// <summary>
-        /// Gets a value that indicates if the X axis is reversed.
+        /// Gets a value that indicates if the values on the Y axis are reversed.
         /// </summary>
-        public bool IsYAxisReversed
+        public bool IsYAxisValueReversed
         {
-            get => isYAxisReversed;
-            private set => SetProperty(ref isYAxisReversed, value);
+            get => isYAxisValueReversed;
+            private set => SetProperty(ref isYAxisValueReversed, value);
         }
 
         /// <summary>
@@ -230,76 +225,7 @@ namespace Application.Sample
         public event PropertyChangedEventHandler PropertyChanged;
         #endregion
 
-        #region Create Data
-        private void MainWindowLoaded(object sender, RoutedEventArgs e)
-        {
-            // CreateTestData1();
-            CreateTestData2();
-        }
-
-        private void CreateTestData1()
-        {
-            int max = 10;
-            Random rand = new Random();
-
-            DataSeriesCollection data = new DataSeriesCollection();
-
-            DataSeries series = data.Add();
-
-            for (int x = 0; x <= max; x++)
-            {
-                int y = rand.Next(-50, 100);
-                series.Add(x, y);
-            }
-
-            data.MakeYZeroCentered();
-            data.ExpandX(0.75);
-            data.DataRange.Y.IncreaseMaxBy(0.05);
-            data.DataRange.Y.DecreaseMinBy(0.05);
-            Data = data;
-        }
-
-        /// <summary>
-        /// This test data represents dates and amounts.
-        /// </summary>
-        private void CreateTestData2()
-        {
-            XAxisTextFormat = "dd-MMM-yy";
-            XAxisTextProvider = new DoubleToDateConverter();
-
-            DataSeriesCollection data = new DataSeriesCollection();
-            DataSeries series = data.Add();
-
-            DateTime now = DateTime.Now;
-            //Random rand = new Random();
-
-            //int min = 10000;
-            //int max = 20000;
-            int y = -750;
-            for (int daysAgo = -15; daysAgo <= 0; daysAgo++)
-            {
-                //int value = rand.Next(min, max + 1);
-                series.Add(now.AddDays(daysAgo).Ticks, y);
-                y += 100;
-            }
-
-            //for (int k = -35; k <= -18; k++)
-            //{
-            //    int value = rand.Next(min, max + 1);
-            //    series.Add(now.AddDays(k).Ticks, value);
-            //    y += 100;
-            //}
-
-
-            long ticksPerDay = now.Ticks - now.AddDays(-1).Ticks;
-            data.ExpandX(ticksPerDay);
-            data.DataRange.Y.Include(0);
-            data.DataRange.Y.IncreaseMaxBy(0.125);
-
-
-            Data = data;
-
-        }
+        #region Property Changed
 
         private bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
         {
@@ -326,6 +252,10 @@ namespace Application.Sample
         private void ButtonClickXAxisPlacement(object sender, RoutedEventArgs e)
         {
             IsXAxisPlacementReversed = !IsXAxisPlacementReversed;
+            if (XAxisTickVisibility == TickVisibility.None)
+            {
+                XAxisTickVisibility = TickVisibility.Default;
+            }
         }
 
         private void ButtonClickXAxisTicks(object sender, RoutedEventArgs e)
@@ -346,7 +276,21 @@ namespace Application.Sample
 
         private void ButtonClickXAxisReverse(object sender, RoutedEventArgs e)
         {
-            IsXAxisReversed = !IsXAxisReversed;
+            IsXAxisValueReversed = !IsXAxisValueReversed;
+        }
+
+        private void ButtonClickXAxisProvider(object sender, RoutedEventArgs e)
+        {
+            if (XAxisTextProvider == null)
+            {
+                XAxisTextProvider = new DoubleToDateConverter();
+                XAxisTextFormat = "dd-MMM-yy";
+            }
+            else
+            {
+                XAxisTextProvider = null;
+                XAxisTextFormat = null;
+            }
         }
         #endregion
 
@@ -354,19 +298,10 @@ namespace Application.Sample
         private void ButtonClickYAxisPlacement(object sender, RoutedEventArgs e)
         {
             IsYAxisPlacementReversed = !IsYAxisPlacementReversed;
-            //switch (YAxisPlacement)
-            //{
-            //    case AxisPlacement.Left:
-            //        YAxisPlacement = AxisPlacement.Right;
-            //        RightTitle = LeftTitle;
-            //        LeftTitle = null;
-            //        break;
-            //    case AxisPlacement.Right:
-            //        YAxisPlacement = AxisPlacement.Left;
-            //        LeftTitle = RightTitle;
-            //        RightTitle = null;
-            //        break;
-            //}
+            if (YAxisTickVisibility == TickVisibility.None)
+            {
+                YAxisTickVisibility = TickVisibility.Default;
+            }
         }
 
         private void ButtonClickYAxisTicks(object sender, RoutedEventArgs e)
@@ -387,14 +322,102 @@ namespace Application.Sample
 
         private void ButtonClickYAxisReverse(object sender, RoutedEventArgs e)
         {
-            IsYAxisReversed = !IsYAxisReversed;
+            IsYAxisValueReversed = !IsYAxisValueReversed;
         }
+
+        private void ButtonClickYAxisProvider(object sender, RoutedEventArgs e)
+        {
+            YAxisTextFormat = string.IsNullOrEmpty(YAxisTextFormat) ? "N3" : null;
+        }
+
         #endregion
 
         #region Chart click handlers
         private void ButtonClickChartOrientation(object sender, RoutedEventArgs e)
         {
             ChartOrientation = ChartOrientation == Orientation.Vertical ? Orientation.Horizontal : Orientation.Vertical;
+        }
+
+        private void ButtonClickRestoreChart(object sender, RoutedEventArgs e)
+        {
+            MainChart.RestoreSizeAndPosition();
+        }
+
+
+        #endregion
+
+        #region Create data
+        private void MainWindowLoaded(object sender, RoutedEventArgs e)
+        {
+            CreateTestData1();
+            //CreateTestData2();
+        }
+
+        private void CreateTestData1()
+        {
+            int max = 10;
+            Random rand = new Random();
+
+            DataSeriesCollection data = new DataSeriesCollection();
+
+            DataSeries series = data.Add();
+
+            for (int x = 0; x < max; x++)
+            {
+                int y = rand.Next(-50, 100);
+                series.Add(x, y);
+            }
+
+
+            //data.ExpandX(0.75);
+            // data.DataRange.Y.IncreaseMaxBy(0.05);
+            data.MakeYZeroCentered();
+            //data.DataRange.Y.DecreaseMinBy(0.05);
+            Data = data;
+        }
+
+        /// <summary>
+        /// This test data represents dates and amounts.
+        /// </summary>
+        private void CreateTestData2()
+        {
+            XAxisTextFormat = "dd-MMM-yy";
+            XAxisTextProvider = new DoubleToDateConverter();
+
+            DataSeriesCollection data = new DataSeriesCollection();
+            DataSeries series = data.Add();
+
+            DateTime now = DateTime.Now;
+            //Random rand = new Random();
+
+            //int min = 10000;
+            //int max = 20000;
+            int startDays = -11;
+            int endDays = 0;
+            int y = -750;
+            for (int days = startDays; days <= endDays; days++)
+            {
+                //int value = rand.Next(min, max + 1);
+                series.Add(now.AddDays(days).Ticks, y);
+                y += 100;
+            }
+
+            //for (int k = -35; k <= -18; k++)
+            //{
+            //    int value = rand.Next(min, max + 1);
+            //    series.Add(now.AddDays(k).Ticks, value);
+            //    y += 100;
+            //}
+
+
+            long ticksPerDay = now.Ticks - now.AddDays(-1).Ticks;
+            data.ExpandX(ticksPerDay);
+            data.DataRange.Y.Include(0);
+            data.DataRange.Y.IncreaseMaxBy(0.125);
+
+
+            Data = data;
+
         }
         #endregion
     }

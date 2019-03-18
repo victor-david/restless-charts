@@ -4,38 +4,46 @@ using System.Globalization;
 namespace Restless.Controls.Chart
 {
     /// <summary>
-    /// Represents ranges for double type.
+    /// Represents a range of double values.
     /// </summary>
     public class Range
     {
+        #region Private
+        private double snapshotMin;
+        private double snapshotMax;
+        private bool isSnapshotCreated;
+        #endregion
+
+        /************************************************************************/
+
         #region Constructors
         /// <summary>
-        /// Initializes a new instance of range from given minimum and maximum values.
+        /// Creates and returns a range using the specified minimum and maximum.
         /// </summary>
-        /// <param name="minimum">Minimum value of the range.</param>
-        /// <param name="maximum">Maximum value of the range.</param>
-        public Range(double minimum, double maximum)
+        /// <param name="min">The minimum value in the range.</param>
+        /// <param name="max">The maximum value in the range.</param>
+        /// <returns>The range object.</returns>
+        /// <exception cref="ArgumentException">Either <paramref name="min"/> or <paramref name="max"/> is not finite.</exception>
+        public static Range SpecifiedRange(double min, double max)
         {
-            if (!minimum.IsFinite() || !maximum.IsFinite())
+            if (!min.IsFinite() || !max.IsFinite())
             {
-                throw new ArgumentException($"{nameof(minimum)} and {nameof(maximum)} must be finite");
+                throw new ArgumentException($"{nameof(min)} and {nameof(max)} must be finite");
             }
-
-            if (minimum < maximum)
-            {
-                Min = minimum;
-                Max = maximum;
-            }
-            else
-            {
-                Min = maximum;
-                Max = minimum;
-            }
+            double createMin = (min < max) ? min : max;
+            double createMax = (min < max) ? max : min;
+            return new Range(createMin, createMax);
         }
 
-        private Range()
+        /// <summary>
+        /// Creates and returns a range that represents a single point, i.e. min is the same as max.
+        /// </summary>
+        /// <param name="value">The value</param>
+        /// <returns>The range object.</returns>
+        /// <exception cref="ArgumentException"><paramref name="value"/> is not finite.</exception>
+        public static Range PointRange(double value)
         {
-
+            return SpecifiedRange(value, value);
         }
 
         /// <summary>
@@ -51,25 +59,28 @@ namespace Restless.Controls.Chart
         /// Creates and returns a range with <see cref="Min"/> set to double.MaxValue and <see cref="Max"/> set to double.MinValue.
         /// This can be used as a starting range to then surround with actual data values.
         /// </summary>
+        /// <returns>A new range object</returns>
         public static Range FullReversedRange()
         {
-            return new Range()
-            {
-                Min = double.MaxValue,
-                Max = double.MinValue
-            };
+            return new Range(double.MaxValue, double.MinValue);
         }
 
         /// <summary>
-        /// Creates and returns an empty range
+        /// Creates and returns an empty range.
         /// </summary>
+        /// <returns>A new range object</returns>
         public static Range EmptyRange()
         {
-            return new Range()
-            {
-                Min = double.PositiveInfinity,
-                Max = double.NegativeInfinity
-            };
+            return new Range(double.PositiveInfinity, double.NegativeInfinity);
+        }
+
+        private Range(double min, double max)
+        {
+            Min = min;
+            Max = max;
+            snapshotMin = 0;
+            snapshotMin = 0;
+            isSnapshotCreated = false;
         }
         #endregion
 
@@ -77,26 +88,26 @@ namespace Restless.Controls.Chart
 
         #region Properties
         /// <summary>
-        /// Gets the minimum value of current range.
+        /// Gets the minimum value of the range.
         /// </summary>
         public double Min
         {
             get;
-            set;
+            private set;
         }
 
         /// <summary>
-        /// Gets the maximum value of current range.
+        /// Gets the maximum value of the range.
         /// </summary>
         public double Max
         {
             get;
-            set;
+            private set;
         }
 
         /// <summary>
-        /// Returns true of this range is considered empty. An empty range is when
-        /// Min == PositiveInfinity and Max == NegativeInfinity
+        /// Returns true of this range is considered empty. An range is empty when
+        /// Min == PositiveInfinity and Max == NegativeInfinity.
         /// </summary>
         public bool IsEmpty
         {
@@ -104,7 +115,7 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
-        /// Returns true of this range is a point (e.g. Min == Max).
+        /// Returns true of this range is a point, that is: Min == Max.
         /// </summary>
         public bool IsPoint
         {
@@ -171,41 +182,38 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
-        /// Returns a string that represents the current range.
+        /// Shifts <see cref="Min"/> and <see cref="Max"/> by the specified percentage.
         /// </summary>
-        /// <returns>String that represents the current range</returns>
-        public override string ToString()
+        /// <param name="percentage">The percentage</param>
+        /// <exception cref="ArgumentException"><paramref name="percentage"/> is not finite.</exception>
+        public void Shift(double percentage)
         {
-            return "[" + Min.ToString(CultureInfo.InvariantCulture) + "," + Max.ToString(CultureInfo.InvariantCulture) + "]";
+            if (!percentage.IsFinite()) throw new ArgumentException($"{nameof(percentage)} must be finite");
+            if (IsEmpty) return;
+
+            // double shift = (Max - Min) / 2 * percentage;
+            double shift = (Max - Min) * percentage;
+
+
+            Min += shift;
+            Max += shift;
         }
 
         /// <summary>
-        /// Calculates and returns a new range object which will have its Min and Max
-        /// zoomed or contracted by the specified factor.
+        /// Changes this range so that it is zoomed or contracted by the specified percentage.
         /// </summary>
-        /// <param name="factor">Zoom factor</param>
-        /// <returns>Zoomed with specified factor range</returns>
-        public Range Zoom(double factor)
+        /// <param name="percentage">The zoom percentage.</param>
+        /// <exception cref="ArgumentException"><paramref name="percentage"/> is not finite.</exception>
+        public void MakeZoomed(double percentage)
         {
-            if (!factor.IsFinite()) throw new ArgumentException($"{nameof(factor)} must be finite");
-            if (IsEmpty) return EmptyRange();
+            if (!percentage.IsFinite()) throw new ArgumentException($"{nameof(percentage)} must be finite");
+            if (IsEmpty) return;
 
             double delta = (Max - Min) / 2;
             double center = (Max + Min) / 2;
 
-            Range zoomed = new Range(center - delta * factor, center + delta * factor);
-
-            return zoomed;
-        }
-
-        /// <summary>
-        /// Returns a <see cref="Range"/> from current Min and Max that is centered on zero.
-        /// </summary>
-        /// <returns>A new range object.</returns>
-        public Range ZeroCentered()
-        {
-            double max = Math.Max(Math.Abs(Min), Math.Abs(Max));
-            return new Range(-max, max);
+            Min = center - delta * percentage; 
+            Max = center + delta * percentage;
         }
 
         /// <summary>
@@ -216,6 +224,41 @@ namespace Restless.Controls.Chart
             double max = Math.Max(Math.Abs(Min), Math.Abs(Max));
             Include(-max);
             Include(max);
+        }
+
+        /// <summary>
+        /// Creates a snapshot of the values in this range. 
+        /// Restore with <see cref="RestoreFromSnapshot"/>.
+        /// </summary>
+        public void CreateSnapshot()
+        {
+            if (!isSnapshotCreated)
+            {
+                snapshotMin = Min;
+                snapshotMax = Max;
+                isSnapshotCreated = true;
+            }
+        }
+
+        /// <summary>
+        /// Restores the values in this range which were saved with <see cref="CreateSnapshot"/>.
+        /// </summary>
+        public void RestoreFromSnapshot()
+        {
+            if (isSnapshotCreated)
+            {
+                Min = snapshotMin;
+                Max = snapshotMax;
+            }
+        }
+
+        /// <summary>
+        /// Returns a string that represents the current range.
+        /// </summary>
+        /// <returns>String that represents the current range</returns>
+        public override string ToString()
+        {
+            return "[" + Min.ToString(CultureInfo.InvariantCulture) + "," + Max.ToString(CultureInfo.InvariantCulture) + "]";
         }
 
         /// <summary>

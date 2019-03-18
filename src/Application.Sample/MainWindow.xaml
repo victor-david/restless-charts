@@ -26,6 +26,10 @@
                         Click="ButtonClickChartOrientation"
                         ToolTip="Toggle the orientation of the chart"
                         Content="Toggle Orientation"/>
+                    <Button
+                        Click="ButtonClickRestoreChart"
+                        ToolTip="Restore the original zoom level and panning. You can also double click the chart"
+                        Content="Restore Size/Position"/>
                 </StackPanel>
             </HeaderedContentControl>
             
@@ -42,7 +46,11 @@
                     <Button 
                         Click="ButtonClickXAxisReverse"
                         ToolTip="Reverse the direction of the X axis"
-                        Content="Reverse"/>
+                        Content="Reverse Values"/>
+                    <Button
+                        Click="ButtonClickXAxisProvider"
+                        ToolTip="Change the text provider and format of the X axis"
+                        Content="Change Provider"/>
 
                 </StackPanel>
             </HeaderedContentControl>
@@ -60,7 +68,11 @@
                     <Button 
                         Click="ButtonClickYAxisReverse"
                         ToolTip="Reverse the direction of the Y axis"
-                        Content="Reverse"/>
+                        Content="Reverse Values"/>
+                    <Button
+                        Click="ButtonClickYAxisProvider"
+                        ToolTip="Change the text provider and format of the Y axis"
+                        Content="Change Provider"/>
                 </StackPanel>
             </HeaderedContentControl>
             
@@ -81,14 +93,14 @@
             XAxisTickVisibility="{Binding XAxisTickVisibility}"
             XAxisTextFormat="{Binding XAxisTextFormat}"
             XAxisTextProvider="{Binding XAxisTextProvider}"
-            IsXAxisReversed="{Binding IsXAxisReversed}"
+            IsXAxisValueReversed="{Binding IsXAxisValueReversed}"
             IsYAxisPlacementReversed="{Binding IsYAxisPlacementReversed}"
             YAxisTickVisibility="{Binding YAxisTickVisibility}"
             YAxisTextFormat="{Binding YAxisTextFormat}"
             YAxisTextProvider="{Binding YAxisTextProvider}"
-            IsYAxisReversed="{Binding IsYAxisReversed}">
+            IsYAxisValueReversed="{Binding IsYAxisValueReversed}">
             
-            <conx:BarChart Data="{Binding Data}" BarThickness="20"/>
+            <conx:BarChart Data="{Binding Data}"/>
             
         </conx:ChartContainer>
 

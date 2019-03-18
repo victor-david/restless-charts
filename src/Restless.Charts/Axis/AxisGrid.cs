@@ -16,6 +16,7 @@ namespace Restless.Controls.Chart
         private readonly ChartContainer owner;
         private readonly Path horzPath;
         private readonly Path vertPath;
+        private double minEdgeDistance;
         #endregion
 
         /************************************************************************/
@@ -56,6 +57,8 @@ namespace Restless.Controls.Chart
 
             Children.Add(horzPath);
             Children.Add(vertPath);
+
+            minEdgeDistance = 3.0;
         }
         #endregion
 
@@ -72,6 +75,24 @@ namespace Restless.Controls.Chart
             {
                 horzPath.Stroke = value;
                 vertPath.Stroke = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the minimum distance that a grid line can be from the edge.
+        /// This value is clamped between 1.0 and 8.0. The default is 3.0
+        /// </summary>
+        public double MinEdgeDistance
+        {
+            get => minEdgeDistance;
+            set
+            {
+                value = value.Clamp(1.0, 8.0);
+                if (value != minEdgeDistance)
+                {
+                    minEdgeDistance = value;
+                    InvalidateMeasure();
+                }
             }
         }
         #endregion
@@ -97,13 +118,13 @@ namespace Restless.Controls.Chart
 
             if (owner.Orientation == Orientation.Vertical)
             {
-                CreateVerticalGeometry(owner.XAxis.MajorTickCoordinates);
-                CreateHorizontalGeometry(owner.YAxis.MajorTickCoordinates);
+                CreateVerticalGeometry(owner.XAxis.MajorTickCoordinates, desiredSize);
+                CreateHorizontalGeometry(owner.YAxis.MajorTickCoordinates, desiredSize);
             }
             else
             {
-                CreateVerticalGeometry(owner.YAxis.MajorTickCoordinates);
-                CreateHorizontalGeometry(owner.XAxis.MajorTickCoordinates);
+                CreateVerticalGeometry(owner.YAxis.MajorTickCoordinates, desiredSize);
+                CreateHorizontalGeometry(owner.XAxis.MajorTickCoordinates, desiredSize);
             }
 
             foreach (UIElement child in Children)
@@ -133,7 +154,7 @@ namespace Restless.Controls.Chart
 
         #region Private methods
 
-        private void CreateVerticalGeometry(TickCoordinateCollection tickCoordinates)
+        private void CreateVerticalGeometry(TickCoordinateCollection tickCoordinates, Size size)
         {
             GeometryGroup vertGroup = new GeometryGroup();
 
@@ -141,17 +162,21 @@ namespace Restless.Controls.Chart
             {
                 double x = tickCoordinate - owner.GridBorderSize;
 
-                LineGeometry line = new LineGeometry
+                // don't make grid lines too close to the edge
+                if (x > MinEdgeDistance && x < size.Width - MinEdgeDistance)
                 {
-                    StartPoint = new Point(x, 0),
-                    EndPoint = new Point(x, ActualHeight)
-                };
-                vertGroup.Children.Add(line);
+                    LineGeometry line = new LineGeometry
+                    {
+                        StartPoint = new Point(x, 0),
+                        EndPoint = new Point(x, size.Height)
+                    };
+                    vertGroup.Children.Add(line);
+                }
             }
             vertPath.Data = vertGroup;
         }
 
-        private void CreateHorizontalGeometry(TickCoordinateCollection tickCoordinates)
+        private void CreateHorizontalGeometry(TickCoordinateCollection tickCoordinates, Size size)
         {
             GeometryGroup horzGroup = new GeometryGroup();
 
@@ -159,13 +184,17 @@ namespace Restless.Controls.Chart
             {
                 double y = tickCoordinate - owner.GridBorderSize;
 
-                LineGeometry line = new LineGeometry
+                // don't make grid lines too close to the edge
+                if (y > MinEdgeDistance && y < size.Height - MinEdgeDistance)
                 {
-                    StartPoint = new Point(0, y),
-                    EndPoint = new Point(ActualWidth, y)
-                };
+                    LineGeometry line = new LineGeometry
+                    {
+                        StartPoint = new Point(0, y),
+                        EndPoint = new Point(size.Width, y)
+                    };
 
-                horzGroup.Children.Add(line);
+                    horzGroup.Children.Add(line);
+                }
             }
             horzPath.Data = horzGroup;
         }

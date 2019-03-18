@@ -1,8 +1,7 @@
-﻿using System;
+﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace Restless.Controls.Chart
 {
@@ -45,8 +44,12 @@ namespace Restless.Controls.Chart
             Navigation = new ChartNavigation(this);
 
             Padding = new Thickness(10);
-            // This can cause a grid line to not display, depending on its exact coordinates
-            // SetValue(RenderOptions.EdgeModeProperty, EdgeMode.Aliased);
+
+            ClipToBounds = true;
+
+            // For best results, these two should be used together.
+            UseLayoutRounding = true;
+            SetValue(RenderOptions.EdgeModeProperty, EdgeMode.Aliased);
         }
 
         static ChartContainer()
@@ -59,7 +62,7 @@ namespace Restless.Controls.Chart
 
         #region Orientation
         /// <summary>
-        /// Gets or sets the orientation of the chart
+        /// Gets or sets the orientation of the chart. This is a dependency property
         /// </summary>
         public Orientation Orientation
         {
@@ -90,7 +93,7 @@ namespace Restless.Controls.Chart
                         c.YAxisPlacement = c.IsYAxisPlacementReversed ? AxisPlacement.Top : AxisPlacement.Bottom;
                         break;
                 }
-                c.InvokeInvalidateAxisGrid();
+                c.InvalidateMeasure();
             }
         }
         #endregion
@@ -102,6 +105,7 @@ namespace Restless.Controls.Chart
         /// Gets or sets the chart top title.
         /// Chart title is an object that is shown centered above plot area.
         /// It is used inside <see cref="ContentControl"/> and can be a <see cref="UIElement"/>.
+        /// This is a dependency property.
         /// </summary>
         public object TopTitle
         {
@@ -125,6 +129,7 @@ namespace Restless.Controls.Chart
         /// Gets or sets the bottom axis title.
         /// Bottom axis title is an object that is centered under plot area.
         /// It is used inside <see cref="ContentControl"/> and can be a <see cref="UIElement"/>.
+        /// This is a dependency property.
         /// </summary>
         public object BottomTitle
         {
@@ -147,7 +152,9 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Gets or sets right axis title.
         /// Right axis title is an object that is vertically centered and located to the right of the plot area.
-        /// It is used inside <see cref="ContentControl"/> and can be a <see cref="UIElement"/>.</summary>
+        /// It is used inside <see cref="ContentControl"/> and can be a <see cref="UIElement"/>.
+        /// This is a dependency property.
+        /// </summary>
         public object RightTitle
         {
             get => GetValue(RightTitleProperty);
@@ -170,6 +177,7 @@ namespace Restless.Controls.Chart
         /// Gets or sets the left axis title.
         /// Left axis title is an object that is vertically centered and located to the left of the plot area.
         /// It is used inside <see cref="ContentControl"/> and can be a  <see cref="UIElement"/>.
+        /// This is a dependency property.
         /// </summary>
         public object LeftTitle
         {
@@ -191,6 +199,7 @@ namespace Restless.Controls.Chart
         #region XAxis
         /// <summary>
         /// Gets the x-axis object.
+        /// This is a read only dependency property.
         /// </summary>
         public Axis XAxis
         {
@@ -306,20 +315,20 @@ namespace Restless.Controls.Chart
             );
 
         /// <summary>
-        /// Gets or sets a value that determines if the X axis is reversed
+        /// Gets or sets a value that determines if the values on the X axis are reversed.
         /// </summary>
-        public bool IsXAxisReversed
+        public bool IsXAxisValueReversed
         {
-            get => (bool)GetValue(IsXAxisReversedProperty);
-            set => SetValue(IsXAxisReversedProperty, value);
+            get => (bool)GetValue(IsXAxisValueReversedProperty);
+            set => SetValue(IsXAxisValueReversedProperty, value);
         }
 
         /// <summary>
-        /// Identifies the <see cref="IsXAxisReversed"/> dependency property.
+        /// Identifies the <see cref="IsXAxisValueReversed"/> dependency property.
         /// </summary>
-        public static readonly DependencyProperty IsXAxisReversedProperty = DependencyProperty.Register
+        public static readonly DependencyProperty IsXAxisValueReversedProperty = DependencyProperty.Register
             (
-                nameof(IsXAxisReversed), typeof(bool), typeof(ChartContainer), new PropertyMetadata(false, OnXAxisPropertyChanged)
+                nameof(IsXAxisValueReversed), typeof(bool), typeof(ChartContainer), new PropertyMetadata(false, OnXAxisPropertyChanged)
             );
 
         private static void OnXAxisPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -340,22 +349,22 @@ namespace Restless.Controls.Chart
                         break;
                     case nameof(XAxisPlacement):
                         c.XAxis.AxisPlacement = c.XAxisPlacement;
+                        // c.XAxis.InvalidateMeasure();
                         break;
                     case nameof(XAxisTextProvider):
                         c.XAxis.TickProvider.TextProvider = c.XAxisTextProvider;
-                        c.XAxis.InvalidateMeasure();
+                        c.InvalidateMeasure();
                         break;
                     case nameof(XAxisTextFormat):
                         c.XAxis.TickProvider.TextFormat = c.XAxisTextFormat;
-                        c.XAxis.InvalidateMeasure();
+                        c.InvalidateMeasure();
                         break;
                     case nameof(XAxisTickVisibility):
                         c.XAxis.TickVisibility = c.XAxisTickVisibility;
                         break;
-                    case nameof(IsXAxisReversed):
-                        c.XAxis.IsReversed = c.IsXAxisReversed;
-                        c.InvalidateChart();
-                        c.InvokeInvalidateAxisGrid();
+                    case nameof(IsXAxisValueReversed):
+                        c.XAxis.IsValueReversed = c.IsXAxisValueReversed;
+                        c.InvalidateMeasure();
                         break;
                 }
             }
@@ -367,6 +376,7 @@ namespace Restless.Controls.Chart
         #region YAxis
         /// <summary>
         /// Gets the y-axis object.
+        /// This is a read only dependency property.
         /// </summary>
         public Axis YAxis
         {
@@ -426,19 +436,6 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty YAxisPlacementProperty = YAxisPlacementPropertyKey.DependencyProperty;
 
-        private static object OnCoerceYPlacement(DependencyObject d, object value)
-        {
-            AxisPlacement proposed = (AxisPlacement)value;
-            switch (proposed)
-            {
-                case AxisPlacement.Left:
-                case AxisPlacement.Right:
-                    return proposed;
-                default:
-                    return AxisPlacement.DefaultY;
-            }
-        }
-
         /// <summary>
         /// Gets or sets a converter for tick values on the Y axis.
         /// </summary>
@@ -492,20 +489,20 @@ namespace Restless.Controls.Chart
             );
 
         /// <summary>
-        /// Gets or sets a value that determines if the Y axis is reversed
+        /// Gets or sets a value that determines if the values on the Y axis are reversed.
         /// </summary>
-        public bool IsYAxisReversed
+        public bool IsYAxisValueReversed
         {
-            get => (bool)GetValue(IsYAxisReversedProperty);
-            set => SetValue(IsYAxisReversedProperty, value);
+            get => (bool)GetValue(IsYAxisValueReversedProperty);
+            set => SetValue(IsYAxisValueReversedProperty, value);
         }
 
         /// <summary>
-        /// Identifies the <see cref="IsYAxisReversed"/> dependency property.
+        /// Identifies the <see cref="IsYAxisValueReversed"/> dependency property.
         /// </summary>
-        public static readonly DependencyProperty IsYAxisReversedProperty = DependencyProperty.Register
+        public static readonly DependencyProperty IsYAxisValueReversedProperty = DependencyProperty.Register
             (
-                nameof(IsYAxisReversed), typeof(bool), typeof(ChartContainer), new PropertyMetadata(false, OnYAxisPropertyChanged)
+                nameof(IsYAxisValueReversed), typeof(bool), typeof(ChartContainer), new PropertyMetadata(false, OnYAxisPropertyChanged)
             );
 
         private static void OnYAxisPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -529,19 +526,18 @@ namespace Restless.Controls.Chart
                         break;
                     case nameof(YAxisTextProvider):
                         c.YAxis.TickProvider.TextProvider = c.YAxisTextProvider;
-                        c.YAxis.InvalidateMeasure();
+                        c.InvalidateMeasure();
                         break;
                     case nameof(YAxisTextFormat):
                         c.YAxis.TickProvider.TextFormat = c.YAxisTextFormat;
-                        c.YAxis.InvalidateMeasure();
+                        c.InvalidateMeasure();
                         break;
                     case nameof(YAxisTickVisibility):
                         c.YAxis.TickVisibility = c.YAxisTickVisibility;
                         break;
-                    case nameof(IsYAxisReversed):
-                        c.YAxis.IsReversed = c.IsYAxisReversed;
-                        c.InvalidateChart();
-                        c.InvokeInvalidateAxisGrid();
+                    case nameof(IsYAxisValueReversed):
+                        c.YAxis.IsValueReversed = c.IsYAxisValueReversed;
+                        c.InvalidateMeasure();
                         break;
                 }
             }
@@ -553,6 +549,7 @@ namespace Restless.Controls.Chart
         #region Brushes
         /// <summary>
         /// Gets or sets the brush that is used to draw major ticks and their corresponding labels.
+        /// This is a dependency property.
         /// </summary>
         public Brush MajorTickBrush
         {
@@ -570,6 +567,7 @@ namespace Restless.Controls.Chart
 
         /// <summary>
         /// Gets or sets the brush that is used to draw minor ticks.
+        /// This is a dependency property.
         /// </summary>
         public Brush MinorTickBrush
         {
@@ -587,6 +585,7 @@ namespace Restless.Controls.Chart
 
         /// <summary>
         /// Gets or sets a brush that determines how the grid lines of <see cref="AxisGrid"/> are drawn.
+        /// This is a dependency property.
         /// </summary>
         public Brush GridBrush
         {
@@ -604,6 +603,7 @@ namespace Restless.Controls.Chart
 
         /// <summary>
         /// Gets or sets a brush that determines how the border of <see cref="AxisGrid"/> is drawn.
+        /// This is a dependency property.
         /// </summary>
         public Brush GridBorderBrush
         {
@@ -643,10 +643,44 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
+        #region IsKeyboardNavigationEnabled
+        /// <summary>
+        /// Gets or sets a value that determines if chart navigation can be performed using the keyboard.
+        /// This is a dependency property.
+        /// </summary>
+        public bool IsKeyboardNavigationEnabled
+        {
+            get => (bool)GetValue(IsKeyboardNavigationEnabledProperty);
+            set => SetValue(IsKeyboardNavigationEnabledProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="IsKeyboardNavigationEnabled"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IsKeyboardNavigationEnabledProperty = DependencyProperty.Register
+            (
+                nameof(IsKeyboardNavigationEnabled), typeof(bool), typeof(ChartContainer), new PropertyMetadata
+                    (
+                        ChartNavigation.IsKeyboardNavigationEnabledDefault, OnIsKeyboardNavigationEnabledChanged
+                    )
+            );
+
+        private static void OnIsKeyboardNavigationEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is ChartContainer c)
+            {
+                c.Navigation.IsKeyboardNavigationEnabled = c.IsKeyboardNavigationEnabled;
+            }
+        }
+        #endregion
+
+        /************************************************************************/
+
         #region GridBorderSize
         /// <summary>
         /// Gets or sets the thickness of the border that surrounds the chart grid lines.
-        /// This value is clamped between 0 and 4 inclusive. The default is 1.0
+        /// This value is clamped between 0 and 4 inclusive. The default is 1.0.
+        /// This is a dependency property.
         /// </summary>
         public double GridBorderSize
         {
@@ -676,7 +710,8 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
-        /// Gets the grid border thickness
+        /// Gets the grid border thickness.
+        /// This is a read only dependency property.
         /// </summary>
         public Thickness GridBorderThickness
         {
@@ -699,7 +734,8 @@ namespace Restless.Controls.Chart
 
         #region AxisGrid (read only)
         /// <summary>
-        /// Gets the AxisGrid for this chart
+        /// Gets the AxisGrid for this chart container.
+        /// This is a read only dependency property.
         /// </summary>
         public AxisGrid AxisGrid
         {
@@ -722,7 +758,8 @@ namespace Restless.Controls.Chart
 
         #region Navigation (read only)
         /// <summary>
-        /// Gets the chart navigation object.
+        /// Gets the chart container navigation object.
+        /// This is a read only dependency property.
         /// </summary>
         public ChartNavigation Navigation
         {
@@ -739,6 +776,30 @@ namespace Restless.Controls.Chart
         /// Identifies the <see cref="Navigation"/> dependency property.
         /// </summary>
         public static readonly DependencyProperty NavigationProperty = NavigationPropertyKey.DependencyProperty;
+        #endregion
+
+        /************************************************************************/
+
+        #region Protected methods
+        /// <summary>
+        /// Measures the size in layout required for child elements and determines a size this element.
+        /// </summary>
+        /// <param name="availableSize">
+        /// The available size that this element can give to child elements.
+        /// Infinity can be specified as a value to indicate that the element will size to whatever content is available.
+        /// </param>
+        /// <returns>The size that this element determines it needs during layout, based on its calculations of child element sizes.</returns>
+        protected override Size MeasureOverride(Size availableSize)
+        {
+            XAxis.Measure(availableSize);
+            YAxis.Measure(availableSize);
+            AxisGrid.Measure(availableSize);
+            if (Content is UIElement element)
+            {
+                element.Measure(availableSize);
+            }
+            return base.MeasureOverride(availableSize);
+        }
         #endregion
 
         /************************************************************************/
@@ -766,48 +827,39 @@ namespace Restless.Controls.Chart
         /// <param name="factor">The factor</param>
         public void Zoom(double factor)
         {
-            ZoomToRange(XAxis.Range.Zoom(factor), YAxis.Range.Zoom(factor));
+            XAxis.Range.MakeZoomed(factor);
+            YAxis.Range.MakeZoomed(factor);
+            InvalidateMeasure();
         }
 
         /// <summary>
-        /// Zooms to the specified ranges.
+        /// Restores the starting size and position of the chart.
         /// </summary>
-        /// <param name="xRange">The X range.</param>
-        /// <param name="yRange">The Y range.</param>
-        public void ZoomToRange(Range xRange, Range yRange)
+        public void RestoreSizeAndPosition()
         {
-            if (xRange != null && yRange != null)
-            {
-                XAxis.Range = xRange;
-                YAxis.Range = yRange;
-                InvalidateChart();
-                InvokeInvalidateAxisGrid();
-            }
+            XAxis.Range.RestoreFromSnapshot();
+            YAxis.Range.RestoreFromSnapshot();
+            InvalidateMeasure();
         }
-        #endregion
 
-        #region Private methods
         /// <summary>
-        /// Causes the chart (if one is inside the container) to redraw itself.
-        /// This method is called from property change handlers to allow the 
-        /// embedded chart to update itself.
+        /// Pans the chart according to the specified percentages.
         /// </summary>
-        private void InvalidateChart()
+        /// <param name="xPercentage">The percentage to pan the X axis.</param>
+        /// <param name="yPercentage">The percentage to pan the Y axis.</param>
+        public void Pan(double xPercentage, double yPercentage)
         {
-            if (Content is UIElement element)
+            if (Orientation == Orientation.Vertical)
             {
-                element.InvalidateMeasure();
+                XAxis.Shift(xPercentage);
+                YAxis.Shift(yPercentage);
             }
-        }
-
-        private void InvokeInvalidateAxisGrid()
-        {
-            //// Without this invoke, AxisGrid.ActualWidth isn't fully updated when the lines
-            //// are generated and they therefore fall short. This solves it.
-            Dispatcher.Invoke(new Action(() =>
+            else
             {
-                AxisGrid.InvalidateMeasure();
-            }), DispatcherPriority.Loaded);
+                XAxis.Shift(yPercentage);
+                YAxis.Shift(xPercentage);
+            }
+            InvalidateMeasure();
         }
         #endregion
     }

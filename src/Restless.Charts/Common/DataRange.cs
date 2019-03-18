@@ -1,24 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace Restless.Controls.Chart
 {
     /// <summary>
-    /// Describes a width, a height and location of a rectangle.
-    /// This type is very similar to <see cref="Rect"/>, but has one important difference:
-    /// while <see cref="Rect"/> describes a rectangle in screen coordinates, where y axis
-    /// points to bottom (that's why <see cref="Rect"/>'s Bottom property is greater than Top).
-    /// This type describes rectange in usual coordinates, and y axis point to top.
+    /// Represents a <see cref="Range"/> of data values for <see cref="X"/>
+    /// and a <see cref="Range"/> of data values for <see cref="Y"/>.
     /// </summary>
     public class DataRange
     {
         /// <summary>
         /// Gets an empty <see cref="DataRange"/>.
         /// </summary>
+        /// <returns>A data range with an empty X range and an empty Y range.</returns>
         public static DataRange EmptyDataRange()
         {
             return new DataRange(Range.EmptyRange(), Range.EmptyRange());
@@ -33,8 +27,8 @@ namespace Restless.Controls.Chart
         /// <param name="maxY">Top value of DataRect.</param>
         public DataRange(double minX, double minY, double maxX, double maxY)
         {
-            X = new Range(minX, maxX);
-            Y = new Range(minY, maxY);
+            X = Range.SpecifiedRange(minX, maxX);
+            Y = Range.SpecifiedRange(minY, maxY);
         }
 
         /// <summary>
@@ -42,10 +36,11 @@ namespace Restless.Controls.Chart
         /// </summary>
         /// <param name="x">Horizontal range</param>
         /// <param name="y">Vertical range</param>
+        /// <exception cref="ArgumentNullException">Either parameter is null.</exception>
         public DataRange(Range x, Range y)
         {
-            X = x;
-            Y = y;
+            X = x ?? throw new ArgumentNullException(nameof(x));
+            Y = y ?? throw new ArgumentNullException(nameof(y));
         }
 
         /// <summary>
@@ -54,7 +49,6 @@ namespace Restless.Controls.Chart
         public Range X
         {
             get;
-            //set;
         }
 
         /// <summary>
@@ -130,7 +124,7 @@ namespace Restless.Controls.Chart
         /// <returns>String that represents the current instance of <see cref="DataRange"/></returns>
         public override string ToString()
         {
-            return "{" + X.ToString() + " " + Y.ToString() + "}";
+            return $"{X} {Y}";
         }
     }
 }
