@@ -51,7 +51,9 @@
                         <!-- Axis Grid -->
                         <ContentPresenter Content="{TemplateBinding AxisGrid}" />
                         <!-- Plot -->
-                        <ContentPresenter />
+                        <Border ClipToBounds="True">
+                            <ContentPresenter />
+                        </Border>
                         <!-- Navigation -->
                         <ContentPresenter Content="{TemplateBinding Navigation}"/>
                     </Grid>

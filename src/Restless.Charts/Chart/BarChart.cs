@@ -113,7 +113,6 @@ namespace Restless.Controls.Chart
                 {
                     Stroke = series.Brush,
                     StrokeThickness = barThickness,
-                    ClipToBounds = true,
                 };
 
                 foreach (DataPoint point in series)

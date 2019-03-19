@@ -42,9 +42,8 @@ namespace Restless.Controls.Chart
 
             AxisGrid = new AxisGrid(this);
             Navigation = new ChartNavigation(this);
-
+            
             Padding = new Thickness(10);
-
             ClipToBounds = true;
 
             // For best results, these two should be used together.
