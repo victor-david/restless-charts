@@ -355,22 +355,24 @@ namespace Application.Sample
 
         private void CreateTestData1()
         {
-            int max = 10;
+            int maxX = 30;
+            int minY = -150;
+            int maxY = 150;
+            
             Random rand = new Random();
 
             DataSeriesCollection data = new DataSeriesCollection();
 
             DataSeries series = data.Add();
 
-            for (int x = 0; x < max; x++)
+            for (int x = 0; x < maxX; x++)
             {
-                int y = rand.Next(-50, 100);
+                int y = rand.Next(minY, maxY + 1);
                 series.Add(x, y);
             }
 
-
-            //data.ExpandX(0.75);
-            // data.DataRange.Y.IncreaseMaxBy(0.05);
+            data.ExpandX(0.75);
+            data.DataRange.Y.IncreaseMaxBy(0.05);
             data.MakeYZeroCentered();
             //data.DataRange.Y.DecreaseMinBy(0.05);
             Data = data;

@@ -77,9 +77,6 @@ namespace Restless.Controls.Chart
 
             Children.Add(majorTickPath);
             Children.Add(minorTickPath);
-            //UseLayoutRounding = true;
-            //SetValue(RenderOptions.EdgeModeProperty, EdgeMode.Aliased);
-            //ClipToBounds = true;
         }
         #endregion
 
