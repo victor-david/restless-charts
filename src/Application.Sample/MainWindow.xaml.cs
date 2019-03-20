@@ -1,5 +1,6 @@
 ﻿using Restless.Controls.Chart;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -349,13 +350,13 @@ namespace Application.Sample
         #region Create data
         private void MainWindowLoaded(object sender, RoutedEventArgs e)
         {
-            CreateTestData1();
-            //CreateTestData2();
+            //CreateTestData1();
+            CreateTestData2();
         }
 
         private void CreateTestData1()
         {
-            int maxX = 30;
+            int maxX = 200;
             int minY = -150;
             int maxY = 150;
             
@@ -383,43 +384,41 @@ namespace Application.Sample
         /// </summary>
         private void CreateTestData2()
         {
-            XAxisTextFormat = "dd-MMM-yy";
+            XAxisTextFormat = "MMM-yy";
             XAxisTextProvider = new DoubleToDateConverter();
 
             DataSeriesCollection data = new DataSeriesCollection();
             DataSeries series = data.Add();
-
             DateTime now = DateTime.Now;
-            //Random rand = new Random();
+            DateTime start = GetMonth(now, -12);
 
-            //int min = 10000;
-            //int max = 20000;
-            int startDays = -11;
-            int endDays = 0;
-            int y = -750;
-            for (int days = startDays; days <= endDays; days++)
+            List<DateTime> months = new List<DateTime>();
+
+            for (int k = 0; k < 12; k++)
             {
-                //int value = rand.Next(min, max + 1);
-                series.Add(now.AddDays(days).Ticks, y);
-                y += 100;
+                months.Add(GetMonth(start, k));
             }
 
-            //for (int k = -35; k <= -18; k++)
-            //{
-            //    int value = rand.Next(min, max + 1);
-            //    series.Add(now.AddDays(k).Ticks, value);
-            //    y += 100;
-            //}
+            Random rand = new Random();
 
+            int min = 10000;
+            int max = 20000;
 
-            long ticksPerDay = now.Ticks - now.AddDays(-1).Ticks;
-            data.ExpandX(ticksPerDay);
+            foreach (DateTime x in months)
+            {
+                int y = rand.Next(min, max + 1);
+                series.Add(x.Ticks, y);
+
+            }
+            
+            data.ExpandY(1000);
             data.DataRange.Y.Include(0);
-            data.DataRange.Y.IncreaseMaxBy(0.125);
-
-
             Data = data;
+        }
 
+        private DateTime GetMonth(DateTime date, int monthsToAdd)
+        {
+            return new DateTime(date.AddMonths(monthsToAdd).Year, date.AddMonths(monthsToAdd).Month, 1);
         }
         #endregion
     }

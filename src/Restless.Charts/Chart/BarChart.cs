@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace Restless.Controls.Chart
 {
@@ -26,7 +24,7 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Gets the default bar thickness. This value (zero) signifies that bars will be auto sized.
         /// </summary>
-        public const double DefaultBarThickness = 30.0;
+        public const double DefaultBarThickness = 0;
         #endregion
 
         /************************************************************************/
@@ -37,11 +35,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public BarChart()
         {
-            //geometryPath = new Path()
-            //{
-            //    Stroke = DefaultBarBrush,
-            //    StrokeThickness = DefaultBarThickness,
-            //};
+            UseLayoutRounding = false;
         }
         #endregion
         
@@ -84,54 +78,38 @@ namespace Restless.Controls.Chart
 
         #region Protected methods
         /// <summary>
-        /// Positions children of this element.
+        /// Called by <see cref="ChartBase"/> to create child visuals.
         /// </summary>
-        /// <param name="finalSize">The final area within the parent this element should use to arrange itself and its children.</param>
-        /// <returns>The actual size used.</returns>
-        protected override Size ArrangeOverride(Size finalSize)
+        /// <param name="desiredSize">The desired size</param>
+        protected override void CreateChildren(Size desiredSize)
         {
-            foreach (UIElement child in Children)
-            {
-                child.Arrange(new Rect(0, 0, finalSize.Width, finalSize.Height));
-            }
-            return finalSize;
-        }
-
-        /// <summary>
-        /// Called during the measuring phase to create the geometry for this control.
-        /// </summary>
-        /// <param name="desiredSize">The desired size.</param>
-        protected override void CreateChildGeometry(Size desiredSize)
-        {
-            GeometryGroup group = new GeometryGroup();
-
-            double barThickness = BarThickness > 0 ? BarThickness : GetAutoBarThickness(Data, desiredSize);
+            double barWidth = BarThickness > 0 ? BarThickness : GetAutoBarThickness(Data, desiredSize);
+            double xMax = Owner.Orientation == Orientation.Vertical ? desiredSize.Width : desiredSize.Height;
+            double yMax = Owner.Orientation == Orientation.Vertical ? desiredSize.Height : desiredSize.Width;
 
             foreach (DataSeries series in Data)
             {
-                Path path = new Path()
-                {
-                    Stroke = series.Brush,
-                    StrokeThickness = barThickness,
-                };
+                //EvaluateSeries(series);
 
                 foreach (DataPoint point in series)
                 {
-                    LineGeometry line = new LineGeometry();
-                    if (Owner.Orientation == Orientation.Vertical)
-                    {
-                        SetLineGeometryVertical(point, line, desiredSize);
-                    }
-                    else
-                    {
-                        SetLineGeometryHorizontal(point, line, desiredSize);
+                    Pen pen = new Pen(series.Brush, barWidth);
+                    double xc = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
+                    double yc = Owner.YAxis.GetCoordinateFromTick(point.YValue, desiredSize);
+                    double ycz = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
 
+                    if (IsVisualCreatable(xc, yc, ycz, xMax, yMax, barWidth))
+                    {
+                        if (Owner.Orientation == Orientation.Vertical)
+                        {
+                            Children.Add(CreateLineVisual(pen, xc, ycz, xc, yc));
+                        }
+                        else
+                        {
+                            Children.Add(CreateLineVisual(pen, ycz, xc, yc, xc));
+                        }
                     }
-                    group.Children.Add(line);
                 }
-
-                path.Data = group;
-                Children.Add(path);
             }
         }
         #endregion
@@ -139,6 +117,17 @@ namespace Restless.Controls.Chart
         /************************************************************************/
 
         #region Private methods
+
+        private bool IsVisualCreatable(double xc, double yc, double ycz, double xMax, double yMax, double lineWidth)
+        {
+            double lineTolerance = lineWidth / 2.0;
+            if (xc < -lineTolerance) return false;
+            if (xc > xMax + lineTolerance) return false;
+            if (ycz < 0.0 && yc < 0.0) return false;
+            if (ycz > yMax && yc > ycz) return false;
+            if (ycz > yMax && yc > yMax) return false;
+            return true;
+        }
 
         private double GetAutoBarThickness(DataSeriesCollection seriesCollection, Size desiredSize)
         {
@@ -161,41 +150,26 @@ namespace Restless.Controls.Chart
             if (distance == 0.0) return Owner.XAxis.IsHorizontal ? desiredSize.Width / 2.0 : desiredSize.Height / 2.0;
 
             double result = distance / series.Count;
-            //Debug.WriteLine("-----------------------------------");
-            //Debug.WriteLine($"S1 {s1} SX {sx} Distance {distance} Count {series.Count} Result {result} DesiredSize {desiredSize}");
             return result;
         }
 
-        /// <summary>
-        /// Sets line geometry when the chart container is in vertical orientation.
-        /// </summary>
-        /// <param name="point">The data point</param>
-        /// <param name="line">The line object</param>
-        /// <param name="desiredSize">The desired size</param>
-        private void SetLineGeometryVertical(DataPoint point, LineGeometry line, Size desiredSize)
+        private void EvaluateSeries(DataSeries series)
         {
-            double xc = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
-            double yc = Owner.YAxis.GetCoordinateFromTick(point.YValue, desiredSize);
-            double ycz = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
+            double minDiff = double.MaxValue;
+            double maxDiff = double.MinValue;
+            double lastX = double.NaN;
 
-            line.StartPoint = new Point(xc, ycz);
-            line.EndPoint = new Point(xc, yc);
-        }
-
-        /// <summary>
-        /// Sets line geometry when the chart container is in horizontal orientation.
-        /// </summary>
-        /// <param name="point">The data point</param>
-        /// <param name="line">The line object</param>
-        /// <param name="desiredSize">The desired size</param>
-        private void SetLineGeometryHorizontal(DataPoint point, LineGeometry line, Size desiredSize)
-        {
-            double xc = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
-            double yc = Owner.YAxis.GetCoordinateFromTick(point.YValue, desiredSize);
-            double ycz = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
-
-            line.StartPoint = new Point(ycz, xc);
-            line.EndPoint = new Point(yc, xc);
+            foreach (DataPoint point in series)
+            {
+                if (!double.IsNaN(lastX))
+                {
+                    double diff = point.XValue - lastX;
+                    minDiff = Math.Min(minDiff, diff);
+                    maxDiff = Math.Max(maxDiff, diff);
+                }
+                lastX = point.XValue;
+            }
+            Debug.WriteLine($"Series has {series.Count} values. Min Diff: {minDiff} MaxDiff: {maxDiff}");
         }
         #endregion
     }
