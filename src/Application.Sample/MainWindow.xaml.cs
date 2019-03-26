@@ -19,7 +19,7 @@ namespace Application.Sample
         private DataSeriesCollection data;
         // chart
         private Orientation chartOrientation;
-
+        private bool isAxisGridVisible;
         // x
         private bool isXAxisPlacementReversed;
         private TickVisibility xAxisTickVisibility;
@@ -52,6 +52,7 @@ namespace Application.Sample
             YAxisTickVisibility = TickVisibility.Default;
 
             ChartOrientation = Orientation.Vertical;
+            IsAxisGridVisible = true;
 
             Loaded += MainWindowLoaded;
         }
@@ -59,12 +60,21 @@ namespace Application.Sample
 
         #region Chart properties
         /// <summary>
-        /// Gets the orientation of the chart
+        /// Gets the orientation of the chart.
         /// </summary>
         public Orientation ChartOrientation
         {
             get => chartOrientation;
             private set => SetProperty(ref chartOrientation, value);
+        }
+
+        /// <summary>
+        /// Gets a value that determines if the axis grid is displayed.
+        /// </summary>
+        public bool IsAxisGridVisible
+        {
+            get => isAxisGridVisible;
+            private set => SetProperty(ref isAxisGridVisible, value);
         }
         #endregion
 
@@ -328,9 +338,8 @@ namespace Application.Sample
 
         private void ButtonClickYAxisProvider(object sender, RoutedEventArgs e)
         {
-            YAxisTextFormat = string.IsNullOrEmpty(YAxisTextFormat) ? "N3" : null;
+            YAxisTextFormat = string.IsNullOrEmpty(YAxisTextFormat) ? "C2" : null;
         }
-
         #endregion
 
         #region Chart click handlers
@@ -344,27 +353,33 @@ namespace Application.Sample
             MainChart.RestoreSizeAndPosition();
         }
 
-
+        private void ButtonClickToggleDisplayAxisGrid(object sender, RoutedEventArgs e)
+        {
+            IsAxisGridVisible = !IsAxisGridVisible;
+        }
         #endregion
 
         #region Create data
         private void MainWindowLoaded(object sender, RoutedEventArgs e)
         {
-            //CreateTestData1();
-            CreateTestData2();
+            CreateTestData1();
+            // CreateTestData2();
         }
 
         private void CreateTestData1()
         {
-            int maxX = 200;
-            int minY = -150;
-            int maxY = 150;
+            int maxX = 20;
+            int minY = 10;
+            int maxY = 15000;
             
             Random rand = new Random();
 
             DataSeriesCollection data = new DataSeriesCollection();
 
             DataSeries series = data.Add();
+            series.Brush = Brushes.SteelBlue;
+            series.PrimaryTextBrush = Brushes.WhiteSmoke;
+            series.SecondaryTextBrush = Brushes.Black;
 
             for (int x = 0; x < maxX; x++)
             {
@@ -374,7 +389,8 @@ namespace Application.Sample
 
             data.ExpandX(0.75);
             data.DataRange.Y.IncreaseMaxBy(0.05);
-            data.MakeYZeroCentered();
+            data.DataRange.Y.Include(0);
+            //data.MakeYZeroCentered();
             //data.DataRange.Y.DecreaseMinBy(0.05);
             Data = data;
         }
@@ -389,6 +405,7 @@ namespace Application.Sample
 
             DataSeriesCollection data = new DataSeriesCollection();
             DataSeries series = data.Add();
+            series.Brush = Brushes.SteelBlue;
             DateTime now = DateTime.Now;
             DateTime start = GetMonth(now, -12);
 
@@ -408,7 +425,6 @@ namespace Application.Sample
             {
                 int y = rand.Next(min, max + 1);
                 series.Add(x.Ticks, y);
-
             }
             
             data.ExpandY(1000);

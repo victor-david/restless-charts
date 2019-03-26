@@ -30,6 +30,10 @@
                         Click="ButtonClickRestoreChart"
                         ToolTip="Restore the original zoom level and panning. You can also double click the chart"
                         Content="Restore Size/Position"/>
+                    <Button
+                        Click="ButtonClickToggleDisplayAxisGrid"
+                        ToolTip="Show or hide the axis grid lines"
+                        Content="Toggle Grid Display"/>
                 </StackPanel>
             </HeaderedContentControl>
             
@@ -83,6 +87,7 @@
             Grid.Row="1"
             Margin="20"
             BorderBrush="DarkBlue"
+            IsAxisGridVisible="{Binding IsAxisGridVisible}"
             BorderThickness="1"
             TopTitle="{Binding TopTitle}"
             BottomTitle="{Binding BottomTitle}"
@@ -100,7 +105,7 @@
             YAxisTextProvider="{Binding YAxisTextProvider}"
             IsYAxisValueReversed="{Binding IsYAxisValueReversed}">
             
-            <conx:BarChart Data="{Binding Data}"/>
+            <conx:BarChart Data="{Binding Data}" DisplayValues="True"/>
             
         </conx:ChartContainer>
 

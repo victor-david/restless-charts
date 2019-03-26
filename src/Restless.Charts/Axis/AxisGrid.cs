@@ -15,6 +15,7 @@ namespace Restless.Controls.Chart
         private readonly ChartContainer owner;
         private readonly Pen gridPen;
         private double minEdgeDistance;
+        private bool isGridVisible;
         #endregion
 
         /************************************************************************/
@@ -48,6 +49,8 @@ namespace Restless.Controls.Chart
             gridPen = new Pen(DefaultGridBrush, 1.0);
 
             minEdgeDistance = 3.0;
+            IsGridVisible = true;
+            IsHitTestVisible = false;
         }
         #endregion
 
@@ -80,6 +83,22 @@ namespace Restless.Controls.Chart
                 {
                     minEdgeDistance = value;
                     InvalidateMeasure();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value that determines if the axis grid is visible.
+        /// </summary>
+        public bool IsGridVisible
+        {
+            get => isGridVisible;
+            set
+            {
+                if (value != isGridVisible)
+                {
+                    isGridVisible = value;
+                    Visibility = isGridVisible ? Visibility.Visible : Visibility.Collapsed;
                 }
             }
         }

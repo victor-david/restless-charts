@@ -26,7 +26,9 @@ namespace Restless.Controls.Chart
         {
             this.owner = owner ?? throw new ArgumentNullException(nameof(owner));
             storage = new List<DataPoint>();
-            Brush = Brushes.DarkGray;
+            Brush = Brushes.SteelBlue;
+            PrimaryTextBrush = Brushes.White;
+            SecondaryTextBrush = Brushes.Black;
         }
         #endregion
 
@@ -56,6 +58,26 @@ namespace Restless.Controls.Chart
         /// Gets or sets the brush that is used for this data series.
         /// </summary>
         public Brush Brush
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the primary text brush used for this series.
+        /// This property is used when <see cref="ChartBase.DisplayValues"/> is true.
+        /// </summary>
+        public Brush PrimaryTextBrush
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the secondary text brush used for this series.
+        /// This property is used by certain charts when <see cref="ChartBase.DisplayValues"/> is true.
+        /// </summary>
+        public Brush SecondaryTextBrush
         {
             get;
             set;

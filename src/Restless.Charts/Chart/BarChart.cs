@@ -12,15 +12,19 @@ namespace Restless.Controls.Chart
     public class BarChart : ChartBase
     {
         #region Private
+        /// <summary>
+        /// Tolerance for bar text. Text plus this amount must fit inside bar.
+        /// </summary>
+        private const double TextTolerance = 10.0;
+        /// <summary>
+        /// Text cushion. Text is placed this distance from edge of bar.
+        /// </summary>
+        private const double TextEdgeCushion = TextTolerance / 2.0;
         #endregion
 
         /************************************************************************/
 
         #region Public fields
-        /// <summary>
-        /// Gets the default brush for the border of the grid axis.
-        /// </summary>
-        public static readonly Brush DefaultBarBrush = Brushes.Gray;
         /// <summary>
         /// Gets the default bar thickness. This value (zero) signifies that bars will be auto sized.
         /// </summary>
@@ -41,7 +45,7 @@ namespace Restless.Controls.Chart
         
         /************************************************************************/
 
-        #region Brush
+        #region BarThickness
         /// <summary>
         /// Gets or sets the thickness of the bars. Zero signifies auto size. This is a dependency property.
         /// </summary>
@@ -56,7 +60,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty BarThicknessProperty = DependencyProperty.Register
             (
-                nameof(BarThickness), typeof(double), typeof(BarChart), new PropertyMetadata(DefaultBarThickness, OnBarThicknessPropertyChanged, OnCoerceBarThickness)
+                nameof(BarThickness), typeof(double), typeof(BarChart), new PropertyMetadata(DefaultBarThickness, OnBarPropertyChanged, OnCoerceBarThickness)
             );
 
         private static object OnCoerceBarThickness(DependencyObject d, object value)
@@ -65,7 +69,7 @@ namespace Restless.Controls.Chart
             return dval.Clamp(0, 100);
         }
 
-        private static void OnBarThicknessPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnBarPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is BarChart c)
             {
@@ -94,19 +98,23 @@ namespace Restless.Controls.Chart
                 foreach (DataPoint point in series)
                 {
                     Pen pen = new Pen(series.Brush, barWidth);
-                    double xc = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
-                    double yc = Owner.YAxis.GetCoordinateFromTick(point.YValue, desiredSize);
-                    double ycz = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
 
-                    if (IsVisualCreatable(xc, yc, ycz, xMax, yMax, barWidth))
+                    double x = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
+                    double y = Owner.YAxis.GetCoordinateFromTick(point.YValue, desiredSize);
+                    double yZero = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
+                    double barLength = Math.Abs(y - yZero);
+
+                    if (IsVisualCreatable(x, y, yZero, xMax, yMax, barWidth))
                     {
                         if (Owner.Orientation == Orientation.Vertical)
                         {
-                            Children.Add(CreateLineVisual(pen, xc, ycz, xc, yc));
+                            Children.Add(CreateLineVisual(pen, x, yZero, x, y));
+                            CreateTextDisplayIf(series, point, x, y, yZero, barWidth, barLength);
                         }
                         else
                         {
-                            Children.Add(CreateLineVisual(pen, ycz, xc, yc, xc));
+                            Children.Add(CreateLineVisual(pen, yZero, x, y, x));
+                            CreateTextDisplayIf(series, point, y, x, yZero, barWidth, barLength);
                         }
                     }
                 }
@@ -117,6 +125,92 @@ namespace Restless.Controls.Chart
         /************************************************************************/
 
         #region Private methods
+
+        private void CreateTextDisplayIf(DataSeries series, DataPoint point, double x, double y, double yZero, double barWidth, double barLength)
+        {
+            if (DisplayValues)
+            {
+                FormattedText text = GetFormattedText(Owner.GetFormattedYValue(point.YValue), ValuesFontFamily, ValuesFontSize, series.PrimaryTextBrush);
+                
+                if (TextFitsInWidth(text, barWidth))
+                {
+                    if (!TextFitsInLength(text, barLength))
+                    {
+                        text.SetForegroundBrush(series.SecondaryTextBrush);
+                    }
+                    bool isNegative = Owner.Orientation == Orientation.Vertical ? y > yZero : x < yZero;
+                    x = GetAdjustedTextX(x, barLength, isNegative, text);
+                    y = GetAdjustedTextY(y, barLength, isNegative, text);
+                    double rotation = Owner.Orientation == Orientation.Vertical ? -90.0 : 0.0;
+                    Children.Add(CreateTextVisual(text, x, y, rotation));
+                }
+            }
+        }
+
+        private bool TextFitsInWidth(FormattedText text, double width)
+        {
+            return width > text.Height + TextTolerance;
+        }
+
+        private bool TextFitsInLength(FormattedText text, double length)
+        {
+            return text.Width + TextTolerance < length;
+        }
+
+        private double GetAdjustedTextX(double x, double barLen, bool isNegative, FormattedText text)
+        {
+
+            if (Owner.Orientation == Orientation.Vertical)
+            {
+                x -= text.Width / 2.0;
+            }
+            else
+            {
+                if (text.Width + TextTolerance > barLen)
+                {
+                    if (isNegative) x -= text.Width + TextEdgeCushion;
+                    else x += TextEdgeCushion;
+                }
+                else
+                {
+                    if (isNegative) x += TextEdgeCushion;
+                    else x -= text.Width + TextEdgeCushion;
+                }
+
+            }
+            return x;
+        }
+
+        private double GetAdjustedTextY(double y, double barLen, bool isNegative, FormattedText text)
+        {
+            if (Owner.Orientation == Orientation.Vertical)
+            {
+                y -= text.Height / 2.0;
+                if (text.Width + TextTolerance > barLen)
+                {
+                    if (isNegative) y += (text.Width / 2.0) + TextEdgeCushion;
+                    else y -= (text.Width / 2.0) + TextEdgeCushion;
+                }
+                else
+                {
+                    if (isNegative) y -= (text.Width / 2.0) + TextEdgeCushion;
+                    else y += (text.Width / 2.0) + TextEdgeCushion;
+                }
+            }
+            else
+            {
+                y -= text.Height / 2.0;
+                if (text.Width + TextTolerance > barLen)
+                {
+
+                }
+                else
+                {
+
+                }
+            }
+            return y;
+        }
 
         private bool IsVisualCreatable(double xc, double yc, double ycz, double xMax, double yMax, double lineWidth)
         {

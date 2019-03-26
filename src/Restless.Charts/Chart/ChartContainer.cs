@@ -750,6 +750,32 @@ namespace Restless.Controls.Chart
         /// Identifies the <see cref="AxisGrid"/> dependency property.
         /// </summary>
         public static readonly DependencyProperty AxisGridProperty = AxisGridPropertyKey.DependencyProperty;
+
+        /// <summary>
+        /// Gets or sets a value that determines if the axis grid is displayed.
+        /// This is a dependency property.
+        /// </summary>
+        public bool IsAxisGridVisible
+        {
+            get => (bool)GetValue(IsAxisGridVisibleProperty);
+            set => SetValue(IsAxisGridVisibleProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="IsAxisGridVisible"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IsAxisGridVisibleProperty = DependencyProperty.Register
+            (
+                nameof(IsAxisGridVisible), typeof(bool), typeof(ChartContainer), new PropertyMetadata(true, OnIsAxisGridVisibleChanged)
+            );
+
+        private static void OnIsAxisGridVisibleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is ChartContainer c)
+            {
+                c.AxisGrid.IsGridVisible = c.IsAxisGridVisible;
+            }
+        }
         #endregion
 
         /************************************************************************/
@@ -858,6 +884,34 @@ namespace Restless.Controls.Chart
                 YAxis.Shift(xPercentage);
             }
             InvalidateMeasure();
+        }
+
+        /// <summary>
+        /// Gets the specified value formatted according to the settings of <see cref="XAxisTextProvider"/> abd <see cref="XAxisTextFormat"/>.
+        /// </summary>
+        /// <param name="value">The value to format.</param>
+        /// <returns>The formatted value.</returns>
+        public string GetFormattedXValue(double value)
+        {
+            if (XAxisTextProvider != null)
+            {
+                return XAxisTextProvider.Convert(value, XAxisTextFormat);
+            }
+            return value.ToString(XAxisTextFormat);
+        }
+
+        /// <summary>
+        /// Gets the specified value formatted according to the settings of <see cref="YAxisTextProvider"/> abd <see cref="YAxisTextFormat"/>.
+        /// </summary>
+        /// <param name="value">The value to format.</param>
+        /// <returns>The formatted value.</returns>
+        public string GetFormattedYValue(double value)
+        {
+            if (YAxisTextProvider != null)
+            {
+                return YAxisTextProvider.Convert(value, YAxisTextFormat);
+            }
+            return value.ToString(YAxisTextFormat);
         }
         #endregion
     }
