@@ -47,7 +47,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         /// <param name="range">The range.</param>
         /// <param name="ticks">An array of major ticks.</param>
-        /// <returns></returns>
+        /// <returns>An array of double.</returns>
         public double[] CreateTicks(Range range, double[] ticks)
         {
             if (ticks == null) throw new ArgumentNullException(nameof(ticks));

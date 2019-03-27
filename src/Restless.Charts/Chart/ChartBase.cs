@@ -23,9 +23,19 @@ namespace Restless.Controls.Chart
         public const string DefaultValueFontFamily = "Verdana";
 
         /// <summary>
-        /// Gets the default value font size.
+        /// Gets the minimum allowed value for <see cref="ValuesFontSize"/>.
         /// </summary>
-        public const double DefaultValueFontSize = 12.0;
+        public const double MinValuesFontSize = 8.0;
+
+        /// <summary>
+        /// Gets the maximum allowed value for <see cref="ValuesFontSize"/>.
+        /// </summary>
+        public const double MaxValuesFontSize = 32.0;
+
+        /// <summary>
+        /// Gets the default value for <see cref="ValuesFontSize"/>.
+        /// </summary>
+        public const double DefaultValuesFontSize = 13.0;
         #endregion
 
         /************************************************************************/
@@ -150,6 +160,9 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Gets or sets the size of the font when <see cref="DisplayValues"/> is true.
         /// </summary>
+        /// <remarks>
+        /// This value is clamped between <see cref="MinValuesFontSize"/> and <see cref="MaxValuesFontSize"/>.
+        /// </remarks>
         public double ValuesFontSize
         {
             get => (double)GetValue(ValuesFontSizeProperty);
@@ -161,13 +174,13 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty ValuesFontSizeProperty = DependencyProperty.Register
             (
-                nameof(ValuesFontSize), typeof(double), typeof(ChartBase), new PropertyMetadata(DefaultValueFontSize, OnDisplayValuesPropertyChanged, OnCoerceValuesFontSize)
+                nameof(ValuesFontSize), typeof(double), typeof(ChartBase), new PropertyMetadata(DefaultValuesFontSize, OnDisplayValuesPropertyChanged, OnCoerceValuesFontSize)
             );
 
         private static object OnCoerceValuesFontSize(DependencyObject d, object value)
         {
             double dval = (double)value;
-            return dval.Clamp(8.0, 32.0);
+            return dval.Clamp(MinValuesFontSize, MaxValuesFontSize);
         }
 
         private static void OnDisplayValuesPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

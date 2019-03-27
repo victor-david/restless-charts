@@ -22,7 +22,7 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Creates a <see cref="DataSeries"/> object with a single Y series.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A DataSeries object that supports a single Y series.</returns>
         public static DataSeries Create()
         {
             return Create(1);
@@ -32,7 +32,7 @@ namespace Restless.Controls.Chart
         /// Creates a <see cref="DataSeries"/> object with the specified number of Y series.
         /// </summary>
         /// <param name="maxYSeries">The number of Y series.</param>
-        /// <returns>A DataSeries object.</returns>
+        /// <returns>A DataSeries object thst supports the specified number of Y series.</returns>
         public static DataSeries Create(int maxYSeries)
         {
             return new DataSeries(maxYSeries);

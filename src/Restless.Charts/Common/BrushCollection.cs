@@ -62,9 +62,10 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
-        /// Sets the brush at the specified index.
+        /// Gets the brush at the specified index.
         /// </summary>
         /// <param name="index">The zero based index.</param>
+        /// <returns>The brush at the specified index.</returns>
         /// <exception cref="IndexOutOfRangeException"><paramref name="index"/> is out of range.</exception>
         public Brush GetBrush(int index)
         {
