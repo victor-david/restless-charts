@@ -80,9 +80,9 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Gets or sets the data series
         /// </summary>
-        public DataSeriesCollection Data
+        public DataSeries Data
         {
-            get => (DataSeriesCollection)GetValue(DataProperty);
+            get => (DataSeries)GetValue(DataProperty);
             set => SetValue(DataProperty, value);
         }
 
@@ -91,7 +91,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty DataProperty = DependencyProperty.Register
             (
-                nameof(Data), typeof(DataSeriesCollection), typeof(ChartBase), new PropertyMetadata(null, OnDataChanged)
+                nameof(Data), typeof(DataSeries), typeof(ChartBase), new PropertyMetadata(null, OnDataChanged)
             );
 
         private static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

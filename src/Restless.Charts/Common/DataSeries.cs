@@ -7,12 +7,12 @@ using System.Windows.Media;
 namespace Restless.Controls.Chart
 {
     /// <summary>
-    /// Represents a data series
+    /// Represents a data series that contains X values
+    /// and one or more Y values associated with each X value.
     /// </summary>
     public class DataSeries : IEnumerable<DataPoint>
     {
         #region Private
-        private readonly DataSeriesCollection owner;
         private readonly List<DataPoint> storage;
         #endregion
 
@@ -20,15 +20,36 @@ namespace Restless.Controls.Chart
 
         #region Constructor
         /// <summary>
+        /// Creates a <see cref="DataSeries"/> object with a single Y series.
+        /// </summary>
+        /// <returns></returns>
+        public static DataSeries Create()
+        {
+            return Create(1);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="DataSeries"/> object with the specified number of Y series.
+        /// </summary>
+        /// <param name="maxYSeries">The number of Y series.</param>
+        /// <returns>A DataSeries object.</returns>
+        public static DataSeries Create(int maxYSeries)
+        {
+            return new DataSeries(maxYSeries);
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DataSeries"/> class.
         /// </summary>
-        internal DataSeries(DataSeriesCollection owner)
+        private DataSeries(int maxYSeries)
         {
-            this.owner = owner ?? throw new ArgumentNullException(nameof(owner));
+            MaxYSeries = Math.Max(1, maxYSeries);
             storage = new List<DataPoint>();
-            Brush = Brushes.SteelBlue;
-            PrimaryTextBrush = Brushes.White;
-            SecondaryTextBrush = Brushes.Black;
+            DataRange = DataRange.EmptyDataRange();
+
+            DataBrushes = new BrushCollection(MaxYSeries, Brushes.Black);
+            PrimaryTextBrushes = new BrushCollection(MaxYSeries, Brushes.White);
+            SecondaryTextBrushes = new BrushCollection(MaxYSeries, Brushes.Black);
         }
         #endregion
 
@@ -36,11 +57,27 @@ namespace Restless.Controls.Chart
 
         #region Properties
         /// <summary>
+        /// Gets the max count of Y series for this data series.
+        /// </summary>
+        public int MaxYSeries
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the data range for this data series collection.
+        /// </summary>
+        public DataRange DataRange
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets the data point at the specified index.
         /// </summary>
         /// <param name="index">The index</param>
         /// <returns>The data point.</returns>
-        /// <exception cref="ArgumentNullException">An attempt was made to set a null value</exception>
+        /// <exception cref="IndexOutOfRangeException">An attempt was made to use an index that is out of range.</exception>
         public DataPoint this[int index]
         {
             get => storage[index];
@@ -55,32 +92,29 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
-        /// Gets or sets the brush that is used for this data series.
+        /// Gets the brush collection used for the Y data of this series.
         /// </summary>
-        public Brush Brush
+        public BrushCollection DataBrushes
         {
             get;
-            set;
         }
 
         /// <summary>
-        /// Gets or sets the primary text brush used for this series.
+        /// Gets the brush collection used for the primary text brush of the Y data series.
         /// This property is used when <see cref="ChartBase.DisplayValues"/> is true.
         /// </summary>
-        public Brush PrimaryTextBrush
+        public BrushCollection PrimaryTextBrushes
         {
             get;
-            set;
         }
 
         /// <summary>
-        /// Gets or sets the secondary text brush used for this series.
-        /// This property is used by certain charts when <see cref="ChartBase.DisplayValues"/> is true.
+        /// Gets the brush collection used for the secondary text brush of the Y data series.
+        /// This property is used when <see cref="ChartBase.DisplayValues"/> is true.
         /// </summary>
-        public Brush SecondaryTextBrush
+        public BrushCollection SecondaryTextBrushes
         {
             get;
-            set;
         }
         #endregion
 
@@ -92,11 +126,50 @@ namespace Restless.Controls.Chart
         /// </summary>
         /// <param name="xValue">The x value.</param>
         /// <param name="yValue">The y value</param>
-        /// <exception cref="ArgumentNullException">An attempt was made to add a null item.</exception>
         public void Add(double xValue, double yValue)
         {
-            owner.DataRange.Include(xValue, yValue);
-            storage.Add(new DataPoint(xValue, yValue));
+            DataRange.Include(xValue, yValue);
+            DataPoint point = GetDataPointAt(xValue);
+            if (point.YValues.Count < MaxYSeries)
+            {
+                point.AddY(yValue);
+            }
+        }
+
+        /// <summary>
+        /// Examines Y data and adjusts <see cref="DataRange"/> accordingly.
+        /// If Y includes negative numbers, makes Y axis centered on zero.
+        /// If not, includes zero on the Y axis.
+        /// </summary>
+        public void MakeYAutoZero()
+        {
+            double min = GetMinYValue();
+            if (min > 0) DataRange.Y.Include(0);
+            if (min < 0) DataRange.Y.MakeZeroCentered();
+        }
+
+        /// <summary>
+        /// Expands the X range by both increasing Max and decreasing Min by the specified amount.
+        /// </summary>
+        /// <param name="amount">The amount to expand.</param>
+        public void ExpandX(double amount)
+        {
+            double min = DataRange.X.Min - Math.Abs(amount);
+            double max = DataRange.X.Max + Math.Abs(amount);
+            DataRange.X.Include(min);
+            DataRange.X.Include(max);
+        }
+
+        /// <summary>
+        /// Expands the Y range by both increasing Max and decreasing Min by the specified amount.
+        /// </summary>
+        /// <param name="amount">The amount to expand.</param>
+        public void ExpandY(double amount)
+        {
+            double min = DataRange.Y.Min - Math.Abs(amount);
+            double max = DataRange.Y.Max + Math.Abs(amount);
+            DataRange.Y.Include(min);
+            DataRange.Y.Include(max);
         }
 
         /// <summary>
@@ -105,7 +178,8 @@ namespace Restless.Controls.Chart
         public void Clear()
         {
             storage.Clear();
-            owner.RecalculateDataRange();
+            DataRange.X.MakeEmpty();
+            DataRange.Y.MakeEmpty();
         }
         #endregion
 
@@ -136,7 +210,41 @@ namespace Restless.Controls.Chart
         }
         #endregion
 
+        /************************************************************************/
+
         #region Private methods
+        /// <summary>
+        /// Gets the data point object with the specified X value.
+        /// If it doesn't yet exist, first creates it and adds it to storage.
+        /// </summary>
+        /// <param name="xValue">The x value</param>
+        /// <returns>A DataPoint, either already in storage or freshly added.</returns>
+        private DataPoint GetDataPointAt(double xValue)
+        {
+            foreach (DataPoint point in this)
+            {
+                if (point.XValue == xValue) return point;
+                if (point.XValue > xValue) break;
+            }
+
+            DataPoint newPoint = new DataPoint(xValue);
+            storage.Add(newPoint);
+            return newPoint;
+        }
+
+        private double GetMinYValue()
+        {
+            double min = double.MaxValue;
+
+            foreach (DataPoint point in this)
+            {
+                foreach (double value in point.YValues)
+                {
+                    min = Math.Min(min, value);
+                }
+            }
+            return min;
+        }
         #endregion
     }
 }

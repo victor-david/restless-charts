@@ -91,16 +91,15 @@ namespace Restless.Controls.Chart
             double xMax = Owner.Orientation == Orientation.Vertical ? desiredSize.Width : desiredSize.Height;
             double yMax = Owner.Orientation == Orientation.Vertical ? desiredSize.Height : desiredSize.Width;
 
-            foreach (DataSeries series in Data)
+            foreach (DataPoint point in Data)
             {
-                //EvaluateSeries(series);
-
-                foreach (DataPoint point in series)
+                int yIndex = 0;
+                foreach (double yValue in point.YValues)
                 {
-                    Pen pen = new Pen(series.Brush, barWidth);
+                    Pen pen = new Pen(Data.DataBrushes[yIndex], barWidth);
 
                     double x = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
-                    double y = Owner.YAxis.GetCoordinateFromTick(point.YValue, desiredSize);
+                    double y = Owner.YAxis.GetCoordinateFromTick(yValue, desiredSize);
                     double yZero = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
                     double barLength = Math.Abs(y - yZero);
 
@@ -109,14 +108,15 @@ namespace Restless.Controls.Chart
                         if (Owner.Orientation == Orientation.Vertical)
                         {
                             Children.Add(CreateLineVisual(pen, x, yZero, x, y));
-                            CreateTextDisplayIf(series, point, x, y, yZero, barWidth, barLength);
+                            CreateTextDisplayIf(yIndex, yValue, x, y, yZero, barWidth, barLength);
                         }
                         else
                         {
                             Children.Add(CreateLineVisual(pen, yZero, x, y, x));
-                            CreateTextDisplayIf(series, point, y, x, yZero, barWidth, barLength);
+                            CreateTextDisplayIf(yIndex, yValue, y, x, yZero, barWidth, barLength);
                         }
                     }
+                    yIndex++;
                 }
             }
         }
@@ -126,17 +126,17 @@ namespace Restless.Controls.Chart
 
         #region Private methods
 
-        private void CreateTextDisplayIf(DataSeries series, DataPoint point, double x, double y, double yZero, double barWidth, double barLength)
+        private void CreateTextDisplayIf(int yIndex, double yValue, double x, double y, double yZero, double barWidth, double barLength)
         {
             if (DisplayValues)
             {
-                FormattedText text = GetFormattedText(Owner.GetFormattedYValue(point.YValue), ValuesFontFamily, ValuesFontSize, series.PrimaryTextBrush);
-                
+                FormattedText text = GetFormattedText(Owner.GetFormattedYValue(yValue), ValuesFontFamily, ValuesFontSize, Data.PrimaryTextBrushes.GetBrush(yIndex));
+
                 if (TextFitsInWidth(text, barWidth))
                 {
                     if (!TextFitsInLength(text, barLength))
                     {
-                        text.SetForegroundBrush(series.SecondaryTextBrush);
+                        text.SetForegroundBrush(Data.SecondaryTextBrushes.GetBrush(yIndex));
                     }
                     bool isNegative = Owner.Orientation == Orientation.Vertical ? y > yZero : x < yZero;
                     x = GetAdjustedTextX(x, barLength, isNegative, text);
@@ -200,14 +200,6 @@ namespace Restless.Controls.Chart
             else
             {
                 y -= text.Height / 2.0;
-                if (text.Width + TextTolerance > barLen)
-                {
-
-                }
-                else
-                {
-
-                }
             }
             return y;
         }
@@ -223,47 +215,19 @@ namespace Restless.Controls.Chart
             return true;
         }
 
-        private double GetAutoBarThickness(DataSeriesCollection seriesCollection, Size desiredSize)
-        {
-            double result = double.PositiveInfinity;
-            foreach(DataSeries series in seriesCollection)
-            {
-                double autoSeries = Math.Abs(GetAutoBarThickness(series, desiredSize));
-                result = (autoSeries > 0) ? Math.Min(result, autoSeries) : result;
-            }
-            return result.IsFinite() ? result : 10.0;
-        }
-
         private double GetAutoBarThickness(DataSeries series, Size desiredSize)
         {
-            if (series.Count == 0) return 0;
-            double s1 = Owner.XAxis.GetCoordinateFromTick(series[0].XValue, desiredSize);
-            double sx = Owner.XAxis.GetCoordinateFromTick(series[series.Count - 1].XValue, desiredSize);
-            double distance = sx - s1;
+            double result = double.PositiveInfinity;
 
-            if (distance == 0.0) return Owner.XAxis.IsHorizontal ? desiredSize.Width / 2.0 : desiredSize.Height / 2.0;
-
-            double result = distance / series.Count;
-            return result;
-        }
-
-        private void EvaluateSeries(DataSeries series)
-        {
-            double minDiff = double.MaxValue;
-            double maxDiff = double.MinValue;
-            double lastX = double.NaN;
-
-            foreach (DataPoint point in series)
+            if (series.Count > 0)
             {
-                if (!double.IsNaN(lastX))
-                {
-                    double diff = point.XValue - lastX;
-                    minDiff = Math.Min(minDiff, diff);
-                    maxDiff = Math.Max(maxDiff, diff);
-                }
-                lastX = point.XValue;
+                double s1 = Owner.XAxis.GetCoordinateFromTick(series[0].XValue, desiredSize);
+                double sx = Owner.XAxis.GetCoordinateFromTick(series[series.Count - 1].XValue, desiredSize);
+                double distance = sx - s1;
+                if (distance == 0.0) return Owner.XAxis.IsHorizontal ? desiredSize.Width / 2.0 : desiredSize.Height / 2.0;
+                result = Math.Abs(distance / series.Count);
             }
-            Debug.WriteLine($"Series has {series.Count} values. Min Diff: {minDiff} MaxDiff: {maxDiff}");
+            return result.IsFinite() ? result : 10.0;
         }
         #endregion
     }

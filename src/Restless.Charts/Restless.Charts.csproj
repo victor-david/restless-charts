@@ -60,10 +60,11 @@
     <Compile Include="Chart\BarChart.cs" />
     <Compile Include="Chart\ChartContainer.cs" />
     <Compile Include="Chart\ChartBase.cs" />
+    <Compile Include="Common\BrushCollection.cs" />
     <Compile Include="Common\DataPoint.cs" />
     <Compile Include="Common\DataRange.cs" />
     <Compile Include="Common\DataSeries.cs" />
-    <Compile Include="Common\DataSeriesCollection.cs" />
+    <Compile Include="Common\DataSequence.cs" />
     <Compile Include="Common\DebugHelper.cs" />
     <Compile Include="Common\MathHelper.cs" />
     <Compile Include="Common\Range.cs" />

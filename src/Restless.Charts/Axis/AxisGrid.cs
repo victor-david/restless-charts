@@ -44,7 +44,7 @@ namespace Restless.Controls.Chart
 
             // AxisGrid doesn't get its data from this collection,
             // but it needs to be non null for CreateChildren to be called.
-            Data = new DataSeriesCollection();
+            Data = DataSeries.Create();
 
             gridPen = new Pen(DefaultGridBrush, 1.0);
 

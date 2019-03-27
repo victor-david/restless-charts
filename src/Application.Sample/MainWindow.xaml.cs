@@ -16,7 +16,7 @@ namespace Application.Sample
     {
         #region Private
         // data
-        private DataSeriesCollection data;
+        private DataSeries data;
         // chart
         private Orientation chartOrientation;
         private bool isAxisGridVisible;
@@ -82,20 +82,11 @@ namespace Application.Sample
         /// <summary>
         /// Gets the chart data range.
         /// </summary>
-        public DataSeriesCollection Data
+        public DataSeries Data
         {
             get => data;
             private set => SetProperty(ref data, value);
         }
-
-        ///// <summary>
-        ///// Gets the chart data range.
-        ///// </summary>
-        //public DataRange DataRange
-        //{
-        //    get => dataRange;
-        //    private set => SetProperty(ref dataRange, value);
-        //}
         #endregion
 
         #region X Axis properties
@@ -363,49 +354,92 @@ namespace Application.Sample
         private void MainWindowLoaded(object sender, RoutedEventArgs e)
         {
             CreateTestData1();
-            // CreateTestData2();
+            //CreateTestData2();
         }
 
+        /// <summary>
+        /// Creates data - single series.
+        /// </summary>
         private void CreateTestData1()
         {
             int maxX = 20;
-            int minY = 10;
-            int maxY = 15000;
+            int minY = 15000;
+            int maxY = 37500;
             
             Random rand = new Random();
 
-            DataSeriesCollection data = new DataSeriesCollection();
+            DataSeries data = DataSeries.Create();
 
-            DataSeries series = data.Add();
-            series.Brush = Brushes.SteelBlue;
-            series.PrimaryTextBrush = Brushes.WhiteSmoke;
-            series.SecondaryTextBrush = Brushes.Black;
+            data.DataBrushes.SetBrush(0, Brushes.SteelBlue);
+            data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
+            data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkRed);
 
             for (int x = 0; x < maxX; x++)
             {
                 int y = rand.Next(minY, maxY + 1);
-                series.Add(x, y);
+                data.Add(x, y);
             }
 
             data.ExpandX(0.75);
             data.DataRange.Y.IncreaseMaxBy(0.05);
-            data.DataRange.Y.Include(0);
-            //data.MakeYZeroCentered();
-            //data.DataRange.Y.DecreaseMinBy(0.05);
+            data.MakeYAutoZero();
+
             Data = data;
         }
+
+
+        /// <summary>
+        /// Create data - multiple series
+        /// </summary>
+        private void CreateTestData2()
+        {
+            int maxX = 20;
+            int minY = 100;
+            int maxY = 15000;
+
+            Random rand = new Random();
+
+            DataSeries data = DataSeries.Create(2);
+
+            data.DataBrushes.SetBrush(0, Brushes.SteelBlue);
+            data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
+            data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkRed);
+
+            data.DataBrushes.SetBrush(1, Brushes.Red);
+            data.PrimaryTextBrushes.SetBrush(1, Brushes.WhiteSmoke);
+            data.SecondaryTextBrushes.SetBrush(1, Brushes.DarkRed);
+
+            for (int x = 0; x < maxX; x++)
+            {
+                int y = rand.Next(minY, maxY + 1);
+                data.Add(x, y);
+
+                y = rand.Next(minY, maxY + 1);
+                data.Add(x, y);
+            }
+
+            data.ExpandX(0.75);
+            data.DataRange.Y.IncreaseMaxBy(0.05);
+            data.MakeYAutoZero();
+
+            Data = data;
+        }
+
+
+
+
 
         /// <summary>
         /// This test data represents dates and amounts.
         /// </summary>
-        private void CreateTestData2()
+        private void CreateTestData3()
         {
             XAxisTextFormat = "MMM-yy";
             XAxisTextProvider = new DoubleToDateConverter();
 
-            DataSeriesCollection data = new DataSeriesCollection();
-            DataSeries series = data.Add();
-            series.Brush = Brushes.SteelBlue;
+            DataSeries data = DataSeries.Create();
+            //XDataSeries series = data.Add();
+            //series.Brush = Brushes.SteelBlue;
             DateTime now = DateTime.Now;
             DateTime start = GetMonth(now, -12);
 
@@ -424,10 +458,10 @@ namespace Application.Sample
             foreach (DateTime x in months)
             {
                 int y = rand.Next(min, max + 1);
-                series.Add(x.Ticks, y);
+                data.Add(x.Ticks, y);
             }
             
-            data.ExpandY(1000);
+            //data.ExpandY(1000);
             data.DataRange.Y.Include(0);
             Data = data;
         }
