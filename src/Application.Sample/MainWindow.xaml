@@ -23,6 +23,18 @@
             <HeaderedContentControl Header="Chart">
                 <StackPanel>
                     <Button
+                        Click="ButtonClickChartUseData1"
+                        ToolTip="Use data set #1, a single series"
+                        Content="Use Data 1 (Single)"/>
+                    <Button
+                        Click="ButtonClickChartUseData2"
+                        ToolTip="Use data set #2, multiple series"
+                        Content="Use Data 2 (Multiple)"/>
+                    <Button
+                        Click="ButtonClickChartUseData3"
+                        ToolTip="Use data set #3, X represents dates"
+                        Content="Use Data 3 (Dates)"/>
+                    <Button
                         Click="ButtonClickChartOrientation"
                         ToolTip="Toggle the orientation of the chart"
                         Content="Toggle Orientation"/>

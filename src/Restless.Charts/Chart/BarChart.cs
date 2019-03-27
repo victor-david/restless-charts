@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -20,6 +22,9 @@ namespace Restless.Controls.Chart
         /// Text cushion. Text is placed this distance from edge of bar.
         /// </summary>
         private const double TextEdgeCushion = TextTolerance / 2.0;
+
+        private readonly List<DrawingVisual> textVisuals;
+
         #endregion
 
         /************************************************************************/
@@ -40,6 +45,7 @@ namespace Restless.Controls.Chart
         public BarChart()
         {
             UseLayoutRounding = false;
+            textVisuals = new List<DrawingVisual>();
         }
         #endregion
         
@@ -91,10 +97,12 @@ namespace Restless.Controls.Chart
             double xMax = Owner.Orientation == Orientation.Vertical ? desiredSize.Width : desiredSize.Height;
             double yMax = Owner.Orientation == Orientation.Vertical ? desiredSize.Height : desiredSize.Width;
 
+            textVisuals.Clear();
+
             foreach (DataPoint point in Data)
             {
                 int yIndex = 0;
-                foreach (double yValue in point.YValues)
+                foreach (double yValue in point.YValues.OrderByDescending((v) => Math.Abs(v)))
                 {
                     Pen pen = new Pen(Data.DataBrushes[yIndex], barWidth);
 
@@ -119,6 +127,9 @@ namespace Restless.Controls.Chart
                     yIndex++;
                 }
             }
+            // CreateTextDisplayIf() adds its visuals to textVisuals. Now add them to Children.
+            // This enables us to make sure text is above the bars when using multiple Y values.
+            textVisuals.ForEach((v) => Children.Add(v));
         }
         #endregion
 
@@ -128,7 +139,7 @@ namespace Restless.Controls.Chart
 
         private void CreateTextDisplayIf(int yIndex, double yValue, double x, double y, double yZero, double barWidth, double barLength)
         {
-            if (DisplayValues)
+            if (DisplayValues && yIndex == 0)
             {
                 FormattedText text = GetFormattedText(Owner.GetFormattedYValue(yValue), ValuesFontFamily, ValuesFontSize, Data.PrimaryTextBrushes.GetBrush(yIndex));
 
@@ -142,7 +153,7 @@ namespace Restless.Controls.Chart
                     x = GetAdjustedTextX(x, barLength, isNegative, text);
                     y = GetAdjustedTextY(y, barLength, isNegative, text);
                     double rotation = Owner.Orientation == Orientation.Vertical ? -90.0 : 0.0;
-                    Children.Add(CreateTextVisual(text, x, y, rotation));
+                    textVisuals.Add(CreateTextVisual(text, x, y, rotation));
                 }
             }
         }

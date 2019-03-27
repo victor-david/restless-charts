@@ -329,11 +329,27 @@ namespace Application.Sample
 
         private void ButtonClickYAxisProvider(object sender, RoutedEventArgs e)
         {
-            YAxisTextFormat = string.IsNullOrEmpty(YAxisTextFormat) ? "C2" : null;
+            YAxisTextFormat = string.IsNullOrEmpty(YAxisTextFormat) ? "C0" : null;
         }
         #endregion
 
         #region Chart click handlers
+
+        private void ButtonClickChartUseData1(object sender, RoutedEventArgs e)
+        {
+            CreateTestData1();
+        }
+
+        private void ButtonClickChartUseData2(object sender, RoutedEventArgs e)
+        {
+            CreateTestData2();
+        }
+
+        private void ButtonClickChartUseData3(object sender, RoutedEventArgs e)
+        {
+            CreateTestData3();
+        }
+
         private void ButtonClickChartOrientation(object sender, RoutedEventArgs e)
         {
             ChartOrientation = ChartOrientation == Orientation.Vertical ? Orientation.Horizontal : Orientation.Vertical;
@@ -354,7 +370,6 @@ namespace Application.Sample
         private void MainWindowLoaded(object sender, RoutedEventArgs e)
         {
             CreateTestData1();
-            //CreateTestData2();
         }
 
         /// <summary>
@@ -362,6 +377,9 @@ namespace Application.Sample
         /// </summary>
         private void CreateTestData1()
         {
+            XAxisTextFormat = null;
+            XAxisTextProvider = null;
+
             int maxX = 20;
             int minY = 15000;
             int maxY = 37500;
@@ -381,33 +399,34 @@ namespace Application.Sample
             }
 
             data.ExpandX(0.75);
-            data.DataRange.Y.IncreaseMaxBy(0.05);
+            data.DataRange.Y.Include(maxY);
             data.MakeYAutoZero();
 
             Data = data;
         }
-
 
         /// <summary>
         /// Create data - multiple series
         /// </summary>
         private void CreateTestData2()
         {
+            XAxisTextFormat = null;
+            XAxisTextProvider = null;
+
             int maxX = 20;
-            int minY = 100;
-            int maxY = 15000;
+            int minY = 1000;
+            int maxY = 25000;
 
             Random rand = new Random();
 
-            DataSeries data = DataSeries.Create(2);
+            DataSeries data = DataSeries.Create(3);
 
             data.DataBrushes.SetBrush(0, Brushes.SteelBlue);
             data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
-            data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkRed);
+            data.SecondaryTextBrushes.SetBrush(0, Brushes.Blue);
 
-            data.DataBrushes.SetBrush(1, Brushes.Red);
-            data.PrimaryTextBrushes.SetBrush(1, Brushes.WhiteSmoke);
-            data.SecondaryTextBrushes.SetBrush(1, Brushes.DarkRed);
+            data.DataBrushes.SetBrush(1, Brushes.Firebrick);
+            data.DataBrushes.SetBrush(2, Brushes.Indigo);
 
             for (int x = 0; x < maxX; x++)
             {
@@ -416,18 +435,17 @@ namespace Application.Sample
 
                 y = rand.Next(minY, maxY + 1);
                 data.Add(x, y);
+
+                y = rand.Next(minY, maxY + 1);
+                data.Add(x, y);
             }
 
             data.ExpandX(0.75);
-            data.DataRange.Y.IncreaseMaxBy(0.05);
+            data.DataRange.Y.Include(maxY);
             data.MakeYAutoZero();
 
             Data = data;
         }
-
-
-
-
 
         /// <summary>
         /// This test data represents dates and amounts.
@@ -436,10 +454,14 @@ namespace Application.Sample
         {
             XAxisTextFormat = "MMM-yy";
             XAxisTextProvider = new DoubleToDateConverter();
+            YAxisTextFormat = "C0";
 
             DataSeries data = DataSeries.Create();
-            //XDataSeries series = data.Add();
-            //series.Brush = Brushes.SteelBlue;
+
+            data.DataBrushes.SetBrush(0, (Brush)TryFindResource("HeaderBrush"));
+            data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
+            data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkRed);
+
             DateTime now = DateTime.Now;
             DateTime start = GetMonth(now, -12);
 
@@ -452,17 +474,20 @@ namespace Application.Sample
 
             Random rand = new Random();
 
-            int min = 10000;
-            int max = 20000;
+            int minY = 10000;
+            int maxY = 20000;
 
             foreach (DateTime x in months)
             {
-                int y = rand.Next(min, max + 1);
+                int y = rand.Next(minY, maxY + 1);
                 data.Add(x.Ticks, y);
             }
-            
-            //data.ExpandY(1000);
-            data.DataRange.Y.Include(0);
+
+            data.ExpandX(GetTicksPerDay() * 16);
+            data.DataRange.Y.Include(maxY);
+
+            data.MakeYAutoZero();
+
             Data = data;
         }
 
@@ -470,6 +495,14 @@ namespace Application.Sample
         {
             return new DateTime(date.AddMonths(monthsToAdd).Year, date.AddMonths(monthsToAdd).Month, 1);
         }
+
+        private long GetTicksPerDay()
+        {
+            TimeSpan span = new TimeSpan(24, 0, 0);
+            return span.Ticks;
+        }
         #endregion
+
+
     }
 }
