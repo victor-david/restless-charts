@@ -1,0 +1,158 @@
+﻿<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:r="clr-namespace:Restless.Controls.Chart.Resources"
+    xmlns:con="clr-namespace:Restless.Controls.Chart">
+
+    <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+
+    <Style x:Key="TextBlockHelpContent" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="#FF404040"/>
+    </Style>
+
+    <Style x:Key="ButtonHelp" TargetType="Button">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Margin" Value="1"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="HorizontalAlignment" Value="Right"/>
+        <Setter Property="VerticalAlignment" Value="Top"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <ContentPresenter/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+    <ControlTemplate x:Key="ChartContainerControlTemplate" TargetType="con:ChartContainer">
+        <Border
+            Background="{TemplateBinding Background}"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            BorderThickness="{TemplateBinding BorderThickness}"
+            Padding="{TemplateBinding Padding}">
+            <Grid>
+                <Button 
+                    Margin="{TemplateBinding IconMargin}" 
+                    Style="{StaticResource ButtonHelp}"
+                    Visibility="{Binding IsNavigationHelpButtonVisible, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BoolToVisibilityConverter}}"
+                    Command="{x:Static con:ChartContainer.NavigationHelpCommand}">
+                    <Image Source="/Restless.Charts;component/Resources/Image.Question.32.png" Height="24"/>
+                </Button>
+                <!-- Navigation Help -->
+                <con:HelpControl
+                    Header="{x:Static r:Strings.HelpChartNavigationHeader}"
+                    Height="180"
+                    IsHelpVisible="{Binding IsNavigationHelpVisible, RelativeSource={RelativeSource TemplatedParent}}">
+                    <con:HelpControl.HelpContent>
+                        <TextBlock 
+                            Style="{StaticResource TextBlockHelpContent}"
+                            Text="{x:Static r:Strings.HelpChartNavigation}"/>
+                    </con:HelpControl.HelpContent>
+                </con:HelpControl>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+
+                        <ColumnDefinition />
+
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+
+                        <RowDefinition />
+
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Titles -->
+                    <ContentPresenter Grid.Column="2" Grid.Row="0" HorizontalAlignment="Center" Content="{TemplateBinding TopTitle}"/>
+                    <ContentPresenter Grid.Column="2" Grid.Row="4" HorizontalAlignment="Center" Content="{TemplateBinding BottomTitle}"/>
+                    <ContentPresenter Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" Content="{TemplateBinding LeftTitle}">
+                        <ContentPresenter.LayoutTransform>
+                            <RotateTransform Angle="-90"/>
+                        </ContentPresenter.LayoutTransform>
+                    </ContentPresenter>
+                    <ContentPresenter Grid.Column="4" Grid.Row="2" VerticalAlignment="Center" Content="{TemplateBinding RightTitle}">
+                        <ContentPresenter.LayoutTransform>
+                            <RotateTransform Angle="-90"/>
+                        </ContentPresenter.LayoutTransform>
+                    </ContentPresenter>
+
+                    <!-- Border around the interior of the chart -->
+                    <Border Grid.Column="2" Grid.Row="2" BorderBrush="{TemplateBinding GridBorderBrush}" BorderThickness="{TemplateBinding GridBorderThickness}">
+                        <Grid>
+                            <!-- Axis Grid -->
+                            <ContentPresenter Content="{TemplateBinding AxisGrid}" />
+                            <!-- Plot -->
+                            <Border ClipToBounds="True">
+                                <ContentPresenter />
+                            </Border>
+                            <!-- Navigation -->
+                            <ContentPresenter Content="{TemplateBinding Navigation}"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- YAxis -->
+                    <ContentPresenter Name="YAxis" Grid.Column="1" Grid.Row="2" Content="{TemplateBinding YAxis}"/>
+
+                    <!-- XAxis -->
+                    <ContentPresenter Name="XAxis" Grid.Column="2" Grid.Row="3" Content="{TemplateBinding XAxis}"/>
+
+                   
+
+                </Grid>
+            </Grid>
+        </Border>
+
+        <ControlTemplate.Triggers>
+            <Trigger Property="XAxisPlacement" Value="Bottom">
+                <Setter TargetName="XAxis" Property="Grid.Column" Value="2"/>
+                <Setter TargetName="XAxis" Property="Grid.Row" Value="3"/>
+            </Trigger>
+            <Trigger Property="XAxisPlacement" Value="Top">
+                <Setter TargetName="XAxis" Property="Grid.Column" Value="2"/>
+                <Setter TargetName="XAxis" Property="Grid.Row" Value="1"/>
+            </Trigger>
+            <Trigger Property="XAxisPlacement" Value="Left">
+                <Setter TargetName="XAxis" Property="Grid.Column" Value="1"/>
+                <Setter TargetName="XAxis" Property="Grid.Row" Value="2"/>
+            </Trigger>
+            <Trigger Property="XAxisPlacement" Value="Right">
+                <Setter TargetName="XAxis" Property="Grid.Column" Value="3"/>
+                <Setter TargetName="XAxis" Property="Grid.Row" Value="2"/>
+            </Trigger>
+            
+            <Trigger Property="YAxisPlacement" Value="Left">
+                <Setter TargetName="YAxis" Property="Grid.Column" Value="1"/>
+                <Setter TargetName="YAxis" Property="Grid.Row" Value="2"/>
+            </Trigger>
+            <Trigger Property="YAxisPlacement" Value="Right">
+                <Setter TargetName="YAxis" Property="Grid.Column" Value="3"/>
+                <Setter TargetName="YAxis" Property="Grid.Row" Value="2"/>
+            </Trigger>
+            <Trigger Property="YAxisPlacement" Value="Top">
+                <Setter TargetName="YAxis" Property="Grid.Column" Value="2"/>
+                <Setter TargetName="YAxis" Property="Grid.Row" Value="1"/>
+            </Trigger>
+            <Trigger Property="YAxisPlacement" Value="Bottom">
+                <Setter TargetName="YAxis" Property="Grid.Column" Value="2"/>
+                <Setter TargetName="YAxis" Property="Grid.Row" Value="3"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+
+    </ControlTemplate>
+    
+    <Style TargetType="con:ChartContainer">
+        <Setter Property="Template" Value="{StaticResource ChartContainerControlTemplate}"/>
+    </Style>
+
+</ResourceDictionary>

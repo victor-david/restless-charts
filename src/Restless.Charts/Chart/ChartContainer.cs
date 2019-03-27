@@ -1,5 +1,7 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace Restless.Controls.Chart
@@ -7,8 +9,13 @@ namespace Restless.Controls.Chart
     /// <summary>
     /// Provides a container for chart controls. Provides titles, axis, axis grid and navigation.
     /// </summary>
+    [TemplatePart(Name = "xx", Type = typeof(Border))]
     public class ChartContainer : ContentControl
     {
+        #region Private
+        private const string PartNavigationHelp = "";
+        #endregion
+
         #region Public fields
         /// <summary>
         /// Gets the default orientation
@@ -48,11 +55,14 @@ namespace Restless.Controls.Chart
             // For best results, these two should be used together.
             UseLayoutRounding = true;
             SetValue(RenderOptions.EdgeModeProperty, EdgeMode.Aliased);
+
+            CommandBindings.Add(new CommandBinding(NavigationHelpCommand, ExecuteNavigationHelpCommand));
         }
 
         static ChartContainer()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(ChartContainer), new FrameworkPropertyMetadata(typeof(ChartContainer)));
+            PaddingProperty.OverrideMetadata(typeof(ChartContainer), new FrameworkPropertyMetadata(new Thickness(), FrameworkPropertyMetadataOptions.AffectsParentMeasure, OnPaddingPropertyChanged));
         }
         #endregion
 
@@ -800,6 +810,86 @@ namespace Restless.Controls.Chart
         /// Identifies the <see cref="Navigation"/> dependency property.
         /// </summary>
         public static readonly DependencyProperty NavigationProperty = NavigationPropertyKey.DependencyProperty;
+        #endregion
+
+        /************************************************************************/
+
+        #region IconMargin (read only)
+        /// <summary>
+        /// Gets the margin to be applied to the icon container.
+        /// </summary>
+        public Thickness IconMargin
+        {
+            get => (Thickness)GetValue(IconMarginProperty);
+            private set => SetValue(IconMarginPropertyKey, value);
+        }
+        
+        private static readonly DependencyPropertyKey IconMarginPropertyKey = DependencyProperty.RegisterReadOnly
+            (
+                nameof(IconMargin), typeof(Thickness), typeof(ChartContainer), new PropertyMetadata(new Thickness())
+            );
+
+        /// <summary>
+        /// Identifies the <see cref="IconMargin"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IconMarginProperty = IconMarginPropertyKey.DependencyProperty;
+
+        private static void OnPaddingPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is ChartContainer c)
+            {
+                c.IconMargin = new Thickness(0, -c.Padding.Top + 3, -c.Padding.Right + 3, 0);
+            }
+        }
+        #endregion
+
+        /************************************************************************/
+
+        #region Help Properties
+        /// <summary>
+        /// Gets the command used to display navigation help.
+        /// </summary>
+        public static readonly RoutedCommand NavigationHelpCommand = new RoutedCommand();
+
+        private void ExecuteNavigationHelpCommand(object sender, ExecutedRoutedEventArgs e)
+        {
+            IsNavigationHelpVisible = !IsNavigationHelpVisible;
+        }
+
+        /// <summary>
+        /// Gets or sets a value that determines if the navigation help button is visible.
+        /// </summary>
+        public bool IsNavigationHelpButtonVisible
+        {
+            get => (bool)GetValue(IsNavigationHelpButtonVisibleProperty);
+            set => SetValue(IsNavigationHelpButtonVisibleProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="IsNavigationHelpButtonVisible"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IsNavigationHelpButtonVisibleProperty = DependencyProperty.Register
+            (
+                nameof(IsNavigationHelpButtonVisible), typeof(bool), typeof(ChartContainer), new PropertyMetadata(true)
+            );
+
+        /// <summary>
+        /// Gets or sets a value that determines if navigation help is visible.
+        /// </summary>
+        public bool IsNavigationHelpVisible
+        {
+            get => (bool)GetValue(IsNavigationHelpVisibleProperty);
+            set => SetValue(IsNavigationHelpVisibleProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="IsNavigationHelpVisible"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IsNavigationHelpVisibleProperty = DependencyProperty.Register
+            (
+                nameof(IsNavigationHelpVisible), typeof(bool), typeof(ChartContainer), 
+                new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault)
+            );
         #endregion
 
         /************************************************************************/

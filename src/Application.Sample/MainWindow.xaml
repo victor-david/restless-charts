@@ -8,7 +8,9 @@
     mc:Ignorable="d"
     Title="Sample Charts" 
     WindowStartupLocation="CenterScreen"
-    Height="900" Width="1400">
+    Height="900" Width="1400"
+    MinHeight="300" MinWidth="600"
+    >
 
     <Window.Resources>
         <ResourceDictionary Source="Resources.xaml"/>
@@ -46,6 +48,14 @@
                         Click="ButtonClickToggleDisplayAxisGrid"
                         ToolTip="Show or hide the axis grid lines"
                         Content="Toggle Grid Display"/>
+                    <Button
+                        Click="ButtonClickToggleNavigationHelpButton"
+                        ToolTip="Toggle the help button off and on"
+                        Content="Toggle Help Button"/>
+                    <Button
+                        Click="ButtonClickToggleNavigationHelp"
+                        ToolTip="Control the display of navigation help programmatically"
+                        Content="Toggle Help Popout"/>
                 </StackPanel>
             </HeaderedContentControl>
             
@@ -115,7 +125,9 @@
             YAxisTickVisibility="{Binding YAxisTickVisibility}"
             YAxisTextFormat="{Binding YAxisTextFormat}"
             YAxisTextProvider="{Binding YAxisTextProvider}"
-            IsYAxisValueReversed="{Binding IsYAxisValueReversed}">
+            IsYAxisValueReversed="{Binding IsYAxisValueReversed}"
+            IsNavigationHelpButtonVisible="{Binding IsNavigationHelpButtonVisible}"
+            IsNavigationHelpVisible="{Binding IsNavigationHelpVisible}">
             
             <conx:BarChart Data="{Binding Data}" DisplayValues="True"/>
             

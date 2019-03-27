@@ -10,15 +10,14 @@ namespace Restless.Controls.Chart
     /// Provides a panel that enables chart navigation.
     /// </summary>
     /// <remarks>
-    /// The following navigation is supported:
+    /// Chart Navigation With Mouse
     /// Mouse wheel - zoom in / zoom out
-    /// Left mouse double click - restore original zoom
-    /// Left mouse single click with Control key pressed - zoom out
-    /// Left mouse single click with Shift key pressed - zoom in
-    /// Right mouse single click - zoom in
-    /// Mouse move - pan X and Y
-    /// Mouse move with Control key pressed - pan Y only.
-    /// Mouse move with Shift key pressed - pan X only.
+    /// Left click with Control key pressed - zoom out
+    /// Left click with Shift key pressed - zoom in
+    /// Left double click - restore original zoom
+    /// Left button down drag - pan X and Y
+    /// Left button down drag with Control key pressed - pan Y only.
+    /// Left button down drag with Shift key pressed - pan X only.
     /// </remarks>
     public class ChartNavigation : Panel
     {

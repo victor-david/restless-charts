@@ -20,6 +20,8 @@ namespace Application.Sample
         // chart
         private Orientation chartOrientation;
         private bool isAxisGridVisible;
+        private bool isNavigationHelpButtonVisible;
+        private bool isNavigationHelpVisible;
         // x
         private bool isXAxisPlacementReversed;
         private TickVisibility xAxisTickVisibility;
@@ -53,6 +55,8 @@ namespace Application.Sample
 
             ChartOrientation = Orientation.Vertical;
             IsAxisGridVisible = true;
+            IsNavigationHelpButtonVisible = true;
+
 
             Loaded += MainWindowLoaded;
         }
@@ -75,6 +79,28 @@ namespace Application.Sample
         {
             get => isAxisGridVisible;
             private set => SetProperty(ref isAxisGridVisible, value);
+        }
+
+        /// <summary>
+        /// Gets a value that determines if the chart navigation help button is displayed.
+        /// If the button is not visible, you can still control the visibility
+        /// of the help itself programmatically.
+        /// </summary>
+        public bool IsNavigationHelpButtonVisible
+        {
+            get => isNavigationHelpButtonVisible;
+            private set => SetProperty(ref isNavigationHelpButtonVisible, value);
+        }
+
+        /// <summary>
+        /// Gets a value that determines if the chart navigation help itself is displayed.
+        /// You can control the display of navigation help programmatically or use
+        /// the built in button if it is visible.
+        /// </summary>
+        public bool IsNavigationHelpVisible
+        {
+            get => isNavigationHelpVisible;
+            set => SetProperty(ref isNavigationHelpVisible, value);
         }
         #endregion
 
@@ -364,6 +390,17 @@ namespace Application.Sample
         {
             IsAxisGridVisible = !IsAxisGridVisible;
         }
+
+        private void ButtonClickToggleNavigationHelpButton(object sender, RoutedEventArgs e)
+        {
+            IsNavigationHelpButtonVisible = !IsNavigationHelpButtonVisible;
+        }
+
+        private void ButtonClickToggleNavigationHelp(object sender, RoutedEventArgs e)
+        {
+            IsNavigationHelpVisible = !IsNavigationHelpVisible;
+        }
+
         #endregion
 
         #region Create data
@@ -501,6 +538,8 @@ namespace Application.Sample
             TimeSpan span = new TimeSpan(24, 0, 0);
             return span.Ticks;
         }
+
+
         #endregion
 
 
