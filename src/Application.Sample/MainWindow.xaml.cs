@@ -1,5 +1,6 @@
 ﻿using Restless.Controls.Chart;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -15,10 +16,10 @@ namespace Application.Sample
     {
         #region Private
         // data
-        private DataSeriesCollection data;
+        private DataSeries data;
         // chart
         private Orientation chartOrientation;
-
+        private bool isAxisGridVisible;
         // x
         private bool isXAxisPlacementReversed;
         private TickVisibility xAxisTickVisibility;
@@ -51,6 +52,7 @@ namespace Application.Sample
             YAxisTickVisibility = TickVisibility.Default;
 
             ChartOrientation = Orientation.Vertical;
+            IsAxisGridVisible = true;
 
             Loaded += MainWindowLoaded;
         }
@@ -58,12 +60,21 @@ namespace Application.Sample
 
         #region Chart properties
         /// <summary>
-        /// Gets the orientation of the chart
+        /// Gets the orientation of the chart.
         /// </summary>
         public Orientation ChartOrientation
         {
             get => chartOrientation;
             private set => SetProperty(ref chartOrientation, value);
+        }
+
+        /// <summary>
+        /// Gets a value that determines if the axis grid is displayed.
+        /// </summary>
+        public bool IsAxisGridVisible
+        {
+            get => isAxisGridVisible;
+            private set => SetProperty(ref isAxisGridVisible, value);
         }
         #endregion
 
@@ -71,20 +82,11 @@ namespace Application.Sample
         /// <summary>
         /// Gets the chart data range.
         /// </summary>
-        public DataSeriesCollection Data
+        public DataSeries Data
         {
             get => data;
             private set => SetProperty(ref data, value);
         }
-
-        ///// <summary>
-        ///// Gets the chart data range.
-        ///// </summary>
-        //public DataRange DataRange
-        //{
-        //    get => dataRange;
-        //    private set => SetProperty(ref dataRange, value);
-        //}
         #endregion
 
         #region X Axis properties
@@ -327,12 +329,27 @@ namespace Application.Sample
 
         private void ButtonClickYAxisProvider(object sender, RoutedEventArgs e)
         {
-            YAxisTextFormat = string.IsNullOrEmpty(YAxisTextFormat) ? "N3" : null;
+            YAxisTextFormat = string.IsNullOrEmpty(YAxisTextFormat) ? "C0" : null;
         }
-
         #endregion
 
         #region Chart click handlers
+
+        private void ButtonClickChartUseData1(object sender, RoutedEventArgs e)
+        {
+            CreateTestData1();
+        }
+
+        private void ButtonClickChartUseData2(object sender, RoutedEventArgs e)
+        {
+            CreateTestData2();
+        }
+
+        private void ButtonClickChartUseData3(object sender, RoutedEventArgs e)
+        {
+            CreateTestData3();
+        }
+
         private void ButtonClickChartOrientation(object sender, RoutedEventArgs e)
         {
             ChartOrientation = ChartOrientation == Orientation.Vertical ? Orientation.Horizontal : Orientation.Vertical;
@@ -343,84 +360,149 @@ namespace Application.Sample
             MainChart.RestoreSizeAndPosition();
         }
 
-
+        private void ButtonClickToggleDisplayAxisGrid(object sender, RoutedEventArgs e)
+        {
+            IsAxisGridVisible = !IsAxisGridVisible;
+        }
         #endregion
 
         #region Create data
         private void MainWindowLoaded(object sender, RoutedEventArgs e)
         {
             CreateTestData1();
-            //CreateTestData2();
         }
 
+        /// <summary>
+        /// Creates data - single series.
+        /// </summary>
         private void CreateTestData1()
         {
-            int maxX = 30;
-            int minY = -150;
-            int maxY = 150;
+            XAxisTextFormat = null;
+            XAxisTextProvider = null;
+
+            int maxX = 20;
+            int minY = 15000;
+            int maxY = 37500;
             
             Random rand = new Random();
 
-            DataSeriesCollection data = new DataSeriesCollection();
+            DataSeries data = DataSeries.Create();
 
-            DataSeries series = data.Add();
+            data.DataBrushes.SetBrush(0, Brushes.SteelBlue);
+            data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
+            data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkRed);
 
             for (int x = 0; x < maxX; x++)
             {
                 int y = rand.Next(minY, maxY + 1);
-                series.Add(x, y);
+                data.Add(x, y);
             }
 
             data.ExpandX(0.75);
-            data.DataRange.Y.IncreaseMaxBy(0.05);
-            data.MakeYZeroCentered();
-            //data.DataRange.Y.DecreaseMinBy(0.05);
+            data.DataRange.Y.Include(maxY);
+            data.MakeYAutoZero();
+
+            Data = data;
+        }
+
+        /// <summary>
+        /// Create data - multiple series
+        /// </summary>
+        private void CreateTestData2()
+        {
+            XAxisTextFormat = null;
+            XAxisTextProvider = null;
+
+            int maxX = 20;
+            int minY = 1000;
+            int maxY = 25000;
+
+            Random rand = new Random();
+
+            DataSeries data = DataSeries.Create(3);
+
+            data.DataBrushes.SetBrush(0, Brushes.SteelBlue);
+            data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
+            data.SecondaryTextBrushes.SetBrush(0, Brushes.Blue);
+
+            data.DataBrushes.SetBrush(1, Brushes.Firebrick);
+            data.DataBrushes.SetBrush(2, Brushes.Indigo);
+
+            for (int x = 0; x < maxX; x++)
+            {
+                int y = rand.Next(minY, maxY + 1);
+                data.Add(x, y);
+
+                y = rand.Next(minY, maxY + 1);
+                data.Add(x, y);
+
+                y = rand.Next(minY, maxY + 1);
+                data.Add(x, y);
+            }
+
+            data.ExpandX(0.75);
+            data.DataRange.Y.Include(maxY);
+            data.MakeYAutoZero();
+
             Data = data;
         }
 
         /// <summary>
         /// This test data represents dates and amounts.
         /// </summary>
-        private void CreateTestData2()
+        private void CreateTestData3()
         {
-            XAxisTextFormat = "dd-MMM-yy";
+            XAxisTextFormat = "MMM-yy";
             XAxisTextProvider = new DoubleToDateConverter();
+            YAxisTextFormat = "C0";
 
-            DataSeriesCollection data = new DataSeriesCollection();
-            DataSeries series = data.Add();
+            DataSeries data = DataSeries.Create();
+
+            data.DataBrushes.SetBrush(0, (Brush)TryFindResource("HeaderBrush"));
+            data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
+            data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkRed);
 
             DateTime now = DateTime.Now;
-            //Random rand = new Random();
+            DateTime start = GetMonth(now, -12);
 
-            //int min = 10000;
-            //int max = 20000;
-            int startDays = -11;
-            int endDays = 0;
-            int y = -750;
-            for (int days = startDays; days <= endDays; days++)
+            List<DateTime> months = new List<DateTime>();
+
+            for (int k = 0; k < 12; k++)
             {
-                //int value = rand.Next(min, max + 1);
-                series.Add(now.AddDays(days).Ticks, y);
-                y += 100;
+                months.Add(GetMonth(start, k));
             }
 
-            //for (int k = -35; k <= -18; k++)
-            //{
-            //    int value = rand.Next(min, max + 1);
-            //    series.Add(now.AddDays(k).Ticks, value);
-            //    y += 100;
-            //}
+            Random rand = new Random();
 
+            int minY = 10000;
+            int maxY = 20000;
 
-            long ticksPerDay = now.Ticks - now.AddDays(-1).Ticks;
-            data.ExpandX(ticksPerDay);
-            data.DataRange.Y.Include(0);
-            data.DataRange.Y.IncreaseMaxBy(0.125);
+            foreach (DateTime x in months)
+            {
+                int y = rand.Next(minY, maxY + 1);
+                data.Add(x.Ticks, y);
+            }
 
+            data.ExpandX(GetTicksPerDay() * 16);
+            data.DataRange.Y.Include(maxY);
+
+            data.MakeYAutoZero();
 
             Data = data;
+        }
 
+        private DateTime GetMonth(DateTime date, int monthsToAdd)
+        {
+            return new DateTime(date.AddMonths(monthsToAdd).Year, date.AddMonths(monthsToAdd).Month, 1);
+        }
+
+        private long GetTicksPerDay()
+        {
+            TimeSpan span = new TimeSpan(24, 0, 0);
+            return span.Ticks;
         }
         #endregion
+
+
     }
 }

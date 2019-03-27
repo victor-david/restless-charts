@@ -2,7 +2,6 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace Restless.Controls.Chart
 {
@@ -10,13 +9,13 @@ namespace Restless.Controls.Chart
     /// Represents a panel that displays horizontal and vertical grid lines
     /// inside the chart area.
     /// </summary>
-    public class AxisGrid : Panel
+    public class AxisGrid : ChartBase
     {
         #region Private
         private readonly ChartContainer owner;
-        private readonly Path horzPath;
-        private readonly Path vertPath;
+        private readonly Pen gridPen;
         private double minEdgeDistance;
+        private bool isGridVisible;
         #endregion
 
         /************************************************************************/
@@ -43,22 +42,15 @@ namespace Restless.Controls.Chart
         {
             this.owner = owner ?? throw new ArgumentNullException(nameof(owner));
 
-            horzPath = new Path()
-            {
-                Stroke = DefaultGridBrush,
-                StrokeThickness = 1.0
-            };
+            // AxisGrid doesn't get its data from this collection,
+            // but it needs to be non null for CreateChildren to be called.
+            Data = DataSeries.Create();
 
-            vertPath = new Path()
-            {
-                Stroke = DefaultGridBrush,
-                StrokeThickness = 1.0
-            };
-
-            Children.Add(horzPath);
-            Children.Add(vertPath);
+            gridPen = new Pen(DefaultGridBrush, 1.0);
 
             minEdgeDistance = 3.0;
+            IsGridVisible = true;
+            IsHitTestVisible = false;
         }
         #endregion
 
@@ -70,11 +62,10 @@ namespace Restless.Controls.Chart
         /// </summary>
         public Brush GridBrush
         {
-            get => horzPath.Stroke;
+            get => gridPen.Brush;
             internal set
             {
-                horzPath.Stroke = value;
-                vertPath.Stroke = value;
+                gridPen.Brush = value;
             }
         }
 
@@ -95,28 +86,34 @@ namespace Restless.Controls.Chart
                 }
             }
         }
+
+        /// <summary>
+        /// Gets or sets a value that determines if the axis grid is visible.
+        /// </summary>
+        public bool IsGridVisible
+        {
+            get => isGridVisible;
+            set
+            {
+                if (value != isGridVisible)
+                {
+                    isGridVisible = value;
+                    Visibility = isGridVisible ? Visibility.Visible : Visibility.Collapsed;
+                }
+            }
+        }
         #endregion
 
         /************************************************************************/
 
         #region Protected Methods
         /// <summary>
-        /// Measures the size in layout required for child elements and determines a size this element.
+        /// Called by <see cref="ChartBase"/> to create child visuals.
         /// </summary>
-        /// <param name="availableSize">
-        /// The available size that this element can give to child elements.
-        /// Infinity can be specified as a value to indicate that the element will size to whatever content is available.
-        /// </param>
-        /// <returns>The size that this element determines it needs during layout, based on its calculations of child element sizes.</returns>
-        protected override Size MeasureOverride(Size availableSize)
+        /// <param name="desiredSize">The desired size</param>
+        protected override void CreateChildren(Size desiredSize)
         {
-            Size desiredSize = new Size
-                (
-                    availableSize.Width.IsFinite() ? availableSize.Width : 128,
-                    availableSize.Height.IsFinite() ? availableSize.Height : 128
-                );
-
-            if (owner.Orientation == Orientation.Vertical)
+            if (Owner.Orientation == Orientation.Vertical)
             {
                 CreateVerticalGeometry(owner.XAxis.MajorTickCoordinates, desiredSize);
                 CreateHorizontalGeometry(owner.YAxis.MajorTickCoordinates, desiredSize);
@@ -126,38 +123,14 @@ namespace Restless.Controls.Chart
                 CreateVerticalGeometry(owner.YAxis.MajorTickCoordinates, desiredSize);
                 CreateHorizontalGeometry(owner.XAxis.MajorTickCoordinates, desiredSize);
             }
-
-            foreach (UIElement child in Children)
-            {
-                child.Measure(desiredSize);
-            }
-
-            return desiredSize;
-        }
-
-        /// <summary>
-        /// Positions children of this element.
-        /// </summary>
-        /// <param name="finalSize">The final area within the parent this element should use to arrange itself and its children.</param>
-        /// <returns>The actual size used.</returns>
-        protected override Size ArrangeOverride(Size finalSize)
-        {
-            foreach (UIElement child in Children)
-            {
-                child.Arrange(new Rect(0, 0, finalSize.Width, finalSize.Height));
-            }
-            return finalSize;
         }
         #endregion
 
         /************************************************************************/
 
         #region Private methods
-
         private void CreateVerticalGeometry(TickCoordinateCollection tickCoordinates, Size size)
         {
-            GeometryGroup vertGroup = new GeometryGroup();
-
             foreach (double tickCoordinate in tickCoordinates)
             {
                 double x = tickCoordinate - owner.GridBorderSize;
@@ -165,21 +138,13 @@ namespace Restless.Controls.Chart
                 // don't make grid lines too close to the edge
                 if (x > MinEdgeDistance && x < size.Width - MinEdgeDistance)
                 {
-                    LineGeometry line = new LineGeometry
-                    {
-                        StartPoint = new Point(x, 0),
-                        EndPoint = new Point(x, size.Height)
-                    };
-                    vertGroup.Children.Add(line);
+                    Children.Add(CreateLineVisual(gridPen, x, 0, x, size.Height));
                 }
             }
-            vertPath.Data = vertGroup;
         }
 
         private void CreateHorizontalGeometry(TickCoordinateCollection tickCoordinates, Size size)
         {
-            GeometryGroup horzGroup = new GeometryGroup();
-
             foreach (double tickCoordinate in tickCoordinates)
             {
                 double y = tickCoordinate - owner.GridBorderSize;
@@ -187,16 +152,9 @@ namespace Restless.Controls.Chart
                 // don't make grid lines too close to the edge
                 if (y > MinEdgeDistance && y < size.Height - MinEdgeDistance)
                 {
-                    LineGeometry line = new LineGeometry
-                    {
-                        StartPoint = new Point(0, y),
-                        EndPoint = new Point(size.Width, y)
-                    };
-
-                    horzGroup.Children.Add(line);
+                    Children.Add(CreateLineVisual(gridPen, 0, y, size.Width, y));
                 }
             }
-            horzPath.Data = horzGroup;
         }
         #endregion
     }

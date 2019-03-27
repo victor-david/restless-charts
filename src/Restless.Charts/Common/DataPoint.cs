@@ -11,10 +11,10 @@ namespace Restless.Controls.Chart
     /// </summary>
     public class DataPoint
     {
-        internal DataPoint(double xValue, double yValue)
+        internal DataPoint(double xValue)
         {
             XValue = xValue;
-            YValue = yValue;
+            YValues = new DataSequence();
         }
 
         /// <summary>
@@ -26,11 +26,16 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
-        /// Gets the Y value for this data point.
+        /// Gets the data sequence for the Y values
         /// </summary>
-        public double YValue
+        public DataSequence YValues
         {
             get;
+        }
+
+        internal void AddY(double y)
+        {
+            YValues.Add(y);
         }
     }
 }

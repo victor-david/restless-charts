@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace Restless.Controls.Chart
 {
@@ -14,19 +14,26 @@ namespace Restless.Controls.Chart
     public class BarChart : ChartBase
     {
         #region Private
+        /// <summary>
+        /// Tolerance for bar text. Text plus this amount must fit inside bar.
+        /// </summary>
+        private const double TextTolerance = 10.0;
+        /// <summary>
+        /// Text cushion. Text is placed this distance from edge of bar.
+        /// </summary>
+        private const double TextEdgeCushion = TextTolerance / 2.0;
+
+        private readonly List<DrawingVisual> textVisuals;
+
         #endregion
 
         /************************************************************************/
 
         #region Public fields
         /// <summary>
-        /// Gets the default brush for the border of the grid axis.
-        /// </summary>
-        public static readonly Brush DefaultBarBrush = Brushes.Gray;
-        /// <summary>
         /// Gets the default bar thickness. This value (zero) signifies that bars will be auto sized.
         /// </summary>
-        public const double DefaultBarThickness = 30.0;
+        public const double DefaultBarThickness = 0;
         #endregion
 
         /************************************************************************/
@@ -37,17 +44,14 @@ namespace Restless.Controls.Chart
         /// </summary>
         public BarChart()
         {
-            //geometryPath = new Path()
-            //{
-            //    Stroke = DefaultBarBrush,
-            //    StrokeThickness = DefaultBarThickness,
-            //};
+            UseLayoutRounding = false;
+            textVisuals = new List<DrawingVisual>();
         }
         #endregion
         
         /************************************************************************/
 
-        #region Brush
+        #region BarThickness
         /// <summary>
         /// Gets or sets the thickness of the bars. Zero signifies auto size. This is a dependency property.
         /// </summary>
@@ -62,7 +66,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty BarThicknessProperty = DependencyProperty.Register
             (
-                nameof(BarThickness), typeof(double), typeof(BarChart), new PropertyMetadata(DefaultBarThickness, OnBarThicknessPropertyChanged, OnCoerceBarThickness)
+                nameof(BarThickness), typeof(double), typeof(BarChart), new PropertyMetadata(DefaultBarThickness, OnBarPropertyChanged, OnCoerceBarThickness)
             );
 
         private static object OnCoerceBarThickness(DependencyObject d, object value)
@@ -71,7 +75,7 @@ namespace Restless.Controls.Chart
             return dval.Clamp(0, 100);
         }
 
-        private static void OnBarThicknessPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnBarPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is BarChart c)
             {
@@ -84,55 +88,48 @@ namespace Restless.Controls.Chart
 
         #region Protected methods
         /// <summary>
-        /// Positions children of this element.
+        /// Called by <see cref="ChartBase"/> to create child visuals.
         /// </summary>
-        /// <param name="finalSize">The final area within the parent this element should use to arrange itself and its children.</param>
-        /// <returns>The actual size used.</returns>
-        protected override Size ArrangeOverride(Size finalSize)
+        /// <param name="desiredSize">The desired size</param>
+        protected override void CreateChildren(Size desiredSize)
         {
-            foreach (UIElement child in Children)
+            double barWidth = BarThickness > 0 ? BarThickness : GetAutoBarThickness(Data, desiredSize);
+            double xMax = Owner.Orientation == Orientation.Vertical ? desiredSize.Width : desiredSize.Height;
+            double yMax = Owner.Orientation == Orientation.Vertical ? desiredSize.Height : desiredSize.Width;
+
+            textVisuals.Clear();
+
+            foreach (DataPoint point in Data)
             {
-                child.Arrange(new Rect(0, 0, finalSize.Width, finalSize.Height));
-            }
-            return finalSize;
-        }
-
-        /// <summary>
-        /// Called during the measuring phase to create the geometry for this control.
-        /// </summary>
-        /// <param name="desiredSize">The desired size.</param>
-        protected override void CreateChildGeometry(Size desiredSize)
-        {
-            GeometryGroup group = new GeometryGroup();
-
-            double barThickness = BarThickness > 0 ? BarThickness : GetAutoBarThickness(Data, desiredSize);
-
-            foreach (DataSeries series in Data)
-            {
-                Path path = new Path()
+                int yIndex = 0;
+                foreach (double yValue in point.YValues.OrderByDescending((v) => Math.Abs(v)))
                 {
-                    Stroke = series.Brush,
-                    StrokeThickness = barThickness,
-                };
+                    Pen pen = new Pen(Data.DataBrushes[yIndex], barWidth);
 
-                foreach (DataPoint point in series)
-                {
-                    LineGeometry line = new LineGeometry();
-                    if (Owner.Orientation == Orientation.Vertical)
-                    {
-                        SetLineGeometryVertical(point, line, desiredSize);
-                    }
-                    else
-                    {
-                        SetLineGeometryHorizontal(point, line, desiredSize);
+                    double x = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
+                    double y = Owner.YAxis.GetCoordinateFromTick(yValue, desiredSize);
+                    double yZero = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
+                    double barLength = Math.Abs(y - yZero);
 
+                    if (IsVisualCreatable(x, y, yZero, xMax, yMax, barWidth))
+                    {
+                        if (Owner.Orientation == Orientation.Vertical)
+                        {
+                            Children.Add(CreateLineVisual(pen, x, yZero, x, y));
+                            CreateTextDisplayIf(yIndex, yValue, x, y, yZero, barWidth, barLength);
+                        }
+                        else
+                        {
+                            Children.Add(CreateLineVisual(pen, yZero, x, y, x));
+                            CreateTextDisplayIf(yIndex, yValue, y, x, yZero, barWidth, barLength);
+                        }
                     }
-                    group.Children.Add(line);
+                    yIndex++;
                 }
-
-                path.Data = group;
-                Children.Add(path);
             }
+            // CreateTextDisplayIf() adds its visuals to textVisuals. Now add them to Children.
+            // This enables us to make sure text is above the bars when using multiple Y values.
+            textVisuals.ForEach((v) => Children.Add(v));
         }
         #endregion
 
@@ -140,62 +137,108 @@ namespace Restless.Controls.Chart
 
         #region Private methods
 
-        private double GetAutoBarThickness(DataSeriesCollection seriesCollection, Size desiredSize)
+        private void CreateTextDisplayIf(int yIndex, double yValue, double x, double y, double yZero, double barWidth, double barLength)
         {
-            double result = double.PositiveInfinity;
-            foreach(DataSeries series in seriesCollection)
+            if (DisplayValues && yIndex == 0)
             {
-                double autoSeries = Math.Abs(GetAutoBarThickness(series, desiredSize));
-                result = (autoSeries > 0) ? Math.Min(result, autoSeries) : result;
+                FormattedText text = GetFormattedText(Owner.GetFormattedYValue(yValue), ValuesFontFamily, ValuesFontSize, Data.PrimaryTextBrushes.GetBrush(yIndex));
+
+                if (TextFitsInWidth(text, barWidth))
+                {
+                    if (!TextFitsInLength(text, barLength))
+                    {
+                        text.SetForegroundBrush(Data.SecondaryTextBrushes.GetBrush(yIndex));
+                    }
+                    bool isNegative = Owner.Orientation == Orientation.Vertical ? y > yZero : x < yZero;
+                    x = GetAdjustedTextX(x, barLength, isNegative, text);
+                    y = GetAdjustedTextY(y, barLength, isNegative, text);
+                    double rotation = Owner.Orientation == Orientation.Vertical ? -90.0 : 0.0;
+                    textVisuals.Add(CreateTextVisual(text, x, y, rotation));
+                }
             }
-            return result.IsFinite() ? result : 10.0;
+        }
+
+        private bool TextFitsInWidth(FormattedText text, double width)
+        {
+            return width > text.Height + TextTolerance;
+        }
+
+        private bool TextFitsInLength(FormattedText text, double length)
+        {
+            return text.Width + TextTolerance < length;
+        }
+
+        private double GetAdjustedTextX(double x, double barLen, bool isNegative, FormattedText text)
+        {
+
+            if (Owner.Orientation == Orientation.Vertical)
+            {
+                x -= text.Width / 2.0;
+            }
+            else
+            {
+                if (text.Width + TextTolerance > barLen)
+                {
+                    if (isNegative) x -= text.Width + TextEdgeCushion;
+                    else x += TextEdgeCushion;
+                }
+                else
+                {
+                    if (isNegative) x += TextEdgeCushion;
+                    else x -= text.Width + TextEdgeCushion;
+                }
+
+            }
+            return x;
+        }
+
+        private double GetAdjustedTextY(double y, double barLen, bool isNegative, FormattedText text)
+        {
+            if (Owner.Orientation == Orientation.Vertical)
+            {
+                y -= text.Height / 2.0;
+                if (text.Width + TextTolerance > barLen)
+                {
+                    if (isNegative) y += (text.Width / 2.0) + TextEdgeCushion;
+                    else y -= (text.Width / 2.0) + TextEdgeCushion;
+                }
+                else
+                {
+                    if (isNegative) y -= (text.Width / 2.0) + TextEdgeCushion;
+                    else y += (text.Width / 2.0) + TextEdgeCushion;
+                }
+            }
+            else
+            {
+                y -= text.Height / 2.0;
+            }
+            return y;
+        }
+
+        private bool IsVisualCreatable(double xc, double yc, double ycz, double xMax, double yMax, double lineWidth)
+        {
+            double lineTolerance = lineWidth / 2.0;
+            if (xc < -lineTolerance) return false;
+            if (xc > xMax + lineTolerance) return false;
+            if (ycz < 0.0 && yc < 0.0) return false;
+            if (ycz > yMax && yc > ycz) return false;
+            if (ycz > yMax && yc > yMax) return false;
+            return true;
         }
 
         private double GetAutoBarThickness(DataSeries series, Size desiredSize)
         {
-            if (series.Count == 0) return 0;
-            double s1 = Owner.XAxis.GetCoordinateFromTick(series[0].XValue, desiredSize);
-            double sx = Owner.XAxis.GetCoordinateFromTick(series[series.Count - 1].XValue, desiredSize);
-            double distance = sx - s1;
+            double result = double.PositiveInfinity;
 
-            if (distance == 0.0) return Owner.XAxis.IsHorizontal ? desiredSize.Width / 2.0 : desiredSize.Height / 2.0;
-
-            double result = distance / series.Count;
-            //Debug.WriteLine("-----------------------------------");
-            //Debug.WriteLine($"S1 {s1} SX {sx} Distance {distance} Count {series.Count} Result {result} DesiredSize {desiredSize}");
-            return result;
-        }
-
-        /// <summary>
-        /// Sets line geometry when the chart container is in vertical orientation.
-        /// </summary>
-        /// <param name="point">The data point</param>
-        /// <param name="line">The line object</param>
-        /// <param name="desiredSize">The desired size</param>
-        private void SetLineGeometryVertical(DataPoint point, LineGeometry line, Size desiredSize)
-        {
-            double xc = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
-            double yc = Owner.YAxis.GetCoordinateFromTick(point.YValue, desiredSize);
-            double ycz = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
-
-            line.StartPoint = new Point(xc, ycz);
-            line.EndPoint = new Point(xc, yc);
-        }
-
-        /// <summary>
-        /// Sets line geometry when the chart container is in horizontal orientation.
-        /// </summary>
-        /// <param name="point">The data point</param>
-        /// <param name="line">The line object</param>
-        /// <param name="desiredSize">The desired size</param>
-        private void SetLineGeometryHorizontal(DataPoint point, LineGeometry line, Size desiredSize)
-        {
-            double xc = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
-            double yc = Owner.YAxis.GetCoordinateFromTick(point.YValue, desiredSize);
-            double ycz = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
-
-            line.StartPoint = new Point(ycz, xc);
-            line.EndPoint = new Point(yc, xc);
+            if (series.Count > 0)
+            {
+                double s1 = Owner.XAxis.GetCoordinateFromTick(series[0].XValue, desiredSize);
+                double sx = Owner.XAxis.GetCoordinateFromTick(series[series.Count - 1].XValue, desiredSize);
+                double distance = sx - s1;
+                if (distance == 0.0) return Owner.XAxis.IsHorizontal ? desiredSize.Width / 2.0 : desiredSize.Height / 2.0;
+                result = Math.Abs(distance / series.Count);
+            }
+            return result.IsFinite() ? result : 10.0;
         }
         #endregion
     }

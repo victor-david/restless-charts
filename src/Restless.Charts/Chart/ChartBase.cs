@@ -1,16 +1,31 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Globalization;
 using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Restless.Controls.Chart
 {
     /// <summary>
     /// Represents the base class for all charts. This class must be inherited.
     /// </summary>
-    public abstract class ChartBase : Panel
+    public abstract class ChartBase : FrameworkElement
     {
         #region Private
         private ChartContainer owner;
+        #endregion
+
+        /************************************************************************/
+
+        #region Public fields
+        /// <summary>
+        /// Gets the default value font family.
+        /// </summary>
+        public const string DefaultValueFontFamily = "Verdana";
+
+        /// <summary>
+        /// Gets the default value font size.
+        /// </summary>
+        public const double DefaultValueFontSize = 12.0;
         #endregion
 
         /************************************************************************/
@@ -21,7 +36,29 @@ namespace Restless.Controls.Chart
         /// </summary>
         protected ChartBase()
         {
+            RenderTransformOrigin = new Point(0.5, 0.5);
+            Children = new VisualCollection(this);
             Loaded += (s, e) => TreeHelper.TrySetParent(this, ref owner);
+        }
+        #endregion
+
+        /************************************************************************/
+
+        #region Children
+        /// <summary>
+        /// Gets the collection of child visuals.
+        /// </summary>
+        public VisualCollection Children
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the count of visuals in <see cref="Children"/>
+        /// </summary>
+        protected override int VisualChildrenCount
+        {
+            get => Children.Count;
         }
         #endregion
 
@@ -43,9 +80,9 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Gets or sets the data series
         /// </summary>
-        public DataSeriesCollection Data
+        public DataSeries Data
         {
-            get => (DataSeriesCollection)GetValue(DataProperty);
+            get => (DataSeries)GetValue(DataProperty);
             set => SetValue(DataProperty, value);
         }
 
@@ -54,7 +91,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty DataProperty = DependencyProperty.Register
             (
-                nameof(Data), typeof(DataSeriesCollection), typeof(ChartBase), new PropertyMetadata(null, OnDataChanged)
+                nameof(Data), typeof(DataSeries), typeof(ChartBase), new PropertyMetadata(null, OnDataChanged)
             );
 
         private static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -75,12 +112,96 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
+        #region DisplayValues
+        /// <summary>
+        /// Gets or sets a value that determines if Y axis values are displayed inside the chart.
+        /// </summary>
+        public bool DisplayValues
+        {
+            get => (bool)GetValue(DisplayValuesProperty);
+            set => SetValue(DisplayValuesProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="DisplayValues"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty DisplayValuesProperty = DependencyProperty.Register
+            (
+                nameof(DisplayValues), typeof(bool), typeof(ChartBase), new PropertyMetadata(false, OnDisplayValuesPropertyChanged)
+            );
+
+        /// <summary>
+        /// Gets or sets the name of the font family to use when <see cref="DisplayValues"/> is true.
+        /// </summary>
+        public string ValuesFontFamily
+        {
+            get => (string)GetValue(ValuesFontFamilyProperty);
+            set => SetValue(ValuesFontFamilyProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="ValuesFontFamily"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty ValuesFontFamilyProperty = DependencyProperty.Register
+            (
+                nameof(ValuesFontFamily), typeof(string), typeof(ChartBase), new PropertyMetadata(DefaultValueFontFamily, OnDisplayValuesPropertyChanged)
+            );
+
+        /// <summary>
+        /// Gets or sets the size of the font when <see cref="DisplayValues"/> is true.
+        /// </summary>
+        public double ValuesFontSize
+        {
+            get => (double)GetValue(ValuesFontSizeProperty);
+            set => SetValue(ValuesFontSizeProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="ValuesFontSize"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty ValuesFontSizeProperty = DependencyProperty.Register
+            (
+                nameof(ValuesFontSize), typeof(double), typeof(ChartBase), new PropertyMetadata(DefaultValueFontSize, OnDisplayValuesPropertyChanged, OnCoerceValuesFontSize)
+            );
+
+        private static object OnCoerceValuesFontSize(DependencyObject d, object value)
+        {
+            double dval = (double)value;
+            return dval.Clamp(8.0, 32.0);
+        }
+
+        private static void OnDisplayValuesPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is ChartBase c)
+            {
+                c.InvalidateMeasure();
+            }
+        }
+        #endregion
+
+        /************************************************************************/
+
         #region Public methods
         #endregion
 
         /************************************************************************/
 
         #region Protected methods
+        /// <summary>
+        /// Gets the visual child at the specified index.
+        /// </summary>
+        /// <param name="index">The index</param>
+        /// <returns>The visual at the specified index.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is out of bounds.</exception>
+        protected override Visual GetVisualChild(int index)
+        {
+            if (index < 0 || index >= Children.Count)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            return Children[index];
+        }
+
         /// <summary>
         /// Measures the size in layout required for child elements and determines a size this element.
         /// </summary>
@@ -100,12 +221,7 @@ namespace Restless.Controls.Chart
             Children.Clear();
             if (Data != null && Owner != null)
             {
-                CreateChildGeometry(desiredSize);
-            }
-
-            foreach (UIElement child in Children)
-            {
-                child.Measure(desiredSize);
+                CreateChildren(desiredSize);
             }
 
             return desiredSize;
@@ -116,15 +232,76 @@ namespace Restless.Controls.Chart
         /// Implementors can use <see cref="Data"/> and <see cref="Owner"/> without a null check.
         /// This method is called only if these properties are non null.
         /// </summary>
-        /// <param name="desiredSize"></param>
-        protected abstract void CreateChildGeometry(Size desiredSize);
+        /// <param name="desiredSize">The desired size</param>
+        protected abstract void CreateChildren(Size desiredSize);
 
+        /// <summary>
+        /// Creates a line visual.
+        /// </summary>
+        /// <param name="pen">The pen to use.</param>
+        /// <param name="startX">The X start coordinate.</param>
+        /// <param name="startY">The Y start coordinate.</param>
+        /// <param name="endX">The X end coordinate.</param>
+        /// <param name="endY">The Y end coordinate.</param>
+        /// <returns>The visual</returns>
+        protected DrawingVisual CreateLineVisual(Pen pen, double startX, double startY, double endX, double endY)
+        {
+            DrawingVisual visual = new DrawingVisual();
+
+            using (DrawingContext dc = visual.RenderOpen())
+            {
+                dc.DrawLine(pen, new Point(startX, startY), new Point(endX, endY));
+            }
+            return visual;
+        }
+
+        /// <summary>
+        /// Creates a text visual at the specified location and rotation.
+        /// </summary>
+        /// <param name="text">The formatted text object.</param>
+        /// <param name="x">The X coordinate.</param>
+        /// <param name="y">The Y coordinate.</param>
+        /// <param name="rotation">The rotation.</param>
+        /// <returns>A drawing visual.</returns>
+        protected DrawingVisual CreateTextVisual(FormattedText text, double x, double y, double rotation)
+        {
+            if (text == null) throw new ArgumentNullException(nameof(text));
+            DrawingVisual visual = new DrawingVisual();
+
+            double rx = x + text.Width / 2.0;
+            double ry = y + text.Height / 2.0;
+
+            RotateTransform rotateTransform = new RotateTransform(rotation, rx, ry);
+
+            using (DrawingContext dc = visual.RenderOpen())
+            {
+                dc.PushTransform(rotateTransform);
+                //dc.DrawEllipse(Brushes.Red, null, new Point(rx, ry), 3, 3);
+                dc.DrawText(text, new Point(x, y));
+                dc.Pop();
+            }
+            return visual;
+        }
+
+        /// <summary>
+        /// Gets a formatted text object.
+        /// </summary>
+        /// <param name="text">The text.</param>
+        /// <param name="fontFamilyName">The font family name. Can be null to use the default.</param>
+        /// <param name="fontSize">The font size.</param>
+        /// <param name="brush">The brush for the text.</param>
+        /// <returns>A formatted text object.</returns>
+        protected FormattedText GetFormattedText(string text, string fontFamilyName, double fontSize, Brush brush)
+        {
+            if (string.IsNullOrEmpty(fontFamilyName)) fontFamilyName = DefaultValueFontFamily;
+            FormattedText ftext = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface(fontFamilyName), fontSize, brush);
+            return ftext;
+        }
         #endregion
 
         /************************************************************************/
 
         #region Private methods
         #endregion
-
     }
 }

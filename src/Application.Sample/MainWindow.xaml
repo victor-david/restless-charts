@@ -23,6 +23,18 @@
             <HeaderedContentControl Header="Chart">
                 <StackPanel>
                     <Button
+                        Click="ButtonClickChartUseData1"
+                        ToolTip="Use data set #1, a single series"
+                        Content="Use Data 1 (Single)"/>
+                    <Button
+                        Click="ButtonClickChartUseData2"
+                        ToolTip="Use data set #2, multiple series"
+                        Content="Use Data 2 (Multiple)"/>
+                    <Button
+                        Click="ButtonClickChartUseData3"
+                        ToolTip="Use data set #3, X represents dates"
+                        Content="Use Data 3 (Dates)"/>
+                    <Button
                         Click="ButtonClickChartOrientation"
                         ToolTip="Toggle the orientation of the chart"
                         Content="Toggle Orientation"/>
@@ -30,6 +42,10 @@
                         Click="ButtonClickRestoreChart"
                         ToolTip="Restore the original zoom level and panning. You can also double click the chart"
                         Content="Restore Size/Position"/>
+                    <Button
+                        Click="ButtonClickToggleDisplayAxisGrid"
+                        ToolTip="Show or hide the axis grid lines"
+                        Content="Toggle Grid Display"/>
                 </StackPanel>
             </HeaderedContentControl>
             
@@ -83,6 +99,7 @@
             Grid.Row="1"
             Margin="20"
             BorderBrush="DarkBlue"
+            IsAxisGridVisible="{Binding IsAxisGridVisible}"
             BorderThickness="1"
             TopTitle="{Binding TopTitle}"
             BottomTitle="{Binding BottomTitle}"
@@ -100,7 +117,7 @@
             YAxisTextProvider="{Binding YAxisTextProvider}"
             IsYAxisValueReversed="{Binding IsYAxisValueReversed}">
             
-            <conx:BarChart Data="{Binding Data}"/>
+            <conx:BarChart Data="{Binding Data}" DisplayValues="True"/>
             
         </conx:ChartContainer>
 
