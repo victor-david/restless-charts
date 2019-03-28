@@ -269,6 +269,60 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
+        /// Creates an ellispe visual.
+        /// </summary>
+        /// <param name="brush">The fill brush. May be null for no fill.</param>
+        /// <param name="pen">The outline pen. May be null for no outline.</param>
+        /// <param name="x">The X center of the ellipse.</param>
+        /// <param name="y">The Y center of the ellipse.</param>
+        /// <param name="radius">The radius</param>
+        /// <returns>A drawing visual.</returns>
+        protected DrawingVisual CreateEllipseVisual(Brush brush, Pen pen, double x, double y, double radius)
+        {
+            DrawingVisual visual = new DrawingVisual();
+
+            using (DrawingContext dc = visual.RenderOpen())
+            {
+                double halfPenWidth = 0;
+                if (pen != null) halfPenWidth = pen.Thickness / 2.0;
+
+                GuidelineSet guidelines = new GuidelineSet();
+                guidelines.GuidelinesX.Add(x + radius + halfPenWidth);
+                guidelines.GuidelinesX.Add(x - radius + halfPenWidth);
+                guidelines.GuidelinesY.Add(y + radius + halfPenWidth);
+                guidelines.GuidelinesY.Add(y - radius + halfPenWidth);
+                dc.PushGuidelineSet(guidelines);
+                dc.DrawEllipse(brush, pen, new Point(x, y), radius, radius);
+                dc.Pop();
+            }
+            return visual;
+        }
+
+        protected DrawingVisual CreateRectangleVisual(Brush brush, Pen pen, double x, double y, double radius)
+        {
+            DrawingVisual visual = new DrawingVisual();
+
+            using (DrawingContext dc = visual.RenderOpen())
+            {
+                double halfPenWidth = 0;
+                if (pen != null) halfPenWidth = pen.Thickness / 2.0;
+
+                Rect rect = new Rect(x - (radius / 2), y - (radius / 2), radius, radius);
+
+                GuidelineSet guidelines = new GuidelineSet();
+                guidelines.GuidelinesX.Add(rect.Left + halfPenWidth);
+                guidelines.GuidelinesX.Add(rect.Right + halfPenWidth);
+                guidelines.GuidelinesY.Add(rect.Top + halfPenWidth);
+                guidelines.GuidelinesY.Add(rect.Bottom + halfPenWidth);
+
+                dc.PushGuidelineSet(guidelines);
+                dc.DrawRectangle(brush, pen, rect);
+                dc.Pop();
+            }
+            return visual;
+        }
+
+        /// <summary>
         /// Creates a text visual at the specified location and rotation.
         /// </summary>
         /// <param name="text">The formatted text object.</param>

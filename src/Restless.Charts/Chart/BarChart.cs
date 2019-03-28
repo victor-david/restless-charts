@@ -31,6 +31,16 @@ namespace Restless.Controls.Chart
 
         #region Public fields
         /// <summary>
+        /// Gets the minimum allowed bar thickness. Zero signifies that bars will be auto sized.
+        /// </summary>
+        public const double MinBarThickness = 0;
+
+        /// <summary>
+        /// Gets the maximum allowed bar thickness.
+        /// </summary>
+        public const double MaxBarThickness = 100.0;
+
+        /// <summary>
         /// Gets the default bar thickness. This value (zero) signifies that bars will be auto sized.
         /// </summary>
         public const double DefaultBarThickness = 0;
@@ -72,7 +82,7 @@ namespace Restless.Controls.Chart
         private static object OnCoerceBarThickness(DependencyObject d, object value)
         {
             double dval = (double)value;
-            return dval.Clamp(0, 100);
+            return dval.Clamp(MinBarThickness, MaxBarThickness);
         }
 
         private static void OnBarPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -102,13 +112,15 @@ namespace Restless.Controls.Chart
             foreach (DataPoint point in Data)
             {
                 int yIndex = 0;
+                double x = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
+                double yZero = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
+
                 foreach (double yValue in point.YValues.OrderByDescending((v) => Math.Abs(v)))
                 {
                     Pen pen = new Pen(Data.DataBrushes[yIndex], barWidth);
-
-                    double x = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
+                    
                     double y = Owner.YAxis.GetCoordinateFromTick(yValue, desiredSize);
-                    double yZero = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
+                    
                     double barLength = Math.Abs(y - yZero);
 
                     if (IsVisualCreatable(x, y, yZero, xMax, yMax, barWidth))

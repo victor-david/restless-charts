@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace Application.Sample
 {
@@ -18,8 +19,8 @@ namespace Application.Sample
         // data
         private ChartBase chart;
         private BarChart barChart;
-        //private LineChart lineChart;
-        //private DataSeries data;
+        private LineChart lineChart;
+        private int activeDataSet;
         // chart
         private Orientation chartOrientation;
         private bool isAxisGridVisible;
@@ -61,7 +62,7 @@ namespace Application.Sample
             IsNavigationHelpButtonVisible = true;
 
             barChart = new BarChart() { DisplayValues = true };
-            // lineChart = new LineChart() { DisplayValues = true };
+            lineChart = new LineChart() { DisplayValues = true };
             Chart = barChart;
 
             Loaded += MainWindowLoaded;
@@ -118,17 +119,6 @@ namespace Application.Sample
             get => isNavigationHelpVisible;
             set => SetProperty(ref isNavigationHelpVisible, value);
         }
-        #endregion
-
-        #region Data Properties
-        ///// <summary>
-        ///// Gets the chart data range.
-        ///// </summary>
-        //public DataSeries Data
-        //{
-        //    get => data;
-        //    private set => SetProperty(ref data, value);
-        //}
         #endregion
 
         #region X Axis properties
@@ -380,8 +370,19 @@ namespace Application.Sample
         {
             if (Chart is BarChart)
             {
-
+                Chart = lineChart;
             }
+            else
+            {
+                Chart = barChart;
+            }
+
+            Dispatcher.Invoke(new Action(() =>
+            {
+                CreateActiveData();
+                MainChart.RestoreSizeAndPosition();
+
+            }), DispatcherPriority.Loaded);
         }
 
         private void ButtonClickChartOrientation(object sender, RoutedEventArgs e)
@@ -444,6 +445,7 @@ namespace Application.Sample
         /// </summary>
         private void CreateTestData1()
         {
+            activeDataSet = 1;
             XAxisTextFormat = null;
             XAxisTextProvider = null;
             SetTopTitle("Data Set #1");
@@ -478,6 +480,7 @@ namespace Application.Sample
         /// </summary>
         private void CreateTestData2()
         {
+            activeDataSet = 2;
             XAxisTextFormat = null;
             XAxisTextProvider = null;
             SetTopTitle("Data Set #2");
@@ -521,6 +524,7 @@ namespace Application.Sample
         /// </summary>
         private void CreateTestData3()
         {
+            activeDataSet = 3;
             XAxisTextFormat = "MMM-yy";
             XAxisTextProvider = new DoubleToDateConverter();
             YAxisTextFormat = "C0";
@@ -559,6 +563,28 @@ namespace Application.Sample
             data.MakeYAutoZero();
 
             chart.Data = data;
+        }
+
+        /// <summary>
+        /// Creates the last used data set.
+        /// </summary>
+        private void CreateActiveData()
+        {
+            switch (activeDataSet)
+            {
+                case 1:
+                    CreateTestData1();
+                    break;
+                case 2:
+                    CreateTestData2();
+                    break;
+                case 3:
+                    CreateTestData3();
+                    break;
+                default:
+                    CreateTestData1();
+                    break;
+            }
         }
 
         private DateTime GetMonth(DateTime date, int monthsToAdd)

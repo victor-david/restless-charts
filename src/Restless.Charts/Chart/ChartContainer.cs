@@ -914,6 +914,14 @@ namespace Restless.Controls.Chart
             }
             return base.MeasureOverride(availableSize);
         }
+
+
+
+        protected override void OnContentChanged(object oldContent, object newContent)
+        {
+            base.OnContentChanged(oldContent, newContent);
+            InvalidateMeasure();
+        }
         #endregion
 
         /************************************************************************/
