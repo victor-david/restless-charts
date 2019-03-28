@@ -14,3 +14,8 @@ This library provides charting capabilities for your application. The following 
 -	Reverse values on both X and Y axis.
 -	Specify how axis values are formatted. You can create a custom format provider for more complex needs.
 -	Specify if the axis grid is displayed or not.
+
+## Acknowledgements
+
+Many thanks to the developers at [InteractiveDataDisplay](https://github.com/Microsoft/InteractiveDataDisplay.WPF).
+This is not a fork of their project, but I got a lot of ideas from their code.
