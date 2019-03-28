@@ -11,3 +11,6 @@ Docs/
 Help/
 packages/
 .vs/
+*.cmd
+*.nupkg
+*.nuspec
