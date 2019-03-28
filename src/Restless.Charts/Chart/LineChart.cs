@@ -63,7 +63,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty LineThicknessProperty = DependencyProperty.Register
             (
-                nameof(LineThickness), typeof(double), typeof(LineChart), new PropertyMetadata(DefaultLineThickness, OnLineThicknessChanged, OnCoerceLineThickness)
+                nameof(LineThickness), typeof(double), typeof(LineChart), new PropertyMetadata(DefaultLineThickness, OnLinePropertyChanged, OnCoerceLineThickness)
             );
 
         private static object OnCoerceLineThickness(DependencyObject d, object value)
@@ -71,8 +71,29 @@ namespace Restless.Controls.Chart
             double dval = (double)value;
             return dval.Clamp(MinLineThickness, MaxLineThickness);
         }
+        #endregion
 
-        private static void OnLineThicknessChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        /************************************************************************/
+
+        #region LinePoint
+        /// <summary>
+        /// Gets or sets the type of data point
+        /// </summary>
+        public LinePoint LinePoint
+        {
+            get => (LinePoint)GetValue(LinePointProperty);
+            set => SetValue(LinePointProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="LinePoint"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty LinePointProperty = DependencyProperty.Register
+            (
+                nameof(LinePoint), typeof(LinePoint), typeof(LineChart), new PropertyMetadata(LinePoint.Circle, OnLinePropertyChanged)
+            );
+
+        private static void OnLinePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is LineChart c)
             {
@@ -80,7 +101,7 @@ namespace Restless.Controls.Chart
             }
         }
         #endregion
-        
+
         /************************************************************************/
 
         #region Protected methods
@@ -94,7 +115,10 @@ namespace Restless.Controls.Chart
             double yMax = Owner.Orientation == Orientation.Vertical ? desiredSize.Height : desiredSize.Width;
 
             textVisuals.Clear();
-            CreatePoints(xMax, yMax, desiredSize);
+            if (LinePoint != LinePoint.None)
+            {
+                CreatePoints(xMax, yMax, desiredSize);
+            }
             for (int yIdx = 0; yIdx < Data.MaxYSeries; yIdx++)
             {
                 CreateLines(yIdx, xMax, yMax, desiredSize);
@@ -111,7 +135,7 @@ namespace Restless.Controls.Chart
 
         private void CreatePoints(double xMax, double yMax, Size desiredSize)
         {
-            double rectWidth = LineThickness * 8.0;
+            double pointWidth = LineThickness * 8.0;
 
             foreach (DataPoint point in Data)
             {
@@ -124,15 +148,18 @@ namespace Restless.Controls.Chart
                    
                     double y = Owner.YAxis.GetCoordinateFromTick(point.YValues[yIdx], desiredSize);
 
-                    if (IsVisualCreatable(x, y, yZero, xMax, yMax, rectWidth))
+                    if (IsVisualCreatable(x, y, yZero, xMax, yMax, pointWidth))
                     {
-                        if (Owner.Orientation == Orientation.Vertical)
+                        double xc = Owner.Orientation == Orientation.Vertical ? x : y;
+                        double yc = Owner.Orientation == Orientation.Vertical ? y : x;
+
+                        if (LinePoint == LinePoint.Square)
                         {
-                            Children.Add(CreateRectangleVisual(Data.DataBrushes[yIdx], pen, x, y, rectWidth));
+                            Children.Add(CreateRectangleVisual(Data.DataBrushes[yIdx], pen, xc, yc, pointWidth));
                         }
                         else
                         {
-                            Children.Add(CreateRectangleVisual(Data.DataBrushes[yIdx], pen, y, x, rectWidth));
+                            Children.Add(CreateEllipseVisual(Data.DataBrushes[yIdx], pen, xc, yc, pointWidth / 2.0));
                         }
                     }
                 }
@@ -159,7 +186,14 @@ namespace Restless.Controls.Chart
                     if (IsVisualCreatable(xStart, yStart, yZero, xMax, yMax, LineThickness) || 
                         IsVisualCreatable(xEnd, yEnd, yZero, xMax, yMax, LineThickness))
                     {
-                        Children.Add(CreateLineVisual(pen, xStart, yStart, xEnd, yEnd));
+                        if (Owner.Orientation == Orientation.Vertical)
+                        {
+                            Children.Add(CreateLineVisual(pen, xStart, yStart, xEnd, yEnd));
+                        }
+                        else
+                        {
+                            Children.Add(CreateLineVisual(pen, yStart, xStart, yEnd, xEnd));
+                        }
                     }
                 }
             }

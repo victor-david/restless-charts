@@ -62,6 +62,7 @@
     <Compile Include="Chart\ChartBase.cs" />
     <Compile Include="Chart\HelpControl.cs" />
     <Compile Include="Chart\LineChart.cs" />
+    <Compile Include="Chart\LinePoint.cs" />
     <Compile Include="Common\BrushCollection.cs" />
     <Compile Include="Common\DataPoint.cs" />
     <Compile Include="Common\DataRange.cs" />

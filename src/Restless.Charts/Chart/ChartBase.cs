@@ -298,7 +298,17 @@ namespace Restless.Controls.Chart
             return visual;
         }
 
-        protected DrawingVisual CreateRectangleVisual(Brush brush, Pen pen, double x, double y, double radius)
+        /// <summary>
+        /// Creates a rectangle visual.
+        /// </summary>
+        /// <param name="brush">The fill brush. May be null for no fill.</param>
+        /// <param name="pen">The outline pen. May be null for no outline.</param>
+        /// <param name="x">The X coordinate of the rectangle. The rectange will be centered on this value.</param>
+        /// <param name="y">The Y coordinate of the rectangle. The rectange will be centered on this value.</param>
+        /// <param name="width">The width of the rectangle.</param>
+        /// <param name="height">The height of the rectange.</param>
+        /// <returns>A drawing visual.</returns>
+        protected DrawingVisual CreateRectangleVisual(Brush brush, Pen pen, double x, double y, double width, double height)
         {
             DrawingVisual visual = new DrawingVisual();
 
@@ -307,19 +317,32 @@ namespace Restless.Controls.Chart
                 double halfPenWidth = 0;
                 if (pen != null) halfPenWidth = pen.Thickness / 2.0;
 
-                Rect rect = new Rect(x - (radius / 2), y - (radius / 2), radius, radius);
+                Rect rect = new Rect(x - (width / 2), y - (height / 2), width, height);
 
                 GuidelineSet guidelines = new GuidelineSet();
                 guidelines.GuidelinesX.Add(rect.Left + halfPenWidth);
                 guidelines.GuidelinesX.Add(rect.Right + halfPenWidth);
                 guidelines.GuidelinesY.Add(rect.Top + halfPenWidth);
                 guidelines.GuidelinesY.Add(rect.Bottom + halfPenWidth);
-
                 dc.PushGuidelineSet(guidelines);
                 dc.DrawRectangle(brush, pen, rect);
                 dc.Pop();
             }
             return visual;
+        }
+
+        /// <summary>
+        /// Creates a rectangle visual of equal width and height.
+        /// </summary>
+        /// <param name="brush">The fill brush. May be null for no fill.</param>
+        /// <param name="pen">The outline pen. May be null for no outline.</param>
+        /// <param name="x">The X coordinate of the rectangle. The rectange will be centered on this value.</param>
+        /// <param name="y">The Y coordinate of the rectangle. The rectange will be centered on this value.</param>
+        /// <param name="size">The width and height of the rectangle.</param>
+        /// <returns>A drawing visual.</returns>
+        protected DrawingVisual CreateRectangleVisual(Brush brush, Pen pen, double x, double y, double size)
+        {
+            return CreateRectangleVisual(brush, pen, x, y, size, size);
         }
 
         /// <summary>
