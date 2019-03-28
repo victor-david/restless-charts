@@ -18,4 +18,5 @@ This library provides charting capabilities for your application. The following 
 ## Acknowledgements
 
 Many thanks to the developers at [InteractiveDataDisplay](https://github.com/Microsoft/InteractiveDataDisplay.WPF).
-This is not a fork of their project, but I got a lot of ideas from their code.
+This is not a fork of their project, but I got a lot of ideas from their code. In some places, their code is used here
+unaltered or slightly modified.
