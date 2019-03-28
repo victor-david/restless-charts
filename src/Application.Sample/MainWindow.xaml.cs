@@ -532,9 +532,17 @@ namespace Application.Sample
 
             DataSeries data = DataSeries.Create();
 
-            data.DataBrushes.SetBrush(0, (Brush)TryFindResource("HeaderBrush"));
-            data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
-            data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkRed);
+            if (Chart is BarChart)
+            {
+                data.DataBrushes.SetBrush(0, (Brush)TryFindResource("HeaderBrush"));
+                data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
+                data.SecondaryTextBrushes.SetBrush(0, Brushes.Black);
+            }
+            else
+            {
+                data.DataBrushes.SetBrush(0, Brushes.Firebrick);
+                data.PrimaryTextBrushes.SetBrush(0, Brushes.Transparent);
+            }
 
             DateTime now = DateTime.Now;
             DateTime start = GetMonth(now, -12);
