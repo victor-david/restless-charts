@@ -9,8 +9,7 @@
     Title="Sample Charts" 
     WindowStartupLocation="CenterScreen"
     Height="900" Width="1400"
-    MinHeight="300" MinWidth="600"
-    >
+    MinHeight="300" MinWidth="600">
 
     <Window.Resources>
         <ResourceDictionary Source="Resources.xaml"/>
@@ -25,17 +24,9 @@
             <HeaderedContentControl Header="Chart">
                 <StackPanel>
                     <Button
-                        Click="ButtonClickChartUseData1"
-                        ToolTip="Use data set #1, a single series"
-                        Content="Use Data 1 (Single)"/>
-                    <Button
-                        Click="ButtonClickChartUseData2"
-                        ToolTip="Use data set #2, multiple series"
-                        Content="Use Data 2 (Multiple)"/>
-                    <Button
-                        Click="ButtonClickChartUseData3"
-                        ToolTip="Use data set #3, X represents dates"
-                        Content="Use Data 3 (Dates)"/>
+                        Click="ButtonClickSwitchChartType"
+                        ToolTip="Switch the chart type"
+                        Content="Switch Chart Type"/>
                     <Button
                         Click="ButtonClickChartOrientation"
                         ToolTip="Toggle the orientation of the chart"
@@ -49,6 +40,10 @@
                         ToolTip="Show or hide the axis grid lines"
                         Content="Toggle Grid Display"/>
                     <Button
+                        Click="ButtonClickToggleValuesDisplay"
+                        ToolTip="Toggle the display of values on the chart"
+                        Content="Toggle Value Display"/>
+                    <Button
                         Click="ButtonClickToggleNavigationHelpButton"
                         ToolTip="Toggle the help button off and on"
                         Content="Toggle Help Button"/>
@@ -59,6 +54,23 @@
                 </StackPanel>
             </HeaderedContentControl>
             
+            <HeaderedContentControl Header="Data">
+                <StackPanel>
+                    <Button
+                        Click="ButtonClickChartUseData1"
+                        ToolTip="Use data set #1, a single series"
+                        Content="Use Data 1 (Single)"/>
+                    <Button
+                        Click="ButtonClickChartUseData2"
+                        ToolTip="Use data set #2, multiple series"
+                        Content="Use Data 2 (Multiple)"/>
+                    <Button
+                        Click="ButtonClickChartUseData3"
+                        ToolTip="Use data set #3, X represents dates"
+                        Content="Use Data 3 (Dates)"/>
+                </StackPanel>
+            </HeaderedContentControl>
+
             <HeaderedContentControl Header="X Axis">
                 <StackPanel>
                     <Button 
@@ -77,7 +89,6 @@
                         Click="ButtonClickXAxisProvider"
                         ToolTip="Change the text provider and format of the X axis"
                         Content="Change Provider"/>
-
                 </StackPanel>
             </HeaderedContentControl>
 
@@ -101,8 +112,8 @@
                         Content="Change Provider"/>
                 </StackPanel>
             </HeaderedContentControl>
-            
         </StackPanel>
+        
         <conx:ChartContainer
             Name="MainChart"
             Grid.Column="1"
@@ -127,9 +138,13 @@
             YAxisTextProvider="{Binding YAxisTextProvider}"
             IsYAxisValueReversed="{Binding IsYAxisValueReversed}"
             IsNavigationHelpButtonVisible="{Binding IsNavigationHelpButtonVisible}"
-            IsNavigationHelpVisible="{Binding IsNavigationHelpVisible}">
-            
-            <conx:BarChart Data="{Binding Data}" DisplayValues="True"/>
+            IsNavigationHelpVisible="{Binding IsNavigationHelpVisible}"
+            Content="{Binding Chart}">
+            <!--
+                For this sample app, we bind Content property to enable switching chart types.
+                Alternatively, could declare a chart directly in the XAML, like so:
+            -->
+            <!--<conx:BarChart Data="{Binding Data}" DisplayValues="True"/>-->
             
         </conx:ChartContainer>
 

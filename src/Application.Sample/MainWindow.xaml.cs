@@ -16,7 +16,10 @@ namespace Application.Sample
     {
         #region Private
         // data
-        private DataSeries data;
+        private ChartBase chart;
+        private BarChart barChart;
+        //private LineChart lineChart;
+        //private DataSeries data;
         // chart
         private Orientation chartOrientation;
         private bool isAxisGridVisible;
@@ -45,7 +48,7 @@ namespace Application.Sample
         {
             InitializeComponent();
             DataContext = this;
-            TopTitle = TryFindResource("TopTitle");
+            //TopTitle = TryFindResource("TopTitle");
             //LeftTitle = TryFindResource("LeftTitle");
             //RightTitle = TryFindResource("LeftTitle");
 
@@ -57,12 +60,25 @@ namespace Application.Sample
             IsAxisGridVisible = true;
             IsNavigationHelpButtonVisible = true;
 
+            barChart = new BarChart() { DisplayValues = true };
+            // lineChart = new LineChart() { DisplayValues = true };
+            Chart = barChart;
 
             Loaded += MainWindowLoaded;
         }
         #endregion
 
         #region Chart properties
+        /// <summary>
+        /// Gets the chart that is used for the chart container.
+        /// </summary>
+        public ChartBase Chart
+        {
+            get => chart;
+            private set => SetProperty(ref chart, value);
+        }
+
+
         /// <summary>
         /// Gets the orientation of the chart.
         /// </summary>
@@ -105,14 +121,14 @@ namespace Application.Sample
         #endregion
 
         #region Data Properties
-        /// <summary>
-        /// Gets the chart data range.
-        /// </summary>
-        public DataSeries Data
-        {
-            get => data;
-            private set => SetProperty(ref data, value);
-        }
+        ///// <summary>
+        ///// Gets the chart data range.
+        ///// </summary>
+        //public DataSeries Data
+        //{
+        //    get => data;
+        //    private set => SetProperty(ref data, value);
+        //}
         #endregion
 
         #region X Axis properties
@@ -360,20 +376,12 @@ namespace Application.Sample
         #endregion
 
         #region Chart click handlers
-
-        private void ButtonClickChartUseData1(object sender, RoutedEventArgs e)
+        private void ButtonClickSwitchChartType(object sender, RoutedEventArgs e)
         {
-            CreateTestData1();
-        }
+            if (Chart is BarChart)
+            {
 
-        private void ButtonClickChartUseData2(object sender, RoutedEventArgs e)
-        {
-            CreateTestData2();
-        }
-
-        private void ButtonClickChartUseData3(object sender, RoutedEventArgs e)
-        {
-            CreateTestData3();
+            }
         }
 
         private void ButtonClickChartOrientation(object sender, RoutedEventArgs e)
@@ -391,6 +399,11 @@ namespace Application.Sample
             IsAxisGridVisible = !IsAxisGridVisible;
         }
 
+        private void ButtonClickToggleValuesDisplay(object sender, RoutedEventArgs e)
+        {
+           Chart.DisplayValues = !Chart.DisplayValues;
+        }
+
         private void ButtonClickToggleNavigationHelpButton(object sender, RoutedEventArgs e)
         {
             IsNavigationHelpButtonVisible = !IsNavigationHelpButtonVisible;
@@ -401,6 +414,23 @@ namespace Application.Sample
             IsNavigationHelpVisible = !IsNavigationHelpVisible;
         }
 
+        #endregion
+
+        #region Data click handlers
+        private void ButtonClickChartUseData1(object sender, RoutedEventArgs e)
+        {
+            CreateTestData1();
+        }
+
+        private void ButtonClickChartUseData2(object sender, RoutedEventArgs e)
+        {
+            CreateTestData2();
+        }
+
+        private void ButtonClickChartUseData3(object sender, RoutedEventArgs e)
+        {
+            CreateTestData3();
+        }
         #endregion
 
         #region Create data
@@ -416,6 +446,7 @@ namespace Application.Sample
         {
             XAxisTextFormat = null;
             XAxisTextProvider = null;
+            SetTopTitle("Data Set #1");
 
             int maxX = 20;
             int minY = 15000;
@@ -439,7 +470,7 @@ namespace Application.Sample
             data.DataRange.Y.Include(maxY);
             data.MakeYAutoZero();
 
-            Data = data;
+            chart.Data = data;
         }
 
         /// <summary>
@@ -449,6 +480,7 @@ namespace Application.Sample
         {
             XAxisTextFormat = null;
             XAxisTextProvider = null;
+            SetTopTitle("Data Set #2");
 
             int maxX = 20;
             int minY = 1000;
@@ -481,7 +513,7 @@ namespace Application.Sample
             data.DataRange.Y.Include(maxY);
             data.MakeYAutoZero();
 
-            Data = data;
+            chart.Data = data;
         }
 
         /// <summary>
@@ -492,6 +524,7 @@ namespace Application.Sample
             XAxisTextFormat = "MMM-yy";
             XAxisTextProvider = new DoubleToDateConverter();
             YAxisTextFormat = "C0";
+            SetTopTitle("Data Set #3");
 
             DataSeries data = DataSeries.Create();
 
@@ -525,7 +558,7 @@ namespace Application.Sample
 
             data.MakeYAutoZero();
 
-            Data = data;
+            chart.Data = data;
         }
 
         private DateTime GetMonth(DateTime date, int monthsToAdd)
@@ -538,6 +571,16 @@ namespace Application.Sample
             TimeSpan span = new TimeSpan(24, 0, 0);
             return span.Ticks;
         }
+
+        private void SetTopTitle(string extraText)
+        {
+            if (TryFindResource("TopTitle") is TextBlock text)
+            {
+                text.Text = $"Balance History ({extraText})";
+                TopTitle = text;
+            }
+        }
+
 
 
         #endregion

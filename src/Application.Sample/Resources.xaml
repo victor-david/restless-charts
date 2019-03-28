@@ -3,7 +3,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:l="clr-namespace:Application.Sample">
 
-
     <!-- Converters -->
     <l:DoubleToDateConverter x:Key="DateConverter"/>
 
@@ -16,10 +15,6 @@
             </GradientStopCollection>
         </GradientBrush.GradientStops>
     </LinearGradientBrush>
-
-    <!--<Style TargetType="TextBlock">
-        <Setter Property="FontSize" Value="16"/>
-    </Style>-->
 
     <Style TargetType="Button">
         <Setter Property="Cursor" Value="Hand"/>
@@ -92,22 +87,11 @@
         Foreground="Blue"
         FontSize="22"
         Text="Balance History"/>
+    
     <TextBlock 
         x:Key="LeftTitle" 
         Margin="0,10"
         Foreground="DarkBlue"
         FontSize="16.5"
         Text="Balance"/>
-    
-    
-
-
-
-
-
-
-
-
-
-
 </ResourceDictionary>
