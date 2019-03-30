@@ -47,7 +47,7 @@ namespace Restless.Controls.Chart
             storage = new List<DataPoint>();
             DataRange = DataRange.EmptyDataRange();
 
-            DataBrushes = new BrushCollection(MaxYSeries, Brushes.Black);
+            DataInfo = new DataSeriesInfoCollection(MaxYSeries, Brushes.Black);
             PrimaryTextBrushes = new BrushCollection(MaxYSeries, Brushes.White);
             SecondaryTextBrushes = new BrushCollection(MaxYSeries, Brushes.Black);
         }
@@ -92,9 +92,9 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
-        /// Gets the brush collection used for the Y data of this series.
+        /// Gets the collection of <see cref="DataSeriesInfo"/> objects used for this series.
         /// </summary>
-        public BrushCollection DataBrushes
+        public DataSeriesInfoCollection DataInfo
         {
             get;
         }

@@ -117,7 +117,7 @@ namespace Restless.Controls.Chart
 
                 foreach (double yValue in point.YValues.OrderByDescending((v) => Math.Abs(v)))
                 {
-                    Pen pen = new Pen(Data.DataBrushes[yIndex], barWidth);
+                    Pen pen = new Pen(Data.DataInfo[yIndex].DataBrush, barWidth);
                     
                     double y = Owner.YAxis.GetCoordinateFromTick(yValue, desiredSize);
                     

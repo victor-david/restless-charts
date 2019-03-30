@@ -484,7 +484,7 @@ namespace Application.Sample
             DataSeries data = DataSeries.Create();
             RandomGenerator generator = new RandomGenerator(minY, maxY);
 
-            data.DataBrushes.SetBrush(0, Brushes.SteelBlue);
+            data.DataInfo.SetInfo(0, "Balance", Brushes.SteelBlue);
             data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
             data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkRed);
 
@@ -518,12 +518,12 @@ namespace Application.Sample
             DataSeries data = DataSeries.Create(3);
             RandomGenerator generator = new RandomGenerator(minY, maxY);
 
-            data.DataBrushes.SetBrush(0, Brushes.SteelBlue);
+            data.DataInfo.SetInfo(0, "Balance", Brushes.SteelBlue);
             data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
             data.SecondaryTextBrushes.SetBrush(0, Brushes.Blue);
 
-            data.DataBrushes.SetBrush(1, Brushes.Firebrick);
-            data.DataBrushes.SetBrush(2, Brushes.Indigo);
+            data.DataInfo.SetInfo(1, "Transactions", Brushes.Firebrick);
+            data.DataInfo.SetInfo(2, "Callbacks", Brushes.Indigo);
 
             for (int x = 0; x < maxX; x++)
             {
@@ -563,13 +563,13 @@ namespace Application.Sample
 
             if (Chart is BarChart)
             {
-                data.DataBrushes.SetBrush(0, (Brush)TryFindResource("HeaderBrush"));
+                data.DataInfo.SetInfo(0, "Balance", (Brush)TryFindResource("HeaderBrush"));
                 data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
                 data.SecondaryTextBrushes.SetBrush(0, Brushes.Black);
             }
             else
             {
-                data.DataBrushes.SetBrush(0, Brushes.Firebrick);
+                data.DataInfo.SetInfo(0, "Balance", Brushes.Firebrick);
                 data.PrimaryTextBrushes.SetBrush(0, Brushes.Transparent);
             }
 
