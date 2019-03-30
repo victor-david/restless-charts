@@ -123,6 +123,7 @@
             Grid.Column="1"
             Grid.Row="1"
             Margin="20"
+            Background="LightGoldenrodYellow"
             BorderBrush="DarkBlue"
             IsAxisGridVisible="{Binding IsAxisGridVisible}"
             BorderThickness="1"

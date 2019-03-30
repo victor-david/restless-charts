@@ -54,7 +54,6 @@ namespace Restless.Controls.Chart
         /// </summary>
         public BarChart()
         {
-            UseLayoutRounding = false;
             textVisuals = new List<DrawingVisual>();
         }
         #endregion

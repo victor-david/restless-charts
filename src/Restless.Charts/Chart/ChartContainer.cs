@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -9,12 +8,12 @@ namespace Restless.Controls.Chart
     /// <summary>
     /// Provides a container for chart controls. Provides titles, axis, axis grid and navigation.
     /// </summary>
-    [TemplatePart(Name = "xx", Type = typeof(Border))]
     public class ChartContainer : ContentControl
     {
         #region Private
-        private const string PartNavigationHelp = "";
         #endregion
+
+        /************************************************************************/
 
         #region Public fields
         /// <summary>
@@ -51,10 +50,7 @@ namespace Restless.Controls.Chart
             
             Padding = new Thickness(10);
             ClipToBounds = true;
-
-            // For best results, these two should be used together.
-            UseLayoutRounding = true;
-            SetValue(RenderOptions.EdgeModeProperty, EdgeMode.Aliased);
+            SnapsToDevicePixels = true;
 
             CommandBindings.Add(new CommandBinding(NavigationHelpCommand, ExecuteNavigationHelpCommand));
         }

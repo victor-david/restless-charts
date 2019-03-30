@@ -31,6 +31,21 @@ namespace Restless.Controls.Chart
         /// Gets the default line thickness.
         /// </summary>
         public const double DefaultLineThickness = 2.0;
+
+        /// <summary>
+        /// Gets the minimum allowed point size.
+        /// </summary>
+        public const double MinPointSize = 8.0;
+
+        /// <summary>
+        /// Gets the maximum allowed point size.
+        /// </summary>
+        public const double MaxPointSize = 80.0;
+
+        /// <summary>
+        /// Gets the default point size.
+        /// </summary>
+        public const double DefaultPointSize = 16.0;
         #endregion
 
         /************************************************************************/
@@ -41,7 +56,6 @@ namespace Restless.Controls.Chart
         /// </summary>
         public LineChart()
         {
-            UseLayoutRounding = false;
             textVisuals = new List<DrawingVisual>();
         }
         #endregion
@@ -70,6 +84,33 @@ namespace Restless.Controls.Chart
         {
             double dval = (double)value;
             return dval.Clamp(MinLineThickness, MaxLineThickness);
+        }
+        #endregion
+
+        /************************************************************************/
+
+        #region PointSize
+        /// <summary>
+        /// Gets or sets the data point size.
+        /// </summary>
+        public double PointSize
+        {
+            get => (double)GetValue(PointSizeProperty);
+            set => SetValue(PointSizeProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="PointSize"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty PointSizeProperty = DependencyProperty.Register
+            (
+                nameof(PointSize), typeof(double), typeof(LineChart), new PropertyMetadata(DefaultPointSize, OnLinePropertyChanged, OnCoercePointSize)
+            );
+
+        private static object OnCoercePointSize(DependencyObject d, object value)
+        {
+            double dval = (double)value;
+            return dval.Clamp(MinPointSize, MaxPointSize);
         }
         #endregion
 
@@ -123,8 +164,8 @@ namespace Restless.Controls.Chart
                     break;
                 case LineChartStyle.StandardCirclePoint:
                 case LineChartStyle.StandardSquarePoint:
-                    CreatePoints(xMax, yMax, desiredSize);
                     CreateLines(xMax, yMax, desiredSize);
+                    CreatePoints(xMax, yMax, desiredSize);
                     break;
                 case LineChartStyle.Filled:
                     CreateFill(xMax, yMax, desiredSize);
@@ -134,7 +175,7 @@ namespace Restless.Controls.Chart
             // CreateTextDisplayIf() adds its visuals to textVisuals. Now add them to Children.
             // This enables us to make sure text is above the lines when using multiple Y values.
             // TODO
-            textVisuals.ForEach((v) => Children.Add(v));
+            //textVisuals.ForEach((v) => Children.Add(v));
         }
         #endregion
 
@@ -144,8 +185,6 @@ namespace Restless.Controls.Chart
 
         private void CreatePoints(double xMax, double yMax, Size desiredSize)
         {
-            double pointWidth = LineThickness * 8.0;
-
             foreach (DataPoint point in Data)
             {
                 double x = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
@@ -153,22 +192,20 @@ namespace Restless.Controls.Chart
 
                 for (int yIdx = 0; yIdx < point.YValues.Count; yIdx++)
                 {
-                    Pen pen = new Pen(Data.PrimaryTextBrushes[yIdx], 1.0);
-                   
                     double y = Owner.YAxis.GetCoordinateFromTick(point.YValues[yIdx], desiredSize);
 
-                    if (IsVisualCreatable(x, y, yZero, xMax, yMax, pointWidth))
+                    if (IsVisualCreatable(x, y, yZero, xMax, yMax, PointSize))
                     {
                         double xc = Owner.Orientation == Orientation.Vertical ? x : y;
                         double yc = Owner.Orientation == Orientation.Vertical ? y : x;
 
                         if (ChartStyle == LineChartStyle.StandardSquarePoint)
                         {
-                            Children.Add(CreateRectangleVisual(Data.DataInfo[yIdx].DataBrush, pen, xc, yc, pointWidth));
+                            Children.Add(CreateRectangleVisual(Data.DataInfo[yIdx].DataBrush, null, xc, yc, PointSize));
                         }
                         else
                         {
-                            Children.Add(CreateEllipseVisual(Data.DataInfo[yIdx].DataBrush, pen, xc, yc, pointWidth / 2.0));
+                            Children.Add(CreateEllipseVisual(Data.DataInfo[yIdx].DataBrush, null, xc, yc, PointSize / 2.0));
                         }
                     }
                 }
