@@ -28,6 +28,10 @@
                         ToolTip="Switch the chart type"
                         Content="Switch Chart Type"/>
                     <Button
+                        Click="ButtonClickChangeChartStyle"
+                        ToolTip="Change the style of the chart. Currently only applies to line chart."
+                        Content="Change Chart Style"/>
+                    <Button
                         Click="ButtonClickChartOrientation"
                         ToolTip="Toggle the orientation of the chart"
                         Content="Toggle Orientation"/>

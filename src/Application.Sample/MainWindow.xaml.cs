@@ -42,6 +42,9 @@ namespace Application.Sample
         private bool isYAxisValueReversed;
         private object leftTitle;
         private object rightTitle;
+        // other
+        //private Random rand;
+        //private RandomGenerator r;
         #endregion
 
         #region Constructor
@@ -49,11 +52,13 @@ namespace Application.Sample
         {
             InitializeComponent();
             DataContext = this;
+            //rand = new Random();
+
             //TopTitle = TryFindResource("TopTitle");
             //LeftTitle = TryFindResource("LeftTitle");
             //RightTitle = TryFindResource("LeftTitle");
 
-            IsXAxisPlacementReversed = true;
+            //IsXAxisPlacementReversed = true;
             XAxisTickVisibility = TickVisibility.Default;
             YAxisTickVisibility = TickVisibility.Default;
 
@@ -385,6 +390,28 @@ namespace Application.Sample
             }), DispatcherPriority.Loaded);
         }
 
+        private void ButtonClickChangeChartStyle(object sender, RoutedEventArgs e)
+        {
+            if (Chart is LineChart chart)
+            {
+                switch (chart.ChartStyle)
+                {
+                    case LineChartStyle.Standard:
+                        chart.ChartStyle = LineChartStyle.StandardCirclePoint;
+                        break;
+                    case LineChartStyle.StandardCirclePoint:
+                        chart.ChartStyle = LineChartStyle.StandardSquarePoint;
+                        break;
+                    case LineChartStyle.StandardSquarePoint:
+                        chart.ChartStyle = LineChartStyle.Filled;
+                        break;
+                    case LineChartStyle.Filled:
+                        chart.ChartStyle = LineChartStyle.Standard;
+                        break;
+                }
+            }
+        }
+
         private void ButtonClickChartOrientation(object sender, RoutedEventArgs e)
         {
             ChartOrientation = ChartOrientation == Orientation.Vertical ? Orientation.Horizontal : Orientation.Vertical;
@@ -451,12 +478,11 @@ namespace Application.Sample
             SetTopTitle("Data Set #1");
 
             int maxX = 20;
-            int minY = 15000;
-            int maxY = 37500;
+            int minY = 10;
+            int maxY = 100;
             
-            Random rand = new Random();
-
             DataSeries data = DataSeries.Create();
+            RandomGenerator generator = new RandomGenerator(minY, maxY);
 
             data.DataBrushes.SetBrush(0, Brushes.SteelBlue);
             data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
@@ -464,11 +490,11 @@ namespace Application.Sample
 
             for (int x = 0; x < maxX; x++)
             {
-                int y = rand.Next(minY, maxY + 1);
+                int y = generator.GetValue(false);
                 data.Add(x, y);
             }
 
-            data.ExpandX(0.75);
+            data.ExpandX(1.0);
             data.DataRange.Y.Include(maxY);
             data.MakeYAutoZero();
 
@@ -489,9 +515,8 @@ namespace Application.Sample
             int minY = 1000;
             int maxY = 25000;
 
-            Random rand = new Random();
-
             DataSeries data = DataSeries.Create(3);
+            RandomGenerator generator = new RandomGenerator(minY, maxY);
 
             data.DataBrushes.SetBrush(0, Brushes.SteelBlue);
             data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
@@ -502,17 +527,17 @@ namespace Application.Sample
 
             for (int x = 0; x < maxX; x++)
             {
-                int y = rand.Next(minY, maxY + 1);
+                int y = generator.GetValue();
                 data.Add(x, y);
 
-                y = rand.Next(minY, maxY + 1);
+                y = generator.GetValue();
                 data.Add(x, y);
 
-                y = rand.Next(minY, maxY + 1);
+                y = generator.GetValue();
                 data.Add(x, y);
             }
 
-            data.ExpandX(0.75);
+            data.ExpandX(1.0);
             data.DataRange.Y.Include(maxY);
             data.MakeYAutoZero();
 
@@ -530,7 +555,11 @@ namespace Application.Sample
             YAxisTextFormat = "C0";
             SetTopTitle("Data Set #3");
 
+            int minY = 10000;
+            int maxY = 20000;
+
             DataSeries data = DataSeries.Create();
+            RandomGenerator generator = new RandomGenerator(minY, maxY);
 
             if (Chart is BarChart)
             {
@@ -554,18 +583,13 @@ namespace Application.Sample
                 months.Add(GetMonth(start, k));
             }
 
-            Random rand = new Random();
-
-            int minY = 10000;
-            int maxY = 20000;
-
             foreach (DateTime x in months)
             {
-                int y = rand.Next(minY, maxY + 1);
+                int y = generator.GetValue();
                 data.Add(x.Ticks, y);
             }
 
-            data.ExpandX(GetTicksPerDay() * 16);
+            data.ExpandX(GetTicksPerDay() * 15);
             data.DataRange.Y.Include(maxY);
 
             data.MakeYAutoZero();
@@ -595,6 +619,7 @@ namespace Application.Sample
             }
         }
 
+
         private DateTime GetMonth(DateTime date, int monthsToAdd)
         {
             return new DateTime(date.AddMonths(monthsToAdd).Year, date.AddMonths(monthsToAdd).Month, 1);
@@ -614,11 +639,6 @@ namespace Application.Sample
                 TopTitle = text;
             }
         }
-
-
-
         #endregion
-
-
     }
 }

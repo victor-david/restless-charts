@@ -143,6 +143,27 @@ namespace Restless.Controls.Chart
         {
             return angleInRadians * 180 / Math.PI;
         }
+
+        ///// <summary>
+        ///// Sets the X and Y values of the specified point.
+        ///// </summary>
+        ///// <param name="point">The point.</param>
+        ///// <param name="x">The X value.</param>
+        ///// <param name="y">The Y value.</param>
+        //public static void SetXY(this Point point, double x, double y)
+        //{
+        //    point.X = x;
+        //    point.Y = y;
+        //}
+
+        /// <summary>
+        /// Gets a Point structure with vX and Y values reversed.
+        /// </summary>
+        /// <param name="point">The point.</param>
+        public static Point SwapXY(this Point point)
+        {
+            return new Point(point.Y, point.X);
+        }
     }
 }
 

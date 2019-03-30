@@ -75,22 +75,22 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
-        #region LinePoint
+        #region ChartStyle
         /// <summary>
-        /// Gets or sets the type of data point
+        /// Gets or sets the style for the line chart.
         /// </summary>
-        public LinePoint LinePoint
+        public LineChartStyle ChartStyle
         {
-            get => (LinePoint)GetValue(LinePointProperty);
-            set => SetValue(LinePointProperty, value);
+            get => (LineChartStyle)GetValue(ChartStyleProperty);
+            set => SetValue(ChartStyleProperty, value);
         }
 
         /// <summary>
-        /// Identifies the <see cref="LinePoint"/> dependency property.
+        /// Identifies the <see cref="ChartStyle"/> dependency property.
         /// </summary>
-        public static readonly DependencyProperty LinePointProperty = DependencyProperty.Register
+        public static readonly DependencyProperty ChartStyleProperty = DependencyProperty.Register
             (
-                nameof(LinePoint), typeof(LinePoint), typeof(LineChart), new PropertyMetadata(LinePoint.Circle, OnLinePropertyChanged)
+                nameof(ChartStyle), typeof(LineChartStyle), typeof(LineChart), new PropertyMetadata(LineChartStyle.StandardCirclePoint, OnLinePropertyChanged)
             );
 
         private static void OnLinePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -115,16 +115,25 @@ namespace Restless.Controls.Chart
             double yMax = Owner.Orientation == Orientation.Vertical ? desiredSize.Height : desiredSize.Width;
 
             textVisuals.Clear();
-            if (LinePoint != LinePoint.None)
+
+            switch (ChartStyle)
             {
-                CreatePoints(xMax, yMax, desiredSize);
+                case LineChartStyle.Standard:
+                    CreateLines(xMax, yMax, desiredSize);
+                    break;
+                case LineChartStyle.StandardCirclePoint:
+                case LineChartStyle.StandardSquarePoint:
+                    CreatePoints(xMax, yMax, desiredSize);
+                    CreateLines(xMax, yMax, desiredSize);
+                    break;
+                case LineChartStyle.Filled:
+                    CreateFill(xMax, yMax, desiredSize);
+                    break;
             }
-            for (int yIdx = 0; yIdx < Data.MaxYSeries; yIdx++)
-            {
-                CreateLines(yIdx, xMax, yMax, desiredSize);
-            }
+
             // CreateTextDisplayIf() adds its visuals to textVisuals. Now add them to Children.
-            // This enables us to make sure text is above the bars when using multiple Y values.
+            // This enables us to make sure text is above the lines when using multiple Y values.
+            // TODO
             textVisuals.ForEach((v) => Children.Add(v));
         }
         #endregion
@@ -153,7 +162,7 @@ namespace Restless.Controls.Chart
                         double xc = Owner.Orientation == Orientation.Vertical ? x : y;
                         double yc = Owner.Orientation == Orientation.Vertical ? y : x;
 
-                        if (LinePoint == LinePoint.Square)
+                        if (ChartStyle == LineChartStyle.StandardSquarePoint)
                         {
                             Children.Add(CreateRectangleVisual(Data.DataBrushes[yIdx], pen, xc, yc, pointWidth));
                         }
@@ -163,6 +172,14 @@ namespace Restless.Controls.Chart
                         }
                     }
                 }
+            }
+        }
+
+        private void CreateLines(double xMax, double yMax, Size desiredSize)
+        {
+            for (int yIdx = 0; yIdx < Data.MaxYSeries; yIdx++)
+            {
+                CreateLines(yIdx, xMax, yMax, desiredSize);
             }
         }
 
@@ -197,6 +214,70 @@ namespace Restless.Controls.Chart
                     }
                 }
             }
+        }
+
+        private void CreateFill(double xMax, double yMax, Size desiredSize)
+        {
+            for (int yIdx = 0; yIdx < Data.MaxYSeries; yIdx++)
+            {
+                CreateFill(yIdx, xMax, yMax, desiredSize);
+            }
+        }
+
+        private void CreateFill(int yIdx, double xMax, double yMax, Size desiredSize)
+        {
+            if (Data.Count == 0) return;
+
+            double yZero = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
+
+            StreamGeometry geo = new StreamGeometry();
+
+            using (StreamGeometryContext gc = geo.Open())
+            {
+                double x = Owner.XAxis.GetCoordinateFromTick(Data[0].XValue, desiredSize);
+                double y = 0;
+
+                Point pt = new Point(x, yZero);
+                if (Owner.Orientation == Orientation.Horizontal)
+                {
+                    pt = pt.SwapXY();
+                }
+
+                gc.BeginFigure(pt, true, true);
+
+                foreach (DataPoint point in Data)
+                {
+                    x = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
+                    y = Owner.YAxis.GetCoordinateFromTick(point.YValues[yIdx], desiredSize);
+
+                    pt.X = x;
+                    pt.Y = y;
+
+                    if (Owner.Orientation == Orientation.Horizontal)
+                    {
+                        pt = pt.SwapXY();
+                    }
+                    gc.LineTo(pt, true, true);
+                }
+
+                if (Owner.Orientation == Orientation.Vertical)
+                    pt.Y = yZero;
+                else
+                    pt.X = yZero;
+
+                gc.LineTo(pt, true, true);
+            }
+
+            geo.Freeze();
+
+            DrawingVisual visual = new DrawingVisual();
+
+            using (DrawingContext dc = visual.RenderOpen())
+            {
+                dc.DrawGeometry(Data.DataBrushes[yIdx], null, geo);
+            }
+
+            Children.Add(visual);
         }
 
         private bool IsVisualCreatable(double xc, double yc, double ycz, double xMax, double yMax, double lineWidth)
