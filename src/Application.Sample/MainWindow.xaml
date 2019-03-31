@@ -85,6 +85,11 @@
                         Click="ButtonClickChartUseData3"
                         ToolTip="Use data set #3, X represents dates"
                         Content="Use Data 3 (Dates)"/>
+                    <Button
+                        Click="ButtonClickChartUserData4"
+                        ToolTip="Use data set # 4, logarithms"
+                        Content="Use Data 4 (Log)"
+                        />
                 </StackPanel>
             </HeaderedContentControl>
 

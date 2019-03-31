@@ -496,6 +496,11 @@ namespace Application.Sample
         {
             CreateTestData3();
         }
+
+        private void ButtonClickChartUserData4(object sender, RoutedEventArgs e)
+        {
+            CreateTestData4();
+        }
         #endregion
 
         #region Create data
@@ -635,6 +640,49 @@ namespace Application.Sample
         }
 
         /// <summary>
+        /// This test data provides logarithms
+        /// </summary>
+        private void CreateTestData4()
+        {
+            activeDataSet = 4;
+
+            XAxisTextFormat = null;
+            XAxisTextProvider = null;
+            YAxisTextFormat = null;
+            SetTopTitle("Logarithms", "Data Set #4");
+
+            int maxX = 25;
+
+            DataSeries data = DataSeries.Create(3);
+
+            data.DataInfo.SetInfo(0, "Natural Logarithm", Brushes.Red);
+            data.PrimaryTextBrushes.SetBrush(0, Brushes.White);
+            data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkBlue);
+
+            data.DataInfo.SetInfo(1, "Log 10", Brushes.Blue);
+            data.DataInfo.SetInfo(2, "Log 16", Brushes.DarkGreen);
+
+            for (int x = 1; x <= maxX; x++)
+            {
+                // Base of Euler's number, about 2.71828.
+                double y = Math.Log(x);
+                data.Add(x, y);
+
+                // base 10
+                y = Math.Log10(x);
+                data.Add(x, y);
+
+                // base 16
+                y = Math.Log(x, 16);
+                data.Add(x, y);
+            }
+
+            data.MakeYAutoZero();
+
+            chart.Data = data;
+        }
+
+        /// <summary>
         /// Creates the last used data set.
         /// </summary>
         private void CreateActiveData()
@@ -649,6 +697,9 @@ namespace Application.Sample
                     break;
                 case 3:
                     CreateTestData3();
+                    break;
+                case 4:
+                    CreateTestData4();
                     break;
                 default:
                     CreateTestData1();
@@ -670,12 +721,19 @@ namespace Application.Sample
 
         private void SetTopTitle(string extraText)
         {
-            if (TryFindResource("TopTitle") is TextBlock text)
+            SetTopTitle("Balance History", extraText);
+        }
+
+        private void SetTopTitle(string text, string extraText)
+        {
+            if (TryFindResource("TopTitle") is TextBlock textBlock)
             {
-                text.Text = $"Balance History ({extraText})";
-                TopTitle = text;
+                textBlock.Text = $"{text} ({extraText})";
+                TopTitle = textBlock;
             }
         }
         #endregion
+
+
     }
 }
