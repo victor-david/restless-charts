@@ -33,17 +33,30 @@
             BorderThickness="{TemplateBinding BorderThickness}"
             Padding="{TemplateBinding Padding}">
             <Grid>
-                <Button 
-                    Margin="{TemplateBinding IconMargin}" 
-                    Style="{StaticResource ButtonHelp}"
-                    Visibility="{Binding IsNavigationHelpButtonVisible, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BoolToVisibilityConverter}}"
-                    Command="{x:Static con:ChartContainer.NavigationHelpCommand}">
-                    <Image Source="/Restless.Charts;component/Resources/Image.Question.32.png" Height="24"/>
-                </Button>
+                <StackPanel
+                    Margin="{TemplateBinding IconMargin}"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+                    
+                    <Button 
+                        Style="{StaticResource ButtonHelp}"
+                        Visibility="{Binding IsLegendHelpButtonVisible, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BoolToVisibilityConverter}}"
+                        Command="{x:Static con:ChartContainer.LegendHelpCommand}">
+                        <Image Source="/Restless.Charts;component/Resources/Image.Caret.Left.Red.32.png" Height="24"/>
+                    </Button>                
+
+                    <Button 
+                        Style="{StaticResource ButtonHelp}"
+                        Visibility="{Binding IsNavigationHelpButtonVisible, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BoolToVisibilityConverter}}"
+                        Command="{x:Static con:ChartContainer.NavigationHelpCommand}">
+                        <Image Source="/Restless.Charts;component/Resources/Image.Caret.Left.Blue.32.png" Height="24"/>
+                    </Button>
+                </StackPanel>
+                
                 <!-- Navigation Help -->
                 <con:HelpControl
                     Header="{x:Static r:Strings.HelpChartNavigationHeader}"
-                    Height="180"
+                    Margin="4,6"
                     IsHelpVisible="{Binding IsNavigationHelpVisible, RelativeSource={RelativeSource TemplatedParent}}">
                     <con:HelpControl.HelpContent>
                         <TextBlock 
@@ -52,6 +65,13 @@
                     </con:HelpControl.HelpContent>
                 </con:HelpControl>
 
+                <!-- Legend -->
+                <con:HelpControl
+                    Header="{x:Static r:Strings.HelpChartLegendHeader}"
+                    Margin="4,6"
+                    IsHelpVisible="{Binding IsLegendVisible, RelativeSource={RelativeSource TemplatedParent}}"
+                    HelpContent="{TemplateBinding LegendContent}"/>
+                
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>

@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="HelpChartLegendHeader" xml:space="preserve">
+    <value>Legend</value>
+  </data>
   <data name="HelpChartNavigation" xml:space="preserve">
     <value>Mouse wheel - zoom in / zoom out
 Left click with Control key pressed - zoom out

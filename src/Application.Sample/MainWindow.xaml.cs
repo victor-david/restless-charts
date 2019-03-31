@@ -26,6 +26,8 @@ namespace Application.Sample
         private bool isAxisGridVisible;
         private bool isNavigationHelpButtonVisible;
         private bool isNavigationHelpVisible;
+        private bool isLegendHelpButtonVisible;
+        private bool isLegendVisible;
         // x
         private bool isXAxisPlacementReversed;
         private TickVisibility xAxisTickVisibility;
@@ -42,9 +44,6 @@ namespace Application.Sample
         private bool isYAxisValueReversed;
         private object leftTitle;
         private object rightTitle;
-        // other
-        //private Random rand;
-        //private RandomGenerator r;
         #endregion
 
         #region Constructor
@@ -52,7 +51,6 @@ namespace Application.Sample
         {
             InitializeComponent();
             DataContext = this;
-            //rand = new Random();
 
             //TopTitle = TryFindResource("TopTitle");
             //LeftTitle = TryFindResource("LeftTitle");
@@ -65,6 +63,7 @@ namespace Application.Sample
             ChartOrientation = Orientation.Vertical;
             IsAxisGridVisible = true;
             IsNavigationHelpButtonVisible = true;
+            IsLegendHelpButtonVisible = true;
 
             barChart = new BarChart() { DisplayValues = true };
             lineChart = new LineChart()
@@ -89,7 +88,6 @@ namespace Application.Sample
             get => chart;
             private set => SetProperty(ref chart, value);
         }
-
 
         /// <summary>
         /// Gets the orientation of the chart.
@@ -129,6 +127,28 @@ namespace Application.Sample
         {
             get => isNavigationHelpVisible;
             set => SetProperty(ref isNavigationHelpVisible, value);
+        }
+
+        /// <summary>
+        /// Gets a value that determines if the legend help button is displayed.
+        /// If the button is not visible, you can still control the visibility
+        /// of the legend itself programmatically.
+        /// </summary>
+        public bool IsLegendHelpButtonVisible
+        {
+            get => isLegendHelpButtonVisible;
+            private set => SetProperty(ref isLegendHelpButtonVisible, value);
+        }
+
+        /// <summary>
+        /// Gets a value that determines if the legend itself is displayed.
+        /// You can control the display of the legend programmatically or use
+        /// the built in button if it is visible.
+        /// </summary>
+        public bool IsLegendVisible
+        {
+            get => isLegendVisible;
+            set => SetProperty(ref isLegendVisible, value);
         }
         #endregion
 
@@ -445,9 +465,20 @@ namespace Application.Sample
 
         private void ButtonClickToggleNavigationHelp(object sender, RoutedEventArgs e)
         {
+            IsLegendVisible = false;
             IsNavigationHelpVisible = !IsNavigationHelpVisible;
         }
 
+        private void ButtonClickToggleLegendHelpButton(object sender, RoutedEventArgs e)
+        {
+            IsLegendHelpButtonVisible = !IsLegendHelpButtonVisible;
+        }
+
+        private void ButtonClickToggleLegendDisplay(object sender, RoutedEventArgs e)
+        {
+            IsNavigationHelpVisible = false;
+            IsLegendVisible = !IsLegendVisible;
+        }
         #endregion
 
         #region Data click handlers

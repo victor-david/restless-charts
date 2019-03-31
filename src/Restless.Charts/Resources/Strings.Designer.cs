@@ -61,6 +61,15 @@ namespace Restless.Controls.Chart.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Legend.
+        /// </summary>
+        public static string HelpChartLegendHeader {
+            get {
+                return ResourceManager.GetString("HelpChartLegendHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Mouse wheel - zoom in / zoom out
         ///Left click with Control key pressed - zoom out
         ///Left click with Shift key pressed - zoom in

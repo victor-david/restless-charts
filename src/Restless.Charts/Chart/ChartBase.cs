@@ -114,6 +114,7 @@ namespace Restless.Controls.Chart
                     c.Owner.YAxis.SetRange(c.Data.DataRange.Y);
                     c.Owner.XAxis.Range.CreateSnapshot();
                     c.Owner.YAxis.Range.CreateSnapshot();
+                    c.Owner.CreateLegend(c.Data);
                     c.Owner.InvalidateMeasure();
                 }
             }

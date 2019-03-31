@@ -17,7 +17,7 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="132"/>
+            <ColumnDefinition Width="134"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <StackPanel>
@@ -47,14 +47,27 @@
                         Click="ButtonClickToggleValuesDisplay"
                         ToolTip="Toggle the display of values on the chart"
                         Content="Toggle Value Display"/>
+                </StackPanel>
+            </HeaderedContentControl>
+
+            <HeaderedContentControl Header="Help">
+                <StackPanel>
                     <Button
                         Click="ButtonClickToggleNavigationHelpButton"
                         ToolTip="Toggle the help button off and on"
                         Content="Toggle Help Button"/>
                     <Button
+                        Click="ButtonClickToggleLegendHelpButton"
+                        ToolTip="Toggle the legend button on and off"
+                        Content="Toggle Legend Button"/>
+                    <Button
                         Click="ButtonClickToggleNavigationHelp"
                         ToolTip="Control the display of navigation help programmatically"
                         Content="Toggle Help Popout"/>
+                    <Button
+                        Click="ButtonClickToggleLegendDisplay"
+                        ToolTip="Control the display of the legend programmatically"
+                        Content="Toggle Legend Popout"/>
                 </StackPanel>
             </HeaderedContentControl>
             
@@ -144,6 +157,8 @@
             IsYAxisValueReversed="{Binding IsYAxisValueReversed}"
             IsNavigationHelpButtonVisible="{Binding IsNavigationHelpButtonVisible}"
             IsNavigationHelpVisible="{Binding IsNavigationHelpVisible}"
+            IsLegendHelpButtonVisible="{Binding IsLegendHelpButtonVisible}"
+            IsLegendVisible="{Binding IsLegendVisible}"
             Content="{Binding Chart}">
             <!--
                 For this sample app, we bind Content property to enable switching chart types.
