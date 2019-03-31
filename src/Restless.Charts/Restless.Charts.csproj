@@ -105,9 +105,5 @@
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Image.Caret.Left.Blue.32.png" />
-    <Resource Include="Resources\Image.Caret.Left.Red.32.png" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
