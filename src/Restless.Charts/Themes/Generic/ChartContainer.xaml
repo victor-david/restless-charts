@@ -78,12 +78,14 @@
                         Style="{StaticResource HelpButton}"
                         Background="{StaticResource RedBrush}"
                         Visibility="{Binding IsLegendHelpButtonVisible, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BoolToVisibilityConverter}}"
+                        ToolTip="{x:Static r:Strings.ToolTipLegendHelpButton}"
                         Command="{x:Static con:ChartContainer.LegendHelpCommand}"/>
 
                     <Button 
                         Style="{StaticResource HelpButton}"
                         Background="{StaticResource BlueBrush}"
                         Visibility="{Binding IsNavigationHelpButtonVisible, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BoolToVisibilityConverter}}"
+                        ToolTip="{x:Static r:Strings.ToolTipNavigationHelpButton}"
                         Command="{x:Static con:ChartContainer.NavigationHelpCommand}"/>
 
                 </StackPanel>

@@ -93,5 +93,23 @@ namespace Restless.Controls.Chart.Resources {
                 return ResourceManager.GetString("HelpChartNavigationHeader", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display the chart legend.
+        /// </summary>
+        public static string ToolTipLegendHelpButton {
+            get {
+                return ResourceManager.GetString("ToolTipLegendHelpButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display information about chart navigation.
+        /// </summary>
+        public static string ToolTipNavigationHelpButton {
+            get {
+                return ResourceManager.GetString("ToolTipNavigationHelpButton", resourceCulture);
+            }
+        }
     }
 }

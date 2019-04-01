@@ -134,4 +134,10 @@ Left button down drag with Shift key pressed - pan X only.</value>
   <data name="HelpChartNavigationHeader" xml:space="preserve">
     <value>Chart Navigation</value>
   </data>
+  <data name="ToolTipLegendHelpButton" xml:space="preserve">
+    <value>Display the chart legend</value>
+  </data>
+  <data name="ToolTipNavigationHelpButton" xml:space="preserve">
+    <value>Display information about chart navigation</value>
+  </data>
 </root>
