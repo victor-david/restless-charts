@@ -3,9 +3,9 @@
 namespace Restless.Controls.Chart
 {
     /// <summary>
-    /// Represents a collection of tick coordinates.
+    /// Represents a collection of double values.
     /// </summary>
-    public class TickCoordinateCollection : List<double>
+    public class DoubleCollection : List<double>
     {
     }
 }

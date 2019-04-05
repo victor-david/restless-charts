@@ -129,7 +129,7 @@ namespace Restless.Controls.Chart
         /************************************************************************/
 
         #region Private methods
-        private void CreateVerticalGeometry(TickCoordinateCollection tickCoordinates, Size size)
+        private void CreateVerticalGeometry(DoubleCollection tickCoordinates, Size size)
         {
             foreach (double tickCoordinate in tickCoordinates)
             {
@@ -143,7 +143,7 @@ namespace Restless.Controls.Chart
             }
         }
 
-        private void CreateHorizontalGeometry(TickCoordinateCollection tickCoordinates, Size size)
+        private void CreateHorizontalGeometry(DoubleCollection tickCoordinates, Size size)
         {
             foreach (double tickCoordinate in tickCoordinates)
             {

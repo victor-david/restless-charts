@@ -519,9 +519,9 @@ namespace Application.Sample
             XAxisTextProvider = null;
             SetTopTitle("Data Set #1");
 
-            int maxX = 40;
-            int minY = 1883;
-            int maxY = 1950;
+            int maxX = 32;
+            int minY = 100;
+            int maxY = 5000;
             
             DataSeries data = DataSeries.Create();
             RandomGenerator generator = new RandomGenerator(minY, maxY);
@@ -530,15 +530,15 @@ namespace Application.Sample
             data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
             data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkRed);
 
-            for (int x = 0; x < maxX; x++)
+            for (int x = 1; x <= maxX; x++)
             {
                 int y = generator.GetValue();
                 data.Add(x, y);
             }
 
             data.ExpandX(1.0);
-            //data.DataRange.Y.Include(maxY);
-            //data.MakeYAutoZero();
+            data.DataRange.Y.Include(maxY);
+            data.MakeYAutoZero();
 
             chart.Data = data;
         }

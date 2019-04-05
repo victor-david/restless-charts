@@ -105,6 +105,11 @@ namespace Restless.Controls.Chart
             private set;
         }
 
+        public double MidPoint
+        {
+            get => Min + (Max - Min) / 2.0;
+        }
+
         /// <summary>
         /// Returns true of this range is considered empty. An range is empty when
         /// Min == PositiveInfinity and Max == NegativeInfinity.
@@ -112,6 +117,14 @@ namespace Restless.Controls.Chart
         public bool IsEmpty
         {
             get => double.IsPositiveInfinity(Min) && double.IsNegativeInfinity(Max);
+        }
+
+        /// <summary>
+        /// Returns true if this range contains finite values for both <see cref="Min"/> and <see cref="Max"/>.
+        /// </summary>
+        public bool HasValues
+        {
+            get => Min.IsFinite() && Max.IsFinite();
         }
 
         /// <summary>
@@ -133,6 +146,19 @@ namespace Restless.Controls.Chart
         {
             Min = double.PositiveInfinity;
             Max = double.NegativeInfinity;
+        }
+
+        /// <summary>
+        /// Gets a boolean value that indicates if <paramref name="value"/> is within <see cref="Min"/> and <see cref="Max"/>.
+        /// </summary>
+        /// <param name="value">The value to check.</param>
+        /// <returns>
+        /// true if <paramref name="value"/> is greater than or equal to <see cref="Min"/> and less than or equal to <see cref="Max"/>;
+        /// otherwise, false.
+        /// </returns>
+        public bool Includes(double value)
+        {
+            return !double.IsNaN(value) && value >= Min && value <= Max;
         }
 
         /// <summary>

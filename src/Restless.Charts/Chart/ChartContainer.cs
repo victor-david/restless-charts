@@ -34,12 +34,13 @@ namespace Restless.Controls.Chart
         /// </summary>
         public ChartContainer()
         {
-            XAxis = new Axis()
+            XAxis = new Axis(this, AxisType.X)
             {
                 Name = "XAxis",
                 AxisPlacement = AxisPlacement.DefaultX,
             };
-            YAxis = new Axis()
+
+            YAxis = new Axis(this, AxisType.Y)
             {
                 Name = "YAxis",
                 AxisPlacement = AxisPlacement.DefaultY,
@@ -336,6 +337,23 @@ namespace Restless.Controls.Chart
                 nameof(IsXAxisValueReversed), typeof(bool), typeof(ChartContainer), new PropertyMetadata(false, OnXAxisPropertyChanged)
             );
 
+        /// <summary>
+        /// Gets or sets a value that determines how ticks are aligned on the X axis.
+        /// </summary>
+        public TickAlignment XAxisTickAlignment
+        {
+            get => (TickAlignment)GetValue(XAxisTickAlignmentProperty);
+            set => SetValue(XAxisTickAlignmentProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="XAxisTickAlignment"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty XAxisTickAlignmentProperty = DependencyProperty.Register
+            (
+                nameof(XAxisTickAlignment), typeof(TickAlignment), typeof(ChartContainer), new PropertyMetadata(TickAlignment.Default, OnXAxisPropertyChanged)
+            );
+
         private static void OnXAxisPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is ChartContainer c)
@@ -357,11 +375,11 @@ namespace Restless.Controls.Chart
                         // c.XAxis.InvalidateMeasure();
                         break;
                     case nameof(XAxisTextProvider):
-                        c.XAxis.TickProvider.TextProvider = c.XAxisTextProvider;
+                        c.XAxis.TextProvider = c.XAxisTextProvider;
                         c.InvalidateMeasure();
                         break;
                     case nameof(XAxisTextFormat):
-                        c.XAxis.TickProvider.TextFormat = c.XAxisTextFormat;
+                        c.XAxis.TextFormat = c.XAxisTextFormat;
                         c.InvalidateMeasure();
                         break;
                     case nameof(XAxisTickVisibility):
@@ -371,6 +389,11 @@ namespace Restless.Controls.Chart
                         c.XAxis.IsValueReversed = c.IsXAxisValueReversed;
                         c.InvalidateMeasure();
                         break;
+                    case nameof(XAxisTickAlignment):
+                        c.XAxis.TickAlignment = c.XAxisTickAlignment;
+                        c.InvalidateMeasure();
+                        break;
+
                 }
             }
         }
@@ -530,11 +553,11 @@ namespace Restless.Controls.Chart
                         c.YAxis.AxisPlacement = c.YAxisPlacement;
                         break;
                     case nameof(YAxisTextProvider):
-                        c.YAxis.TickProvider.TextProvider = c.YAxisTextProvider;
+                        c.YAxis.TextProvider = c.YAxisTextProvider;
                         c.InvalidateMeasure();
                         break;
                     case nameof(YAxisTextFormat):
-                        c.YAxis.TickProvider.TextFormat = c.YAxisTextFormat;
+                        c.YAxis.TextFormat = c.YAxisTextFormat;
                         c.InvalidateMeasure();
                         break;
                     case nameof(YAxisTickVisibility):
@@ -961,6 +984,16 @@ namespace Restless.Controls.Chart
         /// Identifies the <see cref="LegendContent"/> dependency property.
         /// </summary>
         public static readonly DependencyProperty LegendContentProperty = LegendContentPropertyKey.DependencyProperty;
+        #endregion
+
+        #region Chart
+        /// <summary>
+        /// Gets the chart that is currently assigned to the content of this container, or null.
+        /// </summary>
+        public ChartBase Chart
+        {
+            get => Content as ChartBase;
+        }
         #endregion
 
         /************************************************************************/

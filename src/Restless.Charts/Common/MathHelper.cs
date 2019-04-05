@@ -89,25 +89,24 @@ namespace Restless.Controls.Chart
             return val;
         }
 
-        /// <summary>
+        ///// <summary>
         /// Round
         /// </summary>
-        /// <param name="number">The number</param>
-        /// <param name="rem">The rem</param>
+        /// <param name="value">The value to round.</param>
+        /// <param name="digits">The number of digits</param>
         /// <returns>The value</returns>
-        public static double Round(double number, int rem)
+        public static double Round(double value, int digits)
         {
-            if (rem <= 0)
+            digits = Math.Abs(digits).Clamp(0, 8);
+
+            if (digits == 0)
             {
-                rem = Clamp(-rem, 0, 15);
-                return Math.Round(number, rem);
+                return Math.Round(value);
             }
-            else
-            {
-                double pow = Math.Pow(10, rem - 1);
-                double val = pow * Math.Round(number / Math.Pow(10, rem - 1));
-                return val;
-            }
+
+            double pow = Math.Pow(10, digits - 1);
+            value = pow * Math.Round(value / pow);
+            return value;
         }
 
         /// <summary>

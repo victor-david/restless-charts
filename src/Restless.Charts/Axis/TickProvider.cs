@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 
@@ -11,8 +12,8 @@ namespace Restless.Controls.Chart
     public class TickProvider
     {
         #region Private
-        private const int MaxTickArrangeIterations = 12;
-        private const int MaxTicks = 20;
+        private const int MaxTickArrangeIterations = 120;
+        private const int MaxTicks = 2000;
         private const int MinTicks = 1;
         private const double IncreaseRatio = 8.0;
         private const double DecreaseRatio = 8.0;
@@ -20,10 +21,10 @@ namespace Restless.Controls.Chart
         private int delta = 1;
         private int beta = 0;
 
-        private MinorTickProvider minorProvider;
-        private double[] majorTickValues;
-        private TickText[] majorTickLabels;
-        private double[] minorTickValues;
+        private readonly MinorTickProvider minorProvider;
+        //private double[] majorTickValues;
+        //private TickText[] majorTickLabels;
+        //private double[] minorTickValues;
         #endregion
 
         /************************************************************************/
@@ -34,16 +35,34 @@ namespace Restless.Controls.Chart
         /// </summary>
         internal TickProvider()
         {
+            MajorTicks = new MajorTickCollection();
+            MinorTicks = new DoubleCollection();
             minorProvider = new MinorTickProvider();
-            majorTickValues = new double[0];
-            majorTickLabels = new TickText[0];
-            minorTickValues = new double[0];
+            //majorTickValues = new double[0];
+            //majorTickLabels = new TickText[0];
+            //minorTickValues = new double[0];
         }
         #endregion
 
         /************************************************************************/
 
         #region Properties
+        /// <summary>
+        /// Gets the collection of <see cref="MajorTick"/> objects.
+        /// </summary>
+        public MajorTickCollection MajorTicks
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets a collection of double values that represent minor ticks.
+        /// </summary>
+        public DoubleCollection MinorTicks
+        {
+            get;
+        }
+
         /// <summary>
         /// Gets or (from this assembly) sets the format used when converting a ticking value to text.
         /// </summary>
@@ -66,38 +85,38 @@ namespace Restless.Controls.Chart
         /************************************************************************/
 
         #region Public methods
-        /// <summary>
-        /// Provides an enumerator that enumerates <see cref="MajorTick"/> objects of this instance.
-        /// </summary>
-        /// <returns>An enumerator</returns>
-        public IEnumerable<MajorTick> EnumerateMajorTicks()
-        {
-            int len = majorTickValues.Length;
-            if (len != majorTickLabels.Length)
-            {
-                throw new IndexOutOfRangeException($"Length mismatch. Ticks {len} Labels: {majorTickLabels.Length}");
-            }
+        ///// <summary>
+        ///// Provides an enumerator that enumerates <see cref="MajorTick"/> objects of this instance.
+        ///// </summary>
+        ///// <returns>An enumerator</returns>
+        //public IEnumerable<MajorTick> EnumerateMajorTicks()
+        //{
+        //    int len = majorTickValues.Length;
+        //    if (len != majorTickLabels.Length)
+        //    {
+        //        throw new IndexOutOfRangeException($"Length mismatch. Ticks {len} Labels: {majorTickLabels.Length}");
+        //    }
 
-            for (int k = 0; k < len; k++)
-            {
-                yield return new MajorTick(majorTickValues[k], majorTickLabels[k]);
-            }
+        //    for (int k = 0; k < len; k++)
+        //    {
+        //        yield return new MajorTick(majorTickValues[k], majorTickLabels[k]);
+        //    }
 
-            yield break;
-        }
+        //    yield break;
+        //}
 
-        /// <summary>
-        /// Provides an enumerator that enumerates minor ticks.
-        /// </summary>
-        /// <returns>An enumerator</returns>
-        public IEnumerable<double> EnumerateMinorTicks()
-        {
-            for (int k = 0; k < minorTickValues.Length; k++)
-            {
-                yield return minorTickValues[k];
-            }
-            yield break;
-        }
+        ///// <summary>
+        ///// Provides an enumerator that enumerates minor ticks.
+        ///// </summary>
+        ///// <returns>An enumerator</returns>
+        //public IEnumerable<double> EnumerateMinorTicks()
+        //{
+        //    for (int k = 0; k < minorTickValues.Length; k++)
+        //    {
+        //        yield return minorTickValues[k];
+        //    }
+        //    yield break;
+        //}
 
         /// <summary>
         /// Creates major ticks with their corresponding labels and minor ticks.
@@ -115,135 +134,151 @@ namespace Restless.Controls.Chart
             if (range == null) throw new ArgumentNullException(nameof(range));
             if (labelValidator == null) throw new ArgumentNullException(nameof(labelValidator));
 
-            CreateMajorTicks(axisSize, range, labelValidator);
+            MajorTicks.Clear();
+            MinorTicks.Clear();
+
+            CreateMajorTicks(axisSize, range); //, labelValidator);
             CreateMinorTicks(range);
         }
 
-        /// <summary>
-        /// Gets a size struct that represents the maximum width and maximum height of all major tick labels.
-        /// </summary>
-        /// <returns>A size structure.</returns>
-        public Size GetMaxTextSize()
+        public void CreateTicks(Size axisSize, IEnumerable<double> enumerator)
         {
-            Size size = new Size();
-            foreach (TickText text in majorTickLabels)
+            if (enumerator == null) throw new ArgumentNullException(nameof(enumerator));
+
+            MajorTicks.Clear();
+            MinorTicks.Clear();
+
+            foreach (double value in enumerator)
             {
-                size.Width = Math.Max(size.Width, text.DesiredSize.Width);
-                size.Height = Math.Max(size.Height, text.DesiredSize.Height);
+                //Debug.WriteLine(value.ToString());
             }
-            return size;
         }
+
+        ///// <summary>
+        ///// Gets a size struct that represents the maximum width and maximum height of all major tick labels.
+        ///// </summary>
+        ///// <returns>A size structure.</returns>
+        //public Size GetMaxTextSize()
+        //{
+        //    Size size = new Size();
+        //    foreach (TickText text in majorTickLabels)
+        //    {
+        //        size.Width = Math.Max(size.Width, text.DesiredSize.Width);
+        //        size.Height = Math.Max(size.Height, text.DesiredSize.Height);
+        //    }
+        //    return size;
+        //}
         #endregion
 
         /************************************************************************/
 
         #region Private methods
 
-        private void CreateMajorTicks(Size axisSize, Range range, Func<Size, TickEvaluationResult> labelValidator)
+        private void CreateMajorTicks(Size axisSize, Range range)
         {
-            delta = 1;
-            beta = (int)Math.Round(Math.Log10(range.Max - range.Min)) - 1;
-
-            if (range.IsPoint)
-            {
-                majorTickValues = new double[] { range.Min };
-                CreateMajorTickLabels(majorTickValues);
-                return;
-            }
-
-            majorTickValues = GetMajorTicks(range);
-            CreateMajorTickLabels(majorTickValues);
-
-            TickEvaluationResult tickChange;
-            if (majorTickValues.Length > MaxTicks)
-                tickChange = TickEvaluationResult.Decrease;
-            else if (majorTickValues.Length < MinTicks)
-                tickChange = TickEvaluationResult.Increase;
-            else
-                tickChange = labelValidator(axisSize);
-
-            int iterations = 0;
-            int prevLength = majorTickValues.Length;
-
-            while (tickChange != TickEvaluationResult.Ok && iterations++ < MaxTickArrangeIterations)
-            {
-                if (tickChange == TickEvaluationResult.Increase)
-                    IncreaseTickCount();
-                else
-                    DecreaseTickCount();
-
-                double[] newTicks = GetMajorTicks(range);
-                if (newTicks.Length > MaxTicks && tickChange == TickEvaluationResult.Increase)
-                {
-                    DecreaseTickCount(); // Step back and stop to not get more than MaxTicks
-                    break;
-                }
-                else if (newTicks.Length < MinTicks && tickChange == TickEvaluationResult.Decrease)
-                {
-                    IncreaseTickCount(); // Step back and stop to not get less than 2
-                    break;
-                }
-                var prevTicks = majorTickValues;
-                majorTickValues = newTicks;
-                var prevLabels = majorTickLabels;
-                CreateMajorTickLabels(newTicks);
-                TickEvaluationResult newResult = labelValidator(axisSize);
-                if (newResult == tickChange) // Continue in the same direction
-                {
-                    prevLength = newTicks.Length;
-                }
-                else // Direction changed or layout OK - stop the loop
-                {
-                    if (newResult != TickEvaluationResult.Ok) // Direction changed - time to stop
-                    {
-                        if (tickChange == TickEvaluationResult.Decrease)
-                        {
-                            if (prevLength < MaxTicks)
-                            {
-                                majorTickValues = prevTicks;
-                                majorTickLabels = prevLabels;
-                                IncreaseTickCount();
-                            }
-                        }
-                        else
-                        {
-                            if (prevLength >= 2)
-                            {
-                                majorTickValues = prevTicks;
-                                majorTickLabels = prevLabels;
-                                DecreaseTickCount();
-                            }
-                        }
-                        break;
-                    }
-                    break;
-                }
-            }
+            MajorTicks.Add(new MajorTick(16, new TickText() { Text = "TEST" }));
+            //Size size = MajorTicks.GetMaxTextSize();
         }
+
+        //private void CreateMajorTicksOriginal(Size axisSize, Range range, Func<Size, TickEvaluationResult> labelValidator)
+        //{
+        //    delta = 1;
+        //    beta = (int)Math.Round(Math.Log10(range.Max - range.Min)) - 1;
+
+        //    if (range.IsPoint)
+        //    {
+        //        majorTickValues = new double[] { range.Min };
+        //        CreateMajorTickLabels(majorTickValues);
+        //        return;
+        //    }
+
+        //    majorTickValues = GetMajorTicks(range);
+        //    CreateMajorTickLabels(majorTickValues);
+
+        //    TickEvaluationResult tickChange;
+        //    if (majorTickValues.Length > MaxTicks)
+        //        tickChange = TickEvaluationResult.Decrease;
+        //    else if (majorTickValues.Length < MinTicks)
+        //        tickChange = TickEvaluationResult.Increase;
+        //    else
+        //        tickChange = labelValidator(axisSize);
+
+        //    int iterations = 0;
+        //    int prevLength = majorTickValues.Length;
+
+        //    while (tickChange != TickEvaluationResult.Ok && iterations++ < MaxTickArrangeIterations)
+        //    {
+        //        if (tickChange == TickEvaluationResult.Increase)
+        //            IncreaseTickCount();
+        //        else
+        //            DecreaseTickCount();
+
+        //        double[] newTicks = GetMajorTicks(range);
+        //        if (newTicks.Length > MaxTicks && tickChange == TickEvaluationResult.Increase)
+        //        {
+        //            DecreaseTickCount(); // Step back and stop to not get more than MaxTicks
+        //            break;
+        //        }
+        //        else if (newTicks.Length < MinTicks && tickChange == TickEvaluationResult.Decrease)
+        //        {
+        //            IncreaseTickCount(); // Step back and stop to not get less than 2
+        //            break;
+        //        }
+        //        var prevTicks = majorTickValues;
+        //        majorTickValues = newTicks;
+        //        var prevLabels = majorTickLabels;
+        //        CreateMajorTickLabels(newTicks);
+        //        TickEvaluationResult newResult = labelValidator(axisSize);
+        //        if (newResult == tickChange) // Continue in the same direction
+        //        {
+        //            prevLength = newTicks.Length;
+        //        }
+        //        else // Direction changed or layout OK - stop the loop
+        //        {
+        //            if (newResult != TickEvaluationResult.Ok) // Direction changed - time to stop
+        //            {
+        //                if (tickChange == TickEvaluationResult.Decrease)
+        //                {
+        //                    if (prevLength < MaxTicks)
+        //                    {
+        //                        majorTickValues = prevTicks;
+        //                        majorTickLabels = prevLabels;
+        //                        IncreaseTickCount();
+        //                    }
+        //                }
+        //                else
+        //                {
+        //                    if (prevLength >= 2)
+        //                    {
+        //                        majorTickValues = prevTicks;
+        //                        majorTickLabels = prevLabels;
+        //                        DecreaseTickCount();
+        //                    }
+        //                }
+        //                break;
+        //            }
+        //            break;
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Gets an array of ticks for specified axis range.
         /// </summary>
         private double[] GetMajorTicks(Range range)
         {
-            double start = range.Min;
-            double finish = range.Max;
-            double d = finish - start;
-
-            if (d == 0)
-                return new double[] { start, finish };
+            Debug.WriteLine($"GetMajorTicks. Range {range}");
 
             double temp = delta * Math.Pow(10, beta);
-            double min = Math.Floor(start / temp);
-            double max = Math.Floor(finish / temp);
+            double min = Math.Floor(range.Min / temp);
+            double max = Math.Floor(range.Max / temp);
             int count = (int)(max - min + 1);
             List<double> res = new List<double>();
             double x0 = min * temp;
             for (int i = 0; i < count + 1; i++)
             {
                 double v = MathHelper.Round(x0 + i * temp, beta);
-                if(v >= start && v <= finish)
-                    res.Add(v);
+                if (range.Includes(v)) res.Add(v);
             }
             return res.ToArray();
         }
@@ -294,31 +329,31 @@ namespace Restless.Controls.Chart
         /// <param name="range">The range.</param>
         private void CreateMinorTicks(Range range)
         {
-            var ticks = new List<double>(majorTickValues);
-            double temp = delta * Math.Pow(10, beta);
-            ticks.Insert(0, MathHelper.Round(ticks[0] - temp, beta));
-            ticks.Add(MathHelper.Round(ticks[ticks.Count - 1] + temp, beta));
-            minorTickValues = minorProvider.CreateTicks(range, ticks.ToArray());
+            //var ticks = new List<double>(majorTickValues);
+            //double temp = delta * Math.Pow(10, beta);
+            //ticks.Insert(0, MathHelper.Round(ticks[0] - temp, beta));
+            //ticks.Add(MathHelper.Round(ticks[ticks.Count - 1] + temp, beta));
+            //minorTickValues = minorProvider.CreateTicks(range, ticks.ToArray());
         }
 
-        /// <summary>
-        /// Creates the major tick labels from the specified ticks.
-        /// </summary>
-        /// <param name="ticks">An array of double ticks.</param>
-        private void CreateMajorTickLabels(double[] ticks)
-        {
-            if (ticks == null) throw new ArgumentNullException(nameof(ticks));
+        ///// <summary>
+        ///// Creates the major tick labels from the specified ticks.
+        ///// </summary>
+        ///// <param name="ticks">An array of double ticks.</param>
+        //private void CreateMajorTickLabels(double[] ticks)
+        //{
+        //    if (ticks == null) throw new ArgumentNullException(nameof(ticks));
 
-            majorTickLabels = new TickText[ticks.Length];
+        //    majorTickLabels = new TickText[ticks.Length];
 
-            for (int idx = 0; idx < ticks.Length; idx++)
-            {
-                majorTickLabels[idx] = new TickText
-                {
-                    Text = (TextProvider != null) ? TextProvider.Convert(ticks[idx], TextFormat) : ticks[idx].ToString(TextFormat)
-                };
-            }
-        }
+        //    for (int idx = 0; idx < ticks.Length; idx++)
+        //    {
+        //        majorTickLabels[idx] = new TickText
+        //        {
+        //            Text = (TextProvider != null) ? TextProvider.Convert(ticks[idx], TextFormat) : ticks[idx].ToString(TextFormat)
+        //        };
+        //    }
+        //}
         #endregion
     }
 }
