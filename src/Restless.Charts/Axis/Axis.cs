@@ -466,19 +466,29 @@ namespace Restless.Controls.Chart
 
             foreach (MajorTick tick in MajorTicks)
             {
-                double coordinate = GetCoordinateFromTick(tick.Value, finalSize);
+                //double coordinate = GetCoordinateFromTick(tick.Value, finalSize);
 
                 if (IsHorizontal)
                 {
-                    double x = coordinate - tick.TextWidth / 2;
+                    double x = tick.Coordinate - tick.TextWidth / 2;
                     double y = (AxisPlacement == AxisPlacement.Top) ? finalSize.Height - TickLength - maxTextSize.Height - LabelGapHorz : TickLength + LabelGapHorz;
-                    tick.Text.Arrange(new Rect(x, y, tick.TextWidth, tick.TextHeight));
+                    //Debug.WriteLine($"Horz Arrange {tick.Text.Text} at {x}, {y}. Coord is {tick.Coordinate} FinalSize: {finalSize}");
+                    if (tick.IsCoordinateWithin(finalSize.Width))
+                    {
+                        tick.Text.Arrange(new Rect(x, y, tick.TextWidth, tick.TextHeight));
+                    }
+
+
                 }
                 else
                 {
                     double x = (AxisPlacement == AxisPlacement.Left) ? LabelGapVert + maxTextSize.Width - tick.TextWidth : TickLength + LabelGapVert;
-                    double y = coordinate - tick.TextHeight / 2;
-                    tick.Text.Arrange(new Rect(x, y, tick.TextWidth, tick.TextHeight));
+                    double y = tick.Coordinate - tick.TextHeight / 2;
+                    //Debug.WriteLine($"Vert Arrange {tick.Text.Text} at {x}, {y}. Coord is {tick.Coordinate} FinalSize: {finalSize}");
+                    if (tick.IsCoordinateWithin(finalSize.Height))
+                    {
+                        tick.Text.Arrange(new Rect(x, y, tick.TextWidth, tick.TextHeight));
+                    }
                 }
             }
             return finalSize;
@@ -552,6 +562,7 @@ namespace Restless.Controls.Chart
             {
                 LineGeometry line = new LineGeometry();
                 double coordinate = GetCoordinateFromTick(tick.Value, desiredSize);
+                coordinate = Math.Round(coordinate);
                 MajorTickCoordinates.Add(coordinate);
 
                 if (IsHorizontal)
@@ -685,7 +696,7 @@ namespace Restless.Controls.Chart
 
             if (Range.HasValues)
             {
-                CreateMajorTicks(axisSize, Range); //, labelValidator);
+                CreateMajorTicks(axisSize, Range, 4); //, labelValidator);
                 CreateMinorTicks(Range);
             }
         }
@@ -700,31 +711,50 @@ namespace Restless.Controls.Chart
             }
         }
 
-        private void CreateMajorTicks(Size axisSize, Range range)
+        private void CreateMajorTicks(Size size, Range range, int divisions)
         {
-            
-            double mid = range.MidPoint;
-            Debug.WriteLine($"{AxisType} CreateMajorTicks. Range {range} Mid {mid}");
-            AddMajorTick(range.Min);
-            AddMajorTick(range.MidPoint);
-            AddMajorTick(range.Max);
+            double step = (range.Max - range.Min) / divisions;
 
-            //MajorTicks.Add(new MajorTick(range.Min, GetTickText(range.Min)));
-            //MajorTicks.Add(new MajorTick(mid, GetTickText(mid)));
-            //MajorTicks.Add(new MajorTick(range.Max, GetTickText(range.Max)));
 
-            //MajorTicks.Add(new MajorTick(24, GetTickText(24)));
+            Debug.WriteLine($"{AxisType} CreateMajorTicks. Range {range} Divisions {divisions} Step {step} AxisSize {size}");
 
-            //Size size = MajorTicks.GetMaxTextSize();
+            AddMajorTick(range.Min, size);
+            for (int k = 1; k <= divisions; k++)
+            {
+
+                AddMajorTick(range.Min + (step * k), size);
+            //    double min = range.Min;
+            //    double mid = range.MidPoint;
+            //    double max = range.Max;
+
+            //    AddMajorTick(min, size);
+            //    AddMajorTick(mid, size);
+            //    AddMajorTick(max, size);
+
+            }
+
+            AddMajorTick(range.Max, size);
+
+            ////if (recursionCount < 2)
+            //{
+
+            //    Range halfRange1 = Range.SpecifiedRange(range.Min, range.MidPoint);
+            //    Range halfRange2 = Range.SpecifiedRange(range.MidPoint, range.Max);
+            //    CreateMajorTicks(size, halfRange1, recursionCount + 1);
+            //    //CreateMajorTicks(size, halfRange2, recursionCount + 1);
+            //}
+
+
         }
 
-        private void AddMajorTick(double value)
+        private void AddMajorTick(double value, Size size)
         {
-            value = Math.Round(value, 0); //  Math.Round(value, 1); //, 2, MidpointRounding.ToEven);
+            // value = Math.Round(value, 0); //  Math.Round(value, 1); //, 2, MidpointRounding.ToEven);
 
             if (!MajorTicks.Contains(value))
             {
-                MajorTicks.Add(new MajorTick(value, GetTickText(value)));
+                double coordinate = GetCoordinateFromTick(value, size);
+                MajorTicks.Add(new MajorTick(value, coordinate, GetTickText(value)));
             }
         }
 
@@ -746,7 +776,7 @@ namespace Restless.Controls.Chart
         {
             TickText tickText = new TickText()
             {
-                Margin = IsHorizontal ? new Thickness(6, 0, 6, 0) : new Thickness(0, 6, 0, 6),
+                //Margin = IsHorizontal ? new Thickness(6, 0, 6, 0) : new Thickness(0, 6, 0, 6),
                 Text = (TextProvider != null) ? TextProvider.Convert(tickValue, TextFormat) : tickValue.ToString(TextFormat)
             };
             return tickText;

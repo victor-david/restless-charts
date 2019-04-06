@@ -176,7 +176,7 @@ namespace Restless.Controls.Chart
 
         private void CreateMajorTicks(Size axisSize, Range range)
         {
-            MajorTicks.Add(new MajorTick(16, new TickText() { Text = "TEST" }));
+            //MajorTicks.Add(new MajorTick(16, new TickText() { Text = "TEST" }));
             //Size size = MajorTicks.GetMaxTextSize();
         }
 

@@ -14,18 +14,29 @@ namespace Restless.Controls.Chart
         /// </summary>
         /// <param name="value">The tick value.</param>
         /// <param name="text">The label element for the tick.</param>
-        internal MajorTick(double value, TickText text)
+        internal MajorTick(double value, double coordinate, TickText text)
         {
             Text = text ?? throw new ArgumentNullException(nameof(text));
             Value = value;
+            Coordinate = coordinate; // Math.Round(coordinate);
         }
         #endregion
+
+        /************************************************************************/
 
         #region Properties
         /// <summary>
         /// Gets the tick value for the major tick.
         /// </summary>
         public double Value
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the calculated coordinate. This value is rounded to zero decimal places.
+        /// </summary>
+        public double Coordinate
         {
             get;
         }
@@ -58,6 +69,17 @@ namespace Restless.Controls.Chart
         #endregion
 
         #region Public methods
+        /// <summary>
+        /// Gets a boolean value that indicates if <see cref="Coordinate"/> falls
+        /// between zero and <paramref name="maxValue"/>, inclusive.
+        /// </summary>
+        /// <param name="maxValue">The maximum value.</param>
+        /// <returns>true if <see cref="Coordinate"/> falls between zero and <paramref name="maxValue"/>, inclusive; otherwise, false.</returns>
+        public bool IsCoordinateWithin(double maxValue)
+        {
+            return Coordinate >= 0.0 && Coordinate <= maxValue;
+        }
+
         /// <summary>
         /// Gets a string representation of this instance.
         /// </summary>

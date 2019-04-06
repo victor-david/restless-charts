@@ -105,6 +105,9 @@ namespace Restless.Controls.Chart
             private set;
         }
 
+        /// <summary>
+        /// Gets the mid point of this range.
+        /// </summary>
         public double MidPoint
         {
             get => Min + (Max - Min) / 2.0;
