@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -115,13 +116,13 @@ namespace Restless.Controls.Chart
         {
             if (Owner.Orientation == Orientation.Vertical)
             {
-                CreateVerticalGeometry(owner.XAxis.MajorTickCoordinates, desiredSize);
-                CreateHorizontalGeometry(owner.YAxis.MajorTickCoordinates, desiredSize);
+                CreateVerticalGeometry(owner.XAxis.MajorTicks.EnumerateTickCoordinates(), desiredSize);
+                CreateHorizontalGeometry(owner.YAxis.MajorTicks.EnumerateTickCoordinates(), desiredSize);
             }
             else
             {
-                CreateVerticalGeometry(owner.YAxis.MajorTickCoordinates, desiredSize);
-                CreateHorizontalGeometry(owner.XAxis.MajorTickCoordinates, desiredSize);
+                CreateVerticalGeometry(owner.YAxis.MajorTicks.EnumerateTickCoordinates(), desiredSize);
+                CreateHorizontalGeometry(owner.XAxis.MajorTicks.EnumerateTickCoordinates(), desiredSize);
             }
         }
         #endregion
@@ -129,7 +130,7 @@ namespace Restless.Controls.Chart
         /************************************************************************/
 
         #region Private methods
-        private void CreateVerticalGeometry(DoubleCollection tickCoordinates, Size size)
+        private void CreateVerticalGeometry(IEnumerable<double> tickCoordinates, Size size)
         {
             foreach (double tickCoordinate in tickCoordinates)
             {
@@ -143,7 +144,7 @@ namespace Restless.Controls.Chart
             }
         }
 
-        private void CreateHorizontalGeometry(DoubleCollection tickCoordinates, Size size)
+        private void CreateHorizontalGeometry(IEnumerable<double> tickCoordinates, Size size)
         {
             foreach (double tickCoordinate in tickCoordinates)
             {

@@ -50,14 +50,13 @@
     <Compile Include="Axis\AxisGrid.cs" />
     <Compile Include="Axis\AxisPlacement.cs" />
     <Compile Include="Axis\AxisType.cs" />
+    <Compile Include="Axis\MinorTick.cs" />
     <Compile Include="Axis\TickAlignment.cs" />
     <Compile Include="Axis\MajorTickCollection.cs" />
-    <Compile Include="Axis\DoubleCollection.cs" />
-    <Compile Include="Axis\TickEvaluationResult.cs" />
+    <Compile Include="Axis\MinorTickCollection.cs" />
     <Compile Include="Axis\IDoubleConverter.cs" />
     <Compile Include="Axis\MajorTick.cs" />
-    <Compile Include="Axis\MinorTickProvider.cs" />
-    <Compile Include="Axis\TickProvider.cs" />
+    <Compile Include="Axis\TickCalculation.cs" />
     <Compile Include="Axis\TickText.cs" />
     <Compile Include="Axis\TickVisibility.cs" />
     <Compile Include="Chart\BarChart.cs" />

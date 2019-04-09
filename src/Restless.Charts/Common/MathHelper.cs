@@ -89,7 +89,7 @@ namespace Restless.Controls.Chart
             return val;
         }
 
-        ///// <summary>
+        /// <summary>
         /// Round
         /// </summary>
         /// <param name="value">The value to round.</param>

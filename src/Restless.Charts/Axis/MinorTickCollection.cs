@@ -3,9 +3,9 @@
 namespace Restless.Controls.Chart
 {
     /// <summary>
-    /// Represents a collection of double values.
+    /// Represents a collection of <see cref="MinorTick"/> objects.
     /// </summary>
-    public class DoubleCollection : List<double>
+    public class MinorTickCollection : List<MinorTick>
     {
     }
 }
