@@ -39,7 +39,7 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Gets the default brush for major ticks and their corresponding labels.
         /// </summary>
-        public static readonly Brush DefaultMajorTickBrush = Brushes.DarkSlateBlue;
+        public static readonly Brush DefaultMajorTickBrush = Brushes.DarkGray;
 
         /// <summary>
         /// Gets the default brush for minor ticks.
@@ -513,21 +513,21 @@ namespace Restless.Controls.Chart
             GeometryGroup majorTickGeometry = new GeometryGroup();
             GeometryGroup minorTickGeometry = new GeometryGroup();
 
-            bool drawMajorTicks = TickVisibility != TickVisibility.None;
-            bool drawMinorTicks = TickVisibility == TickVisibility.MajorAndMinor && !Range.IsPoint;
+            //bool drawMajorTicks = TickVisibility != TickVisibility.None;
+            //bool drawMinorTicks = TickVisibility == TickVisibility.MajorAndMinor && !Range.IsPoint;
 
             foreach (MajorTick tick in MajorTicks)
             {
                 LineGeometry line = GetLineGeometryFromTick(tick, TickLength);
                 majorTickGeometry.Children.Add(line);
-                if (drawMajorTicks)
+                //if (drawMajorTicks)
                 {
                     tick.Text.Foreground = MajorTickBrush;
                     Children.Add(tick.Text);
                 }
             }
 
-            if (drawMinorTicks)
+            //if (drawMinorTicks)
             {
                 foreach (MinorTick tick in MinorTicks)
                 {
@@ -536,7 +536,7 @@ namespace Restless.Controls.Chart
                 }
             }
 
-            if (drawMajorTicks)
+            //if (drawMajorTicks)
             {
                 majorTickPath.Data = majorTickGeometry;
                 minorTickPath.Data = minorTickGeometry;
@@ -591,16 +591,22 @@ namespace Restless.Controls.Chart
         /// <param name="axisSize">The axis size.</param>
         private void CreateTicks(Size axisSize)
         {
-            switch (TickAlignment)
+            if (TickVisibility != TickVisibility.None)
             {
-                case TickAlignment.Range:
-                    CreateTicksFromRange(axisSize);
-                    break;
-                case TickAlignment.Values:
-                    CreateTicksFromValues(axisSize);
-                    break;
+                switch (TickAlignment)
+                {
+                    case TickAlignment.Range:
+                        CreateTicksFromRange(axisSize);
+                        break;
+                    case TickAlignment.Values:
+                        CreateTicksFromValues(axisSize);
+                        break;
+                }
+                if (TickVisibility == TickVisibility.MajorMinor || TickVisibility == TickVisibility.MajorMinorEdge)
+                {
+                    CreateMinorTicks(axisSize, 5);
+                }
             }
-            CreateMinorTicks(axisSize, 5);
         }
 
         private void CreateTicksFromRange(Size size)
@@ -629,13 +635,36 @@ namespace Restless.Controls.Chart
             }
         }
 
-        private void CreateTicksFromValues(Size axisSize, IEnumerable<double> enumerator)
+        private void CreateTicksFromValues(Size size, IEnumerable<double> enumerator)
         {
-            if (enumerator == null) throw new ArgumentNullException(nameof(enumerator));
+            int step = 1;
+            CreateTicksFromValues(size, enumerator, step);
+            while (!DoMajorTickLabelsHaveMinimumSpacing(size, 16))
+            {
+                MajorTicks.Clear();
+                step++;
+                CreateTicksFromValues(size, enumerator, step);
+            }
+        }
 
+        private void CreateTicksFromValues(Size size, IEnumerable<double> enumerator, int step)
+        {
+            int idx = 1;
             foreach (double value in enumerator)
             {
+                if (idx % step == 0)
+                {
+                    double coordinate = GetCoordinateFromTick(value, size);
+                    MajorTicks.Add(new MajorTick(value, coordinate, GetTickText(value)));
+                }
+                idx++;
             }
+        }
+
+        private bool DoMajorTickLabelsHaveMinimumSpacing(Size size, double minSpacing)
+        {
+            double min = MajorTicks.GetMinimumTextSpacing(size, IsHorizontal);
+            return min >= minSpacing;
         }
 
         private void CreateMajorTicks(Size size, TickCalculation calc)
@@ -661,28 +690,81 @@ namespace Restless.Controls.Chart
             return totalSize.Height < size.Height;
         }
 
+        /// <summary>
+        /// Creates minor ticks that fall between major ticks.
+        /// </summary>
+        /// <param name="size">Size of the axis.</param>
+        /// <param name="count">The max number of minor ticks.</param>
         private void CreateMinorTicks(Size size, int count)
         {
             if (MajorTicks.Count > 1)
             {
-                for (int idx = 0; idx < MajorTicks.Count; idx++)
+                MajorTick tick0 = MajorTicks[0];
+                MajorTick tickZ = MajorTicks[MajorTicks.Count - 1];
+
+                double valueStep = 0;
+                double coordStep = 0;
+
+                int idx = 0;
+                foreach (MajorTick tick in MajorTicks)
                 {
                     if (idx < MajorTicks.Count - 1)
                     {
-                        double tickValue = MajorTicks[idx].Value;
-                        double tickCoord = MajorTicks[idx].Coordinate;
+                        MajorTick nextTick = MajorTicks[idx + 1];
 
-                        double valueDistance = MajorTicks[idx + 1].Value - MajorTicks[idx].Value;
-                        double coordDistance = MajorTicks[idx + 1].Coordinate - MajorTicks[idx].Coordinate;
+                        double valueDistance = nextTick.Value - tick.Value;
+                        double coordDistance = nextTick.Coordinate - tick.Coordinate;
 
-                        double valueStep = valueDistance / (count + 1);
-                        double coordStep = coordDistance / (count + 1);
+                        valueStep = valueDistance / (count + 1);
+                        coordStep = coordDistance / (count + 1);
 
                         for (int step = 1; step <= count; step++)
                         {
-                            MinorTicks.Add(new MinorTick(tickValue + (valueStep * step), tickCoord + (coordStep * step)));
+                            MinorTicks.Add(new MinorTick(tick.Value + (valueStep * step), tick.Coordinate + (coordStep * step)));
                         }
                     }
+                    idx++;
+                }
+
+                if (TickVisibility == TickVisibility.MajorMinorEdge)
+                {
+                    CreateMinorEdgeTicks(size, valueStep, coordStep, count);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates minor ticks that come before the first major tick (if any)
+        /// and those that come after the last major tick (if any).
+        /// </summary>
+        /// <param name="size">Size of the axis.</param>
+        /// <param name="valueStep">The value difference that represents a minor tick step.</param>
+        /// <param name="coordStep">The coordinate difference that represents a minor tick step.</param>
+        /// <param name="count">The max number of minor ticks.</param>
+        private void CreateMinorEdgeTicks(Size size, double valueStep, double coordStep, int count)
+        {
+            // Array access safe because this method is only called if MajorTicks.Count > 1.
+            MajorTick tick0 = MajorTicks[0];
+            MajorTick tickZ = MajorTicks[MajorTicks.Count - 1];
+
+            // Cushion so that minor ticks aren't too close to the edge
+            double cushion = 5.0;
+            double max = IsHorizontal ? size.Width - cushion : size.Height - cushion;
+
+            for (int step = 1; step <= count; step++)
+            {
+                MinorTick tick = new MinorTick(tick0.Value - (valueStep * step), tick0.Coordinate - (coordStep * step));
+
+                if (tick.IsCoordinateWithin(cushion, max))
+                {
+                    MinorTicks.Add(tick);
+                }
+
+                tick = new MinorTick(tickZ.Value + (valueStep * step), tickZ.Coordinate + (coordStep * step));
+
+                if (tick.IsCoordinateWithin(cushion, max))
+                {
+                    MinorTicks.Add(tick);
                 }
             }
         }

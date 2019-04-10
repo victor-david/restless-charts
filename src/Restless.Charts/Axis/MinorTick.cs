@@ -1,7 +1,4 @@
-﻿using System;
-using System.Windows;
-
-namespace Restless.Controls.Chart
+﻿namespace Restless.Controls.Chart
 {
     /// <summary>
     /// Represents a single minor tick on an axis.
@@ -46,13 +43,27 @@ namespace Restless.Controls.Chart
         #region Public methods
         /// <summary>
         /// Gets a boolean value that indicates if <see cref="Coordinate"/> falls
+        /// between <paramref name="minValue"/> and <paramref name="maxValue"/>, inclusive.
+        /// </summary>
+        /// <param name="minValue">The minimum value.</param>
+        /// <param name="maxValue">The maximum value.</param>
+        /// <returns>
+        /// true if <see cref="Coordinate"/> falls between <paramref name="minValue"/> and <paramref name="maxValue"/>, inclusive; otherwise, false.
+        /// </returns>
+        public bool IsCoordinateWithin(double minValue, double maxValue)
+        {
+            return Coordinate >= minValue && Coordinate <= maxValue;
+        }
+
+        /// <summary>
+        /// Gets a boolean value that indicates if <see cref="Coordinate"/> falls
         /// between zero and <paramref name="maxValue"/>, inclusive.
         /// </summary>
         /// <param name="maxValue">The maximum value.</param>
         /// <returns>true if <see cref="Coordinate"/> falls between zero and <paramref name="maxValue"/>, inclusive; otherwise, false.</returns>
         public bool IsCoordinateWithin(double maxValue)
         {
-            return Coordinate >= 0.0 && Coordinate <= maxValue;
+            return IsCoordinateWithin(0.0, maxValue);
         }
 
         /// <summary>

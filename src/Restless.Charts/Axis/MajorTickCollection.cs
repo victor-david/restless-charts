@@ -68,6 +68,41 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
+        /// Measures text lables and returns the smallest spacing between any of them.
+        /// </summary>
+        /// <param name="measureSize">The size to pass to the text's Measure method.</param>
+        /// <param name="useWidth">
+        /// true to measure spacing using the width of the text labels, 
+        /// false to measure spacing using the height.
+        /// </param>
+        /// <returns>The smallest text spacing. Value can be negative indicating that the text labels overlap.</returns>
+        public double GetMinimumTextSpacing(Size measureSize, bool useWidth)
+        {
+            double result = double.MaxValue;
+
+            foreach (MajorTick tick in this)
+            {
+                tick.Text.Measure(measureSize);
+            }
+
+            for (int idx = 0; idx < Count; idx++)
+            {
+                if (idx < Count - 1)
+                {
+                    MajorTick thisTick = this[idx];
+                    MajorTick nextTick = this[idx + 1];
+
+                    double thisTickTextDimension = useWidth ? thisTick.TextWidth : thisTick.TextHeight;
+                    double nextTickTextDimension = useWidth ? nextTick.TextWidth : nextTick.TextHeight;
+
+                    double distance = Math.Abs(nextTick.Coordinate - thisTick.Coordinate) - (nextTickTextDimension / 2.0) - (thisTickTextDimension / 2.0);
+                    result = Math.Min(result, distance);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Provides an enumerable that enumerates the values of <see cref="MinorTick.Coordinate"/>.
         /// </summary>
         /// <returns>The enumerator.</returns>

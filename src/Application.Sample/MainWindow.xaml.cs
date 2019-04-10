@@ -31,6 +31,7 @@ namespace Application.Sample
         // x
         private bool isXAxisPlacementReversed;
         private TickVisibility xAxisTickVisibility;
+        private TickAlignment xAxisTickAlignment;
         private string xAxisTextFormat;
         private IDoubleConverter xAxisTextProvider;
         private bool isXAxisValueReversed;
@@ -58,6 +59,7 @@ namespace Application.Sample
 
             //IsXAxisPlacementReversed = true;
             XAxisTickVisibility = TickVisibility.Default;
+            XAxisTickAlignment = TickAlignment.Default;
             YAxisTickVisibility = TickVisibility.Default;
 
             ChartOrientation = Orientation.Vertical;
@@ -169,6 +171,15 @@ namespace Application.Sample
         {
             get => xAxisTickVisibility;
             private set => SetProperty(ref xAxisTickVisibility, value);
+        }
+
+        /// <summary>
+        /// Gets the tick alignment for the X axis.
+        /// </summary>
+        public TickAlignment XAxisTickAlignment
+        {
+            get => xAxisTickAlignment;
+            private set => SetProperty(ref xAxisTickAlignment, value);
         }
 
         /// <summary>
@@ -325,18 +336,12 @@ namespace Application.Sample
 
         private void ButtonClickXAxisTicks(object sender, RoutedEventArgs e)
         {
-            switch (XAxisTickVisibility)
-            {
-                case TickVisibility.MajorAndMinor:
-                    XAxisTickVisibility = TickVisibility.MajorOnly;
-                    break;
-                case TickVisibility.MajorOnly:
-                    XAxisTickVisibility = TickVisibility.None;
-                    break;
-                case TickVisibility.None:
-                    XAxisTickVisibility = TickVisibility.MajorAndMinor;
-                    break;
-            }
+            XAxisTickVisibility = GetNextTickVisibility(XAxisTickVisibility);
+        }
+
+        private void ButtonClickXAxisTickAlignment(object sender, RoutedEventArgs e)
+        {
+            XAxisTickAlignment = XAxisTickAlignment == TickAlignment.Range ? TickAlignment.Values : TickAlignment.Range;
         }
 
         private void ButtonClickXAxisReverse(object sender, RoutedEventArgs e)
@@ -346,10 +351,16 @@ namespace Application.Sample
 
         private void ButtonClickXAxisProvider(object sender, RoutedEventArgs e)
         {
+
             if (XAxisTextProvider == null)
             {
                 XAxisTextProvider = new DoubleToDateConverter();
                 XAxisTextFormat = "dd-MMM-yy";
+            }
+            else if (XAxisTextProvider is DoubleToDateConverter)
+            {
+                XAxisTextProvider = new DoubleToLookupConverter();
+                XAxisTextFormat = null;
             }
             else
             {
@@ -371,17 +382,22 @@ namespace Application.Sample
 
         private void ButtonClickYAxisTicks(object sender, RoutedEventArgs e)
         {
-            switch (YAxisTickVisibility)
+            YAxisTickVisibility = GetNextTickVisibility(YAxisTickVisibility);
+        }
+
+        // also used by ButtonClickXAxisTicks()
+        private TickVisibility GetNextTickVisibility(TickVisibility currentVisibility)
+        {
+            switch (currentVisibility)
             {
-                case TickVisibility.MajorAndMinor:
-                    YAxisTickVisibility = TickVisibility.MajorOnly;
-                    break;
-                case TickVisibility.MajorOnly:
-                    YAxisTickVisibility = TickVisibility.None;
-                    break;
-                case TickVisibility.None:
-                    YAxisTickVisibility = TickVisibility.MajorAndMinor;
-                    break;
+                case TickVisibility.MajorMinorEdge:
+                    return TickVisibility.MajorMinor;
+                case TickVisibility.MajorMinor:
+                    return TickVisibility.Major;
+                case TickVisibility.Major:
+                    return TickVisibility.None;
+                default:
+                    return TickVisibility.MajorMinorEdge;
             }
         }
 
@@ -519,7 +535,7 @@ namespace Application.Sample
             XAxisTextProvider = null;
             SetTopTitle("Data Set #1");
 
-            int maxX = 32;
+            int maxX = 14;
             int minY = 100;
             int maxY = 5000;
             
@@ -662,7 +678,7 @@ namespace Application.Sample
             data.DataInfo.SetInfo(1, "Log 10", Brushes.Blue);
             data.DataInfo.SetInfo(2, "Log 16", Brushes.DarkGreen);
 
-            for (int x = 1; x <= maxX; x++)
+            for (int x = 2; x <= maxX; x++)
             {
                 // Base of Euler's number, about 2.71828.
                 double y = Math.Log(x);
@@ -677,6 +693,7 @@ namespace Application.Sample
                 data.Add(x, y);
             }
 
+            data.ExpandX(1.0);
             data.MakeYAutoZero();
 
             chart.Data = data;
@@ -732,6 +749,7 @@ namespace Application.Sample
                 TopTitle = textBlock;
             }
         }
+
         #endregion
 
 

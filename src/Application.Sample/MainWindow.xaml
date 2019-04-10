@@ -102,7 +102,11 @@
                     <Button 
                         Click="ButtonClickXAxisTicks"
                         ToolTip="Change tick display for the X axis between major and minor, major only, and none"
-                        Content="Change Ticks"/>
+                        Content="Change Tick Display"/>
+                    <Button
+                        Click="ButtonClickXAxisTickAlignment"
+                        ToolTip="Change the tick alignment between aligned to range / aligned to values"
+                        Content="Change Tick Alignment"/>
                     <Button 
                         Click="ButtonClickXAxisReverse"
                         ToolTip="Reverse the direction of the X axis"
@@ -123,7 +127,7 @@
                     <Button
                         Click="ButtonClickYAxisTicks"
                         ToolTip="Change tick display for the Y axis between major and minor, major only, and none"
-                        Content="Change Ticks"/>
+                        Content="Change Tick Display"/>
                     <Button 
                         Click="ButtonClickYAxisReverse"
                         ToolTip="Reverse the direction of the Y axis"
@@ -152,6 +156,7 @@
             Orientation="{Binding ChartOrientation}"
             IsXAxisPlacementReversed="{Binding IsXAxisPlacementReversed}"
             XAxisTickVisibility="{Binding XAxisTickVisibility}"
+            XAxisTickAlignment="{Binding XAxisTickAlignment}"
             XAxisTextFormat="{Binding XAxisTextFormat}"
             XAxisTextProvider="{Binding XAxisTextProvider}"
             IsXAxisValueReversed="{Binding IsXAxisValueReversed}"
