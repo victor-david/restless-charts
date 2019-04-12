@@ -470,7 +470,7 @@ namespace Restless.Controls.Chart
             {
                 if (IsHorizontal)
                 {
-                    double x = tick.Coordinate - tick.TextWidth / 2;
+                    double x = tick.Coordinate - tick.TextWidth / 2.0;
                     double y = (AxisPlacement == AxisPlacement.Top) ? finalSize.Height - TickLength - maxTextSize.Height - LabelGapHorz : TickLength + LabelGapHorz;
                     if (tick.IsCoordinateWithin(finalSize.Width))
                     {
@@ -480,7 +480,7 @@ namespace Restless.Controls.Chart
                 else
                 {
                     double x = (AxisPlacement == AxisPlacement.Left) ? LabelGapVert + maxTextSize.Width - tick.TextWidth : TickLength + LabelGapVert;
-                    double y = tick.Coordinate - tick.TextHeight / 2;
+                    double y = tick.Coordinate - tick.TextHeight / 2.0;
                     if (tick.IsCoordinateWithin(finalSize.Height))
                     {
                         tick.Text.Arrange(new Rect(x, y, tick.TextWidth, tick.TextHeight));
@@ -513,34 +513,22 @@ namespace Restless.Controls.Chart
             GeometryGroup majorTickGeometry = new GeometryGroup();
             GeometryGroup minorTickGeometry = new GeometryGroup();
 
-            //bool drawMajorTicks = TickVisibility != TickVisibility.None;
-            //bool drawMinorTicks = TickVisibility == TickVisibility.MajorAndMinor && !Range.IsPoint;
-
             foreach (MajorTick tick in MajorTicks)
             {
                 LineGeometry line = GetLineGeometryFromTick(tick, TickLength);
                 majorTickGeometry.Children.Add(line);
-                //if (drawMajorTicks)
-                {
-                    tick.Text.Foreground = MajorTickBrush;
-                    Children.Add(tick.Text);
-                }
+                tick.Text.Foreground = MajorTickBrush;
+                Children.Add(tick.Text);
             }
 
-            //if (drawMinorTicks)
+            foreach (MinorTick tick in MinorTicks)
             {
-                foreach (MinorTick tick in MinorTicks)
-                {
-                    LineGeometry line = GetLineGeometryFromTick(tick, TickLength / 2.0);
-                    minorTickGeometry.Children.Add(line);
-                }
+                LineGeometry line = GetLineGeometryFromTick(tick, TickLength / 2.0);
+                minorTickGeometry.Children.Add(line);
             }
 
-            //if (drawMajorTicks)
-            {
-                majorTickPath.Data = majorTickGeometry;
-                minorTickPath.Data = minorTickGeometry;
-            }
+            majorTickPath.Data = majorTickGeometry;
+            minorTickPath.Data = minorTickGeometry;
         }
 
         private LineGeometry GetLineGeometryFromTick(MinorTick tick, double tickLength)
