@@ -16,20 +16,16 @@ namespace Restless.Controls.Chart
         #region Private
         private const double IncreaseRatio = 8.0;
         private const double DecreaseRatio = 8.0;
+        // LabelGap is the distance between the tick mark and the label
+        // and between the label and the edge of the control.
+        // LabelGapHorz is used when the axis is horizontal, LabelGapVert when vertical.
         private const double LabelGapHorz = 0.0;
-        private const double LabelGapVert = 2.0;
+        private const double LabelGapVert = 3.0;
 
         private readonly ChartContainer owner;
         private Path majorTickPath;
         private Path minorTickPath;
-
-        private int tickLength;
-        private long maxTickCount;
-        private AxisPlacement axisPlacement;
-        private TickVisibility tickVisibility;
         private DataTransform dataTransform;
-        private bool isValueReversed;
-        private TickAlignment tickAlignment;
         private DataSeries data;
         #endregion
 
@@ -49,17 +45,17 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Gets the minimum allowed value for <see cref="MaxTickCount"/>.
         /// </summary>
-        public const int MinMaxTickCount = 10;
+        public const long MinMaxTickCount = 10;
 
         /// <summary>
         /// Gets the maximum allowed value for <see cref="MaxTickCount"/>.
         /// </summary>
-        public const int MaxMaxTickCount = 24;
+        public const long MaxMaxTickCount = 24;
 
         /// <summary>
         /// Gets the default value for <see cref="MaxTickCount"/>.
         /// </summary>
-        public const int DefaultMaxTickCount = 20;
+        public const long DefaultMaxTickCount = 20;
 
         /// <summary>
         /// Gets the minimum allowed value for <see cref="TickLength"/>.
@@ -89,12 +85,6 @@ namespace Restless.Controls.Chart
             AxisType = axisType;
             MajorTicks = new MajorTickCollection();
             MinorTicks = new MinorTickCollection();
-
-            // These are set via the backing store to avoid triggering InvalidateMeasure()
-            tickLength = DefaultTickLength;
-            maxTickCount = DefaultMaxTickCount;
-            tickVisibility = TickVisibility.Default;
-            tickAlignment = TickAlignment.Default;
 
             Range = Range.EmptyRange();
 
@@ -141,7 +131,7 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
-        #region Ticks
+        #region Tick Collections
         /// <summary>
         /// Gets the collection of <see cref="MajorTick"/> objects.
         /// </summary>
@@ -157,19 +147,36 @@ namespace Restless.Controls.Chart
         {
             get;
         }
+        #endregion
 
+        /************************************************************************/
+
+        #region TickLength / MaxTickCount
         /// <summary>
         /// Gets or sets the length of the major ticks. Minor ticks are half this size.
         /// This value is clamped between <see cref="MinTickLength"/> and <see cref="MaxTickLength"/> inclusive.
         /// </summary>
         public int TickLength
         {
-            get => tickLength;
-            set
-            {
-                tickLength = value.Clamp(MinTickLength, MaxTickLength);
-                InvalidateMeasure();
-            }
+            get => (int)GetValue(TickLengthProperty);
+            set => SetValue(TickLengthProperty, value);
+        }
+
+        /// <summary>
+        /// Identifes the <see cref="TickLength"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty TickLengthProperty = DependencyProperty.Register
+            (
+                nameof(TickLength), typeof(int), typeof(Axis),
+                new FrameworkPropertyMetadata(DefaultTickLength,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsArrange |
+                    FrameworkPropertyMetadataOptions.AffectsParentMeasure | FrameworkPropertyMetadataOptions.AffectsParentArrange |
+                    FrameworkPropertyMetadataOptions.AffectsRender, null, OnCoerceTickLength)
+            );
+
+        private static object OnCoerceTickLength(DependencyObject d, object value)
+        {
+            return ((double)value).Clamp(MinTickLength, MaxTickLength);
         }
 
         /// <summary>
@@ -178,67 +185,122 @@ namespace Restless.Controls.Chart
         /// </summary>
         public long MaxTickCount
         {
-            get => maxTickCount;
-            set
-            {
-                maxTickCount = value.Clamp(MinMaxTickCount, MaxMaxTickCount);
-                InvalidateMeasure();
-            }
+            get => (long)GetValue(MaxTickCountProperty);
+            set => SetValue(MaxTickCountProperty, value);
         }
 
+        /// <summary>
+        /// Identifes the <see cref="MaxTickCount"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty MaxTickCountProperty = DependencyProperty.Register
+            (
+                nameof(MaxTickCount), typeof(long), typeof(Axis), 
+                new FrameworkPropertyMetadata(DefaultMaxTickCount,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsArrange |
+                    FrameworkPropertyMetadataOptions.AffectsParentMeasure | FrameworkPropertyMetadataOptions.AffectsParentArrange |
+                    FrameworkPropertyMetadataOptions.AffectsRender, null, OnCoerceMaxTickCount)
+            );
+
+        private static object OnCoerceMaxTickCount(DependencyObject d, object value)
+        {
+            return ((double)value).Clamp(MinMaxTickCount, MaxMaxTickCount);
+        }
+        #endregion
+
+        /************************************************************************/
+
+        #region TextFormat / TextProvider
         /// <summary>
         /// Gets or (from this assembly) sets the format used when converting a tick value to text.
         /// </summary>
         public string TextFormat
         {
-            get;
-            internal set;
+            get => (string)GetValue(TextFormatProperty);
+            internal set => SetValue(TextFormatPropertyKey, value);
         }
+        
+        private static readonly DependencyPropertyKey TextFormatPropertyKey = DependencyProperty.RegisterReadOnly
+            (
+                nameof(TextFormat), typeof(string), typeof(Axis), 
+                new FrameworkPropertyMetadata(null,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsArrange |
+                    FrameworkPropertyMetadataOptions.AffectsParentMeasure | FrameworkPropertyMetadataOptions.AffectsParentArrange |
+                    FrameworkPropertyMetadataOptions.AffectsRender)
+            );
+
+        /// <summary>
+        /// Identifes the <see cref="TextFormat"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty TextFormatProperty = TextFormatPropertyKey.DependencyProperty;
 
         /// <summary>
         /// Gets or (from this assembly) sets an <see cref="IDoubleConverter"/> to convert tick values to text.
         /// </summary>
         public IDoubleConverter TextProvider
         {
-            get;
-            internal set;
+            get => (IDoubleConverter)GetValue(TextProviderProperty);
+            internal set => SetValue(TextProviderPropertyKey, value);
         }
+
+        private static readonly DependencyPropertyKey TextProviderPropertyKey = DependencyProperty.RegisterReadOnly
+            (
+                nameof(TextProvider), typeof(IDoubleConverter), typeof(Axis),
+                new FrameworkPropertyMetadata(null, 
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsArrange |
+                    FrameworkPropertyMetadataOptions.AffectsParentMeasure | FrameworkPropertyMetadataOptions.AffectsParentArrange |
+                    FrameworkPropertyMetadataOptions.AffectsRender)
+            );
+
+        /// <summary>
+        /// Identifes the <see cref="TextProvider"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty TextProviderProperty = TextProviderPropertyKey.DependencyProperty;
         #endregion
 
         /************************************************************************/
 
-        #region TickProvider / TickVisibility / TickAlignment
+        #region TickVisibility / TickAlignment
         /// <summary>
         /// Gets or sets a value that determines which ticks are rendered
         /// </summary>
         public TickVisibility TickVisibility
         {
-            get => tickVisibility;
-            set
-            {
-                if (value != tickVisibility)
-                {
-                    tickVisibility = value;
-                    InvalidateMeasure();
-                }
-            }
+            get => (TickVisibility)GetValue(TickVisibilityProperty);
+            set => SetValue(TickVisibilityProperty, value);
         }
+
+        /// <summary>
+        /// Identifies the <see cref="TickVisibility"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty TickVisibilityProperty = DependencyProperty.Register
+            (
+                nameof(TickVisibility), typeof(TickVisibility), typeof(Axis), 
+                new FrameworkPropertyMetadata(TickVisibility.Default,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsArrange |
+                    FrameworkPropertyMetadataOptions.AffectsParentMeasure | FrameworkPropertyMetadataOptions.AffectsParentArrange |
+                    FrameworkPropertyMetadataOptions.AffectsRender)
+            );
 
         /// <summary>
         /// Gets or (from this assembly) sets a value that determines how ticks are aligned on the axis.
         /// </summary>
         public TickAlignment TickAlignment
         {
-            get => tickAlignment;
-            internal set
-            {
-                if (value != tickAlignment)
-                {
-                    tickAlignment = value;
-                    InvalidateMeasure();
-                }
-            }
+            get => (TickAlignment)GetValue(TickAlignmentProperty);
+            set => SetValue(TickAlignmentProperty, value);
         }
+
+        /// <summary>
+        /// Identifies the <see cref="TickAlignment"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty TickAlignmentProperty = DependencyProperty.Register
+            (
+                nameof(TickAlignment), typeof(TickAlignment), typeof(Axis), 
+                new FrameworkPropertyMetadata(TickAlignment.Default,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsArrange |
+                    FrameworkPropertyMetadataOptions.AffectsParentMeasure | FrameworkPropertyMetadataOptions.AffectsParentArrange |
+                    FrameworkPropertyMetadataOptions.AffectsRender)
+            );
         #endregion
 
         /************************************************************************/
@@ -256,7 +318,7 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
-        #region AxisPlacement
+        #region AxisType / AxisPlacement
         /// <summary>
         /// Gets the axis type.
         /// </summary>
@@ -266,20 +328,27 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
-        /// Gets or (from this assembly) sets the axis placement.
+        /// Gets or (from this assembly) sets the axis placement
         /// </summary>
         public AxisPlacement AxisPlacement
         {
-            get => axisPlacement;
-            internal set
-            {
-                if (value != axisPlacement)
-                {
-                    axisPlacement = value;
-                    InvalidateMeasure();
-                }
-            }
+            get => (AxisPlacement)GetValue(AxisPlacementProperty);
+            internal set => SetValue(AxisPlacementPropertyKey, value);
         }
+
+        private static readonly DependencyPropertyKey AxisPlacementPropertyKey = DependencyProperty.RegisterReadOnly
+            (
+                nameof(AxisPlacement), typeof(AxisPlacement), typeof(Axis), 
+                new FrameworkPropertyMetadata(AxisPlacement.Left,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsArrange |
+                    FrameworkPropertyMetadataOptions.AffectsParentMeasure | FrameworkPropertyMetadataOptions.AffectsParentArrange |
+                    FrameworkPropertyMetadataOptions.AffectsRender)
+            );
+
+        /// <summary>
+        /// Identifies the <see cref="AxisPlacement"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty AxisPlacementProperty = AxisPlacementPropertyKey.DependencyProperty;
 
         /// <summary>
         /// Gets a value that indicates whether the axis is horizontal or not.
@@ -292,22 +361,27 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
-        #region IsReversed
+        #region IsValueReversed
         /// <summary>
         /// Gets or sets a flag that determines whether the axis is reversed or not.
         /// </summary>
         public bool IsValueReversed
         {
-            get => isValueReversed;
-            set
-            {
-                if (value != isValueReversed)
-                {
-                    isValueReversed = value;
-                    InvalidateMeasure();
-                }
-            }
+            get => (bool)GetValue(IsValueReversedProperty);
+            set => SetValue(IsValueReversedProperty, value);
         }
+
+        /// <summary>
+        /// Identifies the <see cref="IsValueReversed"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IsValueReversedProperty = DependencyProperty.Register
+            (
+                nameof(IsValueReversed), typeof(bool), typeof(Axis), 
+                new FrameworkPropertyMetadata(false,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsArrange |
+                    FrameworkPropertyMetadataOptions.AffectsParentMeasure | FrameworkPropertyMetadataOptions.AffectsParentArrange |
+                    FrameworkPropertyMetadataOptions.AffectsRender)
+            );
         #endregion
 
         /************************************************************************/
@@ -392,30 +466,50 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
+        
+
         #region Protected methods
         /// <summary>
         /// Measures the size in layout required for child elements and determines a size this element.
         /// </summary>
-        /// <param name="availableSize">
+        /// <param name="constraint">
         /// The available size that this element can give to child elements.
         /// Infinity can be specified as a value to indicate that the element will size to whatever content is available.
         /// </param>
         /// <returns>The size that this element determines it needs during layout, based on its calculations of child element sizes.</returns>
-        protected override Size MeasureOverride(Size availableSize)
+        protected override Size MeasureOverride(Size constraint)
         {
+            // The value 1024 is used to assign to the starting size dimension if the dimenison comes in as Infinity.
+            // For reasons unknown, a size smaller than 479.5 causes the center section of the grid
+            // (where ChartBase sits) to receive a size that causes that center grid cell to go out of bounds, leaving it cut off.
+            // Whether it gets cut off or not depends on other factors. Orientation = Vertical, AxisAlignment = Values, and using
+            // the DoubleToLookupConverter to emulate getting values for the X axis labels from a lookup table causes this problem.
+            //
+            // I think it has something to do with how Grid measures. An axis sits in an Auto column or row. See:
+            // https://referencesource.microsoft.com/#PresentationFramework/src/Framework/System/Windows/Controls/Grid.cs,f9ce1d6be154348a
+            // 
+            // In the comments for Grid.MeasureOverride(), they talk about certain grid topologies that create a cyclical dependency.
+            // I think that's what's happening here.
+            // 
+            // By setting the infinite dimension to 1024, the problem goes away. It could also be set to 479.5, but I'm not sure
+            // (being on the limit, didn't check more decimal places) if some other factor might introduce the problem again.
+            //
+            // I also tried higher values, up to one trillion. Still okay. However, double.MaxValue and double.MaxValue minus one trillion
+            // don't work. The cell is cut off under all conditions and switching to Orientation = Vertical causes an exception
+            // during child.Measure(constraint) below.
             Size desiredSize = new Size
                 (
-                    availableSize.Width.IsFinite() ? availableSize.Width : 128,
-                    availableSize.Height.IsFinite() ? availableSize.Height : 128
+                    constraint.Width.IsFinite() ? constraint.Width : 1024,
+                    constraint.Height.IsFinite() ? constraint.Height : 1024
                 );
 
             ClearAll();
             CreateTicks(desiredSize);
-            CreateGeometry(desiredSize);
+            CreateGeometry();
 
             foreach (UIElement child in Children)
             {
-                child.Measure(availableSize);
+                child.Measure(constraint);
             }
 
             Size maxTextSize = MajorTicks.GetMaxTextSize();
@@ -431,8 +525,8 @@ namespace Restless.Controls.Chart
                 desiredSize.Width = majorTickPath.DesiredSize.Width + maxTextSize.Width + (LabelGapVert * 2.0);
             }
 
-            desiredSize.Width = Math.Min(desiredSize.Width, availableSize.Width);
-            desiredSize.Height = Math.Min(desiredSize.Height, availableSize.Height);
+            desiredSize.Width = Math.Min(desiredSize.Width, constraint.Width);
+            desiredSize.Height = Math.Min(desiredSize.Height, constraint.Height);
 
             return desiredSize;
         }
@@ -508,7 +602,7 @@ namespace Restless.Controls.Chart
             minorTickPath.Data = null;
         }
 
-        private void CreateGeometry(Size desiredSize)
+        private void CreateGeometry() // Size desiredSize)
         {
             GeometryGroup majorTickGeometry = new GeometryGroup();
             GeometryGroup minorTickGeometry = new GeometryGroup();

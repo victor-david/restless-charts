@@ -219,17 +219,17 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Measures the size in layout required for child elements and determines a size this element.
         /// </summary>
-        /// <param name="availableSize">
+        /// <param name="constraint">
         /// The available size that this element can give to child elements.
         /// Infinity can be specified as a value to indicate that the element will size to whatever content is available.
         /// </param>
         /// <returns>The size that this element determines it needs during layout, based on its calculations of child element sizes.</returns>
-        protected override Size MeasureOverride(Size availableSize)
+        protected override Size MeasureOverride(Size constraint)
         {
             Size desiredSize = new Size
                 (
-                    availableSize.Width.IsFinite() ? availableSize.Width : 128,
-                    availableSize.Height.IsFinite() ? availableSize.Height : 128
+                    constraint.Width.IsFinite() ? constraint.Width : 128,
+                    constraint.Height.IsFinite() ? constraint.Height : 128
                 );
 
             Children.Clear();
