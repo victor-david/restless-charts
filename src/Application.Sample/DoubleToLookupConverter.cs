@@ -2,8 +2,26 @@
 
 namespace Application.Sample
 {
+    /// <summary>
+    /// Represents a converter to provide an axis label via a lookup table.
+    /// </summary>
     public class DoubleToLookupConverter : IDoubleConverter
     {
+        #region Private
+        private readonly CategoryTable catTable;
+        #endregion
+
+        #region Constructor
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DoubleToLookupConverter"/> class.
+        /// </summary>
+        public DoubleToLookupConverter()
+        {
+            catTable = new CategoryTable();
+        }
+        #endregion
+
+        #region Public methods
         /// <summary>
         /// Converts the specified value into a string via a table lookup.
         /// </summary>
@@ -13,42 +31,10 @@ namespace Application.Sample
         public string Convert(double value, string format)
         {
             long id = (long)value;
-            // Normally, we'd use the id to lookup a corresponding category (for instance)
-            // in a table or other data structure. For this sample, we fake it.
-
-            switch (id)
-            {
-                case 1:
-                    return "Art";
-                case 2:
-                    return "Food";
-                case 3:
-                    return "Home";
-                case 4:
-                    return "Auto";
-                case 5:
-                    return "Taxes";
-                case 6:
-                    return "Gas";
-                case 7:
-                    return "Water";
-                case 8:
-                    return "Rent";
-                case 9:
-                    return "Atm";
-                case 10:
-                    return "Electric";
-                case 11:
-                    return "Cats";
-                case 12:
-                    return "Dogs";
-                case 13:
-                    return "Computer";
-                case 14:
-                    return "TV";
-                default:
-                    return $"Cat {id}";
-            }
+            // Use the id to lookup a corresponding category in our faker table.
+            CategoryRow catRow = catTable.GetCategoryRow(id);
+            return (catRow != null) ? catRow.Name : $"Cat {id}";
         }
+        #endregion
     }
 }

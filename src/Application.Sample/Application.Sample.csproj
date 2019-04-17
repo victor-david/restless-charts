@@ -58,6 +58,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CategoryRow.cs" />
+    <Compile Include="CategoryTable.cs" />
     <Compile Include="DoubleToLookupConverter.cs" />
     <Compile Include="RandomGenerator.cs" />
     <Page Include="MainWindow.xaml">

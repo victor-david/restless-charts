@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -513,7 +514,12 @@ namespace Application.Sample
             CreateTestData3();
         }
 
-        private void ButtonClickChartUserData4(object sender, RoutedEventArgs e)
+        private void ButtonClickChartUseData4(object sender, RoutedEventArgs e)
+        {
+            CreateTestData4();
+        }
+
+        private void ButtonClickChartUserData5(object sender, RoutedEventArgs e)
         {
             CreateTestData4();
         }
@@ -522,7 +528,7 @@ namespace Application.Sample
         #region Create data
         private void MainWindowLoaded(object sender, RoutedEventArgs e)
         {
-            CreateTestData1();
+            CreateTestData2();
         }
 
         /// <summary>
@@ -560,14 +566,42 @@ namespace Application.Sample
         }
 
         /// <summary>
-        /// Create data - multiple series
+        /// Creates data - faker category data.
         /// </summary>
         private void CreateTestData2()
         {
             activeDataSet = 2;
             XAxisTextFormat = null;
-            XAxisTextProvider = null;
+            XAxisTextProvider = new DoubleToLookupConverter();
             SetTopTitle("Data Set #2");
+
+            DataSeries data = DataSeries.Create();
+            data.DataInfo.SetInfo(0, "Amount", Brushes.Red);
+            data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
+            data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkRed);
+
+
+            CategoryTable catTable = new CategoryTable();
+            foreach (CategoryRow row in catTable.OrderBy((cat) => cat.Name))
+            {
+                data.Add(row.Id, row.Amount);
+            }
+
+            data.ExpandX(1.0);
+            data.MakeYAutoZero();
+
+            chart.Data = data;
+        }
+
+        /// <summary>
+        /// Create data - multiple series
+        /// </summary>
+        private void CreateTestData3()
+        {
+            activeDataSet = 3;
+            XAxisTextFormat = null;
+            XAxisTextProvider = null;
+            SetTopTitle("Data Set #3");
 
             int maxX = 20;
             int minY = 1000;
@@ -605,13 +639,13 @@ namespace Application.Sample
         /// <summary>
         /// This test data represents dates and amounts.
         /// </summary>
-        private void CreateTestData3()
+        private void CreateTestData4()
         {
-            activeDataSet = 3;
+            activeDataSet = 4;
             XAxisTextFormat = "MMM-yy";
             XAxisTextProvider = new DoubleToDateConverter();
             YAxisTextFormat = "C0";
-            SetTopTitle("Data Set #3");
+            SetTopTitle("Data Set #4");
 
             int minY = 10000;
             int maxY = 20000;
@@ -658,14 +692,14 @@ namespace Application.Sample
         /// <summary>
         /// This test data provides logarithms
         /// </summary>
-        private void CreateTestData4()
+        private void CreateTestData5()
         {
-            activeDataSet = 4;
+            activeDataSet = 5;
 
             XAxisTextFormat = null;
             XAxisTextProvider = null;
             YAxisTextFormat = null;
-            SetTopTitle("Logarithms", "Data Set #4");
+            SetTopTitle("Logarithms", "Data Set #5");
 
             int maxX = 25;
 
@@ -718,6 +752,9 @@ namespace Application.Sample
                 case 4:
                     CreateTestData4();
                     break;
+                case 5:
+                    CreateTestData5();
+                    break;
                 default:
                     CreateTestData1();
                     break;
@@ -749,9 +786,6 @@ namespace Application.Sample
                 TopTitle = textBlock;
             }
         }
-
         #endregion
-
-
     }
 }
