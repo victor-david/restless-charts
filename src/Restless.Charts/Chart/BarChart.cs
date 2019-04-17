@@ -243,8 +243,8 @@ namespace Restless.Controls.Chart
 
             if (series.Count > 0)
             {
-                double s1 = Owner.XAxis.GetCoordinateFromTick(series[0].XValue, desiredSize);
-                double sx = Owner.XAxis.GetCoordinateFromTick(series[series.Count - 1].XValue, desiredSize);
+                double s1 = Owner.XAxis.GetCoordinateFromTick(series.MinXValue, desiredSize);
+                double sx = Owner.XAxis.GetCoordinateFromTick(series.MaxXValue, desiredSize);
                 double distance = sx - s1;
                 if (distance == 0.0) return Owner.XAxis.IsHorizontal ? desiredSize.Width / 2.0 : desiredSize.Height / 2.0;
                 result = Math.Abs(distance / series.Count);

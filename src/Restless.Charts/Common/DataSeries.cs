@@ -53,6 +53,8 @@ namespace Restless.Controls.Chart
             xValues = new HashSet<double>();
             storage = new List<DataPoint>();
             DataRange = DataRange.EmptyDataRange();
+            MinXValue = double.NaN;
+            MaxXValue = double.NaN;
             DataInfo = new DataSeriesInfoCollection(MaxYSeries, Brushes.Black);
             PrimaryTextBrushes = new BrushCollection(MaxYSeries, Brushes.White);
             SecondaryTextBrushes = new BrushCollection(MaxYSeries, Brushes.Black);
@@ -68,6 +70,24 @@ namespace Restless.Controls.Chart
         public int MaxYSeries
         {
             get;
+        }
+
+        /// <summary>
+        /// Gets the minimum X value of all <see cref="DataPoint"/> objects that have been added to the series.
+        /// </summary>
+        public double MinXValue
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets the maximum X value of all <see cref="DataPoint"/> objects that have been added to the series.
+        /// </summary>
+        public double MaxXValue
+        {
+            get;
+            private set;
         }
 
         /// <summary>
@@ -132,14 +152,27 @@ namespace Restless.Controls.Chart
         /// </summary>
         /// <param name="xValue">The x value.</param>
         /// <param name="yValue">The y value</param>
+        /// <exception cref="ArgumentException">Either <paramref name="xValue"/> or <paramref name="yValue"/> is not finite.</exception>
         public void Add(double xValue, double yValue)
         {
+            if (!xValue.IsFinite() || !yValue.IsFinite())
+            {
+                throw new ArgumentException("Values must be finite");
+            }
+
             DataRange.Include(xValue, yValue);
+            MinXValue = double.IsNaN(MinXValue) ? xValue : Math.Min(MinXValue, xValue);
+            MaxXValue = double.IsNaN(MaxXValue) ? xValue : Math.Max(MaxXValue, xValue);
             DataPoint point = GetDataPointAt(xValue);
             if (point.YValues.Count < MaxYSeries)
             {
                 point.AddY(yValue);
             }
+            // XValues must remain sorted. A BarChart uses the enumerator
+            // (which uses an OrderBy<> to return in XValue order), but a LineChart
+            // uses indices so it can look ahead to the next data point for the
+            // connecting line.
+            storage.Sort(SortByXValue);
         }
 
         /// <summary>
@@ -187,6 +220,8 @@ namespace Restless.Controls.Chart
             xValues.Clear();
             DataRange.X.MakeEmpty();
             DataRange.Y.MakeEmpty();
+            MinXValue = double.NaN;
+            MaxXValue = double.NaN;
         }
         #endregion
 
@@ -278,6 +313,14 @@ namespace Restless.Controls.Chart
         /************************************************************************/
 
         #region Private methods
+        /// <summary>
+        /// Called during <see cref="Add(double, double)"/> to keep X values sorted.
+        /// </summary>
+        private int SortByXValue(DataPoint dp1, DataPoint dp2)
+        {
+            return dp1.XValue.CompareTo(dp2.XValue);
+        }
+
         /// <summary>
         /// Gets the data point object with the specified X value.
         /// If it doesn't yet exist, first creates it and adds it to storage.
