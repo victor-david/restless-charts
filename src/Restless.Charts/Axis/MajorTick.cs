@@ -1,35 +1,29 @@
 ﻿using System;
-using System.Windows;
 
 namespace Restless.Controls.Chart
 {
     /// <summary>
-    /// Represents a single major axis tick.
+    /// Extends <see cref="MinorTick"/> to represents a single major tick on an axis.
     /// </summary>
-    public class MajorTick
+    public class MajorTick : MinorTick
     {
         #region Constructor
         /// <summary>
         /// Initializes a new instance of the <see cref="MajorTick"/> class.
         /// </summary>
         /// <param name="value">The tick value.</param>
+        /// <param name="coordinate">The screen coordinate that corresponds to <paramref name="value"/>.</param>
         /// <param name="text">The label element for the tick.</param>
-        internal MajorTick(double value, TickText text)
+        internal MajorTick(double value, double coordinate, TickText text)
+            : base(value, coordinate)
         {
             Text = text ?? throw new ArgumentNullException(nameof(text));
-            Value = value;
         }
         #endregion
 
-        #region Properties
-        /// <summary>
-        /// Gets the tick value for the major tick.
-        /// </summary>
-        public double Value
-        {
-            get;
-        }
+        /************************************************************************/
 
+        #region Properties
         /// <summary>
         /// Gets the corresponding text for the major tick.
         /// </summary>
@@ -57,6 +51,8 @@ namespace Restless.Controls.Chart
         }
         #endregion
 
+        /************************************************************************/
+
         #region Public methods
         /// <summary>
         /// Gets a string representation of this instance.
@@ -64,7 +60,7 @@ namespace Restless.Controls.Chart
         /// <returns>A string that describes this instance.</returns>
         public override string ToString()
         {
-            return $"Value:{Value} Text:{Text.Text}";
+            return $"{base.ToString()} Text: {Text.Text}";
         }
         #endregion
     }

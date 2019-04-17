@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Restless.Controls.Chart
+﻿namespace Restless.Controls.Chart
 {
     /// <summary>
     /// Provides an enumeration that describes which ticks are rendered on an axis.
@@ -12,16 +10,20 @@ namespace Restless.Controls.Chart
         /// </summary>
         None,
         /// <summary>
-        /// Major ticks are rendered.
+        /// Only major ticks are rendered.
         /// </summary>
-        MajorOnly,
+        Major,
         /// <summary>
-        /// Major and minor ticks are rendered
+        /// Major and minor ticks are rendered.
         /// </summary>
-        MajorAndMinor,
+        MajorMinor,
+        /// <summary>
+        /// Major and minor ticks are rendered. Minor edge ticks (if any are needed) are rendered.
+        /// </summary>
+        MajorMinorEdge,
         /// <summary>
         /// The default visibility setting.
         /// </summary>
-        Default = MajorAndMinor,
+        Default = MajorMinorEdge,
     }
 }

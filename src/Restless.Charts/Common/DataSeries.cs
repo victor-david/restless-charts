@@ -10,9 +10,15 @@ namespace Restless.Controls.Chart
     /// Represents a data series that contains X values
     /// and one or more Y values associated with each X value.
     /// </summary>
+    /// <remarks>
+    /// The <see cref="DataSeries"/> class is esentially a matrix.
+    /// It stores X values which each have a corresponding <see cref="DataSequence"/>
+    /// of Y values. X values cannot be duplicated.
+    /// </remarks>
     public class DataSeries : IEnumerable<DataPoint>
     {
         #region Private
+        private readonly HashSet<double> xValues;
         private readonly List<DataPoint> storage;
         #endregion
 
@@ -44,9 +50,9 @@ namespace Restless.Controls.Chart
         private DataSeries(int maxYSeries)
         {
             MaxYSeries = Math.Max(1, maxYSeries);
+            xValues = new HashSet<double>();
             storage = new List<DataPoint>();
             DataRange = DataRange.EmptyDataRange();
-
             DataInfo = new DataSeriesInfoCollection(MaxYSeries, Brushes.Black);
             PrimaryTextBrushes = new BrushCollection(MaxYSeries, Brushes.White);
             SecondaryTextBrushes = new BrushCollection(MaxYSeries, Brushes.Black);
@@ -178,6 +184,7 @@ namespace Restless.Controls.Chart
         public void Clear()
         {
             storage.Clear();
+            xValues.Clear();
             DataRange.X.MakeEmpty();
             DataRange.Y.MakeEmpty();
         }
@@ -212,6 +219,64 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
+        #region Other enumerables
+        /// <summary>
+        /// Gets an enumerable of X double values. The values
+        /// are returned in ascending order.
+        /// </summary>
+        /// <returns>The enumerable.</returns>
+        public IEnumerable<double> EnumerateX()
+        {
+            foreach (DataPoint point in this)
+            {
+                yield return point.XValue;
+            }
+        }
+
+        /// <summary>
+        /// Gets an enumerable of Y double values.
+        /// </summary>
+        /// <param name="ySeriesIndex">The Y series index.</param>
+        /// <returns>The enumerable</returns>
+        /// <remarks>
+        /// This method gets an enumerable that for each X value gets the Y value at the specfied index.
+        /// For example, EnumerateY(1) returns: X[0].Y[1], X[1].Y[1], X[2].Y[1], X[3].Y[1], etc.
+        /// </remarks>
+        public IEnumerable<double> EnumerateY(int ySeriesIndex)
+        {
+            if (ySeriesIndex < 0 || ySeriesIndex > MaxYSeries - 1)
+            {
+                throw new IndexOutOfRangeException($"Y series index {ySeriesIndex} is out of range");
+            }
+            foreach (DataPoint point in this)
+            {
+                yield return point.YValues[ySeriesIndex];
+            }
+        }
+
+        /// <summary>
+        /// Gets an enumerable of Y double values.
+        /// </summary>
+        /// <returns>The enumerable.</returns>
+        /// <remarks>
+        /// This method gets an enumerable that returns all Y values.
+        /// First, each Y value in Y series zero is returned, then in Y series 1
+        /// (if it exists), etc. until all Y values have been enumerated.
+        /// </remarks>
+        public IEnumerable<double> EnumerateY()
+        {
+            for (int yIdx = 0; yIdx < MaxYSeries; yIdx++)
+            {
+                foreach (DataPoint point in this)
+                {
+                    yield return point.YValues[yIdx];
+                }
+            }
+        }
+        #endregion
+
+        /************************************************************************/
+
         #region Private methods
         /// <summary>
         /// Gets the data point object with the specified X value.
@@ -221,15 +286,30 @@ namespace Restless.Controls.Chart
         /// <returns>A DataPoint, either already in storage or freshly added.</returns>
         private DataPoint GetDataPointAt(double xValue)
         {
-            foreach (DataPoint point in this)
+            if (xValues.Contains(xValue))
             {
-                if (point.XValue == xValue) return point;
-                if (point.XValue > xValue) break;
+                return GetDataPointFromStorage(xValue);
             }
 
             DataPoint newPoint = new DataPoint(xValue);
             storage.Add(newPoint);
+            xValues.Add(xValue);
             return newPoint;
+        }
+
+        /// <summary>
+        /// Gets the data point object with the specified X value.
+        /// If not found, throws an exception. Exception here indicates programmer error.
+        /// </summary>
+        /// <param name="xValue">The value.</param>
+        /// <returns>A DataPoint.</returns>
+        private DataPoint GetDataPointFromStorage(double xValue)
+        {
+            foreach (DataPoint point in this)
+            {
+                if (point.XValue == xValue) return point;
+            }
+            throw new ArgumentOutOfRangeException(nameof(xValue), xValue, "Internal error");
         }
 
         private double GetMinYValue()
