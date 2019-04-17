@@ -72,7 +72,7 @@
         /// <returns>A string that describes this instance.</returns>
         public override string ToString()
         {
-            return $"Value:{Value} Coordinate:{Coordinate}";
+            return $"Value: {Value} Coordinate: {Coordinate}";
         }
         #endregion
     }

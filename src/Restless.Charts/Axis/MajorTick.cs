@@ -60,7 +60,7 @@ namespace Restless.Controls.Chart
         /// <returns>A string that describes this instance.</returns>
         public override string ToString()
         {
-            return $"{base.ToString()} Text:{Text.Text}";
+            return $"{base.ToString()} Text: {Text.Text}";
         }
         #endregion
     }
