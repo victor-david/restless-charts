@@ -18,12 +18,16 @@ namespace Application.Sample
     {
         #region Private
         // data
-        private ChartBase chart;
-        private BarChart barChart;
-        private LineChart lineChart;
-        private PieChart pieChart;
+        private ActiveChartType chartType;
+        private ChartControlBase chartControl;
+
+        //private ChartBase chart;
+        //private BarChart barChart;
+        //private LineChart lineChart;
+        //private PieChart pieChart;
         private int activeDataSet;
         // chart
+        private Brush chartBackground;
         private Orientation chartOrientation;
         private bool isAxisGridVisible;
         private bool isNavigationHelpButtonVisible;
@@ -47,13 +51,19 @@ namespace Application.Sample
         private bool isYAxisValueReversed;
         private object leftTitle;
         private object rightTitle;
+
         #endregion
+
+        /************************************************************************/
 
         #region Constructor
         public MainWindow()
         {
             InitializeComponent();
             DataContext = this;
+            Commands = new CommandDictionary();
+            InitializeCommands();
+            
 
             //TopTitle = TryFindResource("TopTitle");
             //LeftTitle = TryFindResource("LeftTitle");
@@ -69,31 +79,114 @@ namespace Application.Sample
             IsNavigationHelpButtonVisible = true;
             IsLegendHelpButtonVisible = true;
 
-            barChart = new BarChart() { DisplayValues = true };
-            lineChart = new LineChart()
-            {
-                DisplayValues = true,
-                LineThickness = 1.0,
-                PointSize = 10.0,
-            };
+            //barChart = new BarChart() { DisplayValues = true };
+            //lineChart = new LineChart()
+            //{
+            //    DisplayValues = true,
+            //    LineThickness = 1.0,
+            //    PointSize = 10.0,
+            //};
 
-            pieChart = new PieChart();
+            //pieChart = new PieChart();
 
-            Chart = barChart;
+            //Chart = barChart;
 
-            Loaded += MainWindowLoaded;
+            ChartBackground = Brushes.LightGoldenrodYellow;
+
+            //ChartType = ActiveChartType.Bar;
+
+            Loaded += (s, e) => ChartType = ActiveChartType.Bar;
         }
         #endregion
 
-        #region Chart properties
+        /************************************************************************/
+
+        #region Commands (property, initialization and handlers)
         /// <summary>
-        /// Gets the chart that is used for the chart container.
+        /// Gets the commands
         /// </summary>
-        public ChartBase Chart
+        public CommandDictionary Commands
         {
-            get => chart;
-            private set => SetProperty(ref chart, value);
+            get;
         }
+        
+        private void InitializeCommands()
+        {
+            Commands.Add("ChartBar", (p) => ChartType = ActiveChartType.Bar);
+            Commands.Add("ChartLine", (p) => ChartType = ActiveChartType.Line);
+            Commands.Add("ChartPie", (p) => ChartType = ActiveChartType.Pie);
+
+            Commands.Add("OrientationVert", (p) => ChartOrientation = Orientation.Vertical);
+            Commands.Add("OrientationHorz", (p) => ChartOrientation = Orientation.Horizontal);
+            Commands.Add("ToggleGrid", (p) => IsAxisGridVisible = !IsAxisGridVisible);
+        }
+        #endregion
+
+        /************************************************************************/
+
+        #region Chart properties
+        public ActiveChartType ChartType
+        {
+            get => chartType;
+            private set
+            {
+                if (SetProperty(ref chartType, value))
+                {
+                    switch (chartType)
+                    {
+                        case ActiveChartType.None:
+                            ChartControl = null;
+                            break;
+                        case ActiveChartType.Bar:
+                            ChartControl = ChartControlBase.GetChartControl<BarChartControl>();
+                            break;
+                        case ActiveChartType.Line:
+                            ChartControl = null;
+                            break;
+                        case ActiveChartType.Pie:
+                            ChartControl = null;
+                            break;
+                    }
+                    if (ChartControl != null)
+                    {
+                        ChartControl.CreateChartData();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the user control that has the active chart (bar, line , pie, etc)
+        /// </summary>
+        public ChartControlBase ChartControl
+        {
+            get => chartControl;
+            private set => SetProperty(ref chartControl, value);
+        }
+
+        /// <summary>
+        /// Gets the background color for the chart.
+        /// </summary>
+        public Brush ChartBackground
+        {
+            get => chartBackground;
+            private set => SetProperty(ref chartBackground, value);
+        }
+
+        //public DataSeries Data
+        //{
+        //    get;
+        //    private set;
+        //}
+
+        ///// <summary>
+        ///// Gets the chart that is used for the chart container.
+        ///// </summary>
+        //public ChartBase Chart
+        //{
+        //    get => chart;
+        //    private set => SetProperty(ref chart, value);
+        //}
 
         /// <summary>
         /// Gets the orientation of the chart.
@@ -303,9 +396,6 @@ namespace Application.Sample
 
         #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
-        #endregion
-
-        #region Property Changed
 
         private bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
         {
@@ -419,47 +509,47 @@ namespace Application.Sample
         #region Chart click handlers
         private void ButtonClickSwitchChartType(object sender, RoutedEventArgs e)
         {
-            if (Chart is BarChart)
-            {
-                Chart = lineChart;
-            }
-            else if (Chart is LineChart)
-            {
-                Chart = pieChart;
-            }
-            else
-            {
-                Chart = barChart;
-            }
+            //if (Chart is BarChart)
+            //{
+            //    Chart = lineChart;
+            //}
+            //else if (Chart is LineChart)
+            //{
+            //    Chart = pieChart;
+            //}
+            //else
+            //{
+            //    Chart = barChart;
+            //}
 
-            Dispatcher.Invoke(new Action(() =>
-            {
-                CreateActiveData();
-                MainChart.RestoreSizeAndPosition();
+            //Dispatcher.Invoke(new Action(() =>
+            //{
+            //    CreateActiveData();
+            //    //MainChart.RestoreSizeAndPosition();
 
-            }), DispatcherPriority.Loaded);
+            //}), DispatcherPriority.Loaded);
         }
 
         private void ButtonClickChangeChartStyle(object sender, RoutedEventArgs e)
         {
-            if (Chart is LineChart chart)
-            {
-                switch (chart.ChartStyle)
-                {
-                    case LineChartStyle.Standard:
-                        chart.ChartStyle = LineChartStyle.StandardCirclePoint;
-                        break;
-                    case LineChartStyle.StandardCirclePoint:
-                        chart.ChartStyle = LineChartStyle.StandardSquarePoint;
-                        break;
-                    case LineChartStyle.StandardSquarePoint:
-                        chart.ChartStyle = LineChartStyle.Filled;
-                        break;
-                    case LineChartStyle.Filled:
-                        chart.ChartStyle = LineChartStyle.Standard;
-                        break;
-                }
-            }
+            //if (Chart is LineChart chart)
+            //{
+            //    switch (chart.ChartStyle)
+            //    {
+            //        case LineChartStyle.Standard:
+            //            chart.ChartStyle = LineChartStyle.StandardCirclePoint;
+            //            break;
+            //        case LineChartStyle.StandardCirclePoint:
+            //            chart.ChartStyle = LineChartStyle.StandardSquarePoint;
+            //            break;
+            //        case LineChartStyle.StandardSquarePoint:
+            //            chart.ChartStyle = LineChartStyle.Filled;
+            //            break;
+            //        case LineChartStyle.Filled:
+            //            chart.ChartStyle = LineChartStyle.Standard;
+            //            break;
+            //    }
+            //}
         }
 
         private void ButtonClickChartOrientation(object sender, RoutedEventArgs e)
@@ -469,7 +559,7 @@ namespace Application.Sample
 
         private void ButtonClickRestoreChart(object sender, RoutedEventArgs e)
         {
-            MainChart.RestoreSizeAndPosition();
+            //MainChart.RestoreSizeAndPosition();
         }
 
         private void ButtonClickToggleDisplayAxisGrid(object sender, RoutedEventArgs e)
@@ -479,7 +569,7 @@ namespace Application.Sample
 
         private void ButtonClickToggleValuesDisplay(object sender, RoutedEventArgs e)
         {
-           Chart.DisplayValues = !Chart.DisplayValues;
+           //Chart.DisplayValues = !Chart.DisplayValues;
         }
 
         private void ButtonClickToggleNavigationHelpButton(object sender, RoutedEventArgs e)
@@ -533,10 +623,10 @@ namespace Application.Sample
         #endregion
 
         #region Create data
-        private void MainWindowLoaded(object sender, RoutedEventArgs e)
-        {
-            CreateTestData2();
-        }
+        //private void MainWindowLoaded(object sender, RoutedEventArgs e)
+        //{
+        //    CreateTestData2();
+        //}
 
         /// <summary>
         /// Creates data - single series.
@@ -569,7 +659,7 @@ namespace Application.Sample
             data.DataRange.Y.Include(maxY);
             data.MakeYAutoZero();
 
-            chart.Data = data;
+            //chart.Data = data;
         }
 
         /// <summary>
@@ -597,7 +687,7 @@ namespace Application.Sample
             data.ExpandX(1.0);
             data.MakeYAutoZero();
 
-            chart.Data = data;
+            //chart.Data = data;
         }
 
         /// <summary>
@@ -640,7 +730,7 @@ namespace Application.Sample
             data.DataRange.Y.Include(maxY);
             data.MakeYAutoZero();
 
-            chart.Data = data;
+            //chart.Data = data;
         }
 
         /// <summary>
@@ -660,17 +750,17 @@ namespace Application.Sample
             DataSeries data = DataSeries.Create();
             RandomGenerator generator = new RandomGenerator(minY, maxY);
 
-            if (Chart is BarChart)
-            {
-                data.DataInfo.SetInfo(0, "Balance", (Brush)TryFindResource("HeaderBrush"));
-                data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
-                data.SecondaryTextBrushes.SetBrush(0, Brushes.Black);
-            }
-            else
-            {
-                data.DataInfo.SetInfo(0, "Balance", Brushes.Firebrick);
-                data.PrimaryTextBrushes.SetBrush(0, Brushes.Transparent);
-            }
+            //if (Chart is BarChart)
+            //{
+            //    data.DataInfo.SetInfo(0, "Balance", (Brush)TryFindResource("HeaderBrush"));
+            //    data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
+            //    data.SecondaryTextBrushes.SetBrush(0, Brushes.Black);
+            //}
+            //else
+            //{
+            //    data.DataInfo.SetInfo(0, "Balance", Brushes.Firebrick);
+            //    data.PrimaryTextBrushes.SetBrush(0, Brushes.Transparent);
+            //}
 
             DateTime now = DateTime.Now;
             DateTime start = GetMonth(now, -12);
@@ -693,7 +783,7 @@ namespace Application.Sample
 
             data.MakeYAutoZero();
 
-            chart.Data = data;
+            //chart.Data = data;
         }
 
         /// <summary>
@@ -737,7 +827,7 @@ namespace Application.Sample
             data.ExpandX(1.0);
             data.MakeYAutoZero();
 
-            chart.Data = data;
+            //chart.Data = data;
         }
 
         /// <summary>

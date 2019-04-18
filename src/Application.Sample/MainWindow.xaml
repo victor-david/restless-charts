@@ -4,49 +4,55 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:conl="clr-namespace:Application.Sample"
     xmlns:conx="clr-namespace:Restless.Controls.Chart;assembly=Restless.Charts"
+    
     mc:Ignorable="d"
     Title="Sample Charts" 
     WindowStartupLocation="CenterScreen"
     Height="900" Width="1400"
     MinHeight="300" MinWidth="600">
 
-    <Window.Resources>
-        <ResourceDictionary Source="Resources.xaml"/>
-    </Window.Resources>
-
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="134"/>
+            <ColumnDefinition Width="142"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <StackPanel>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <!-- Topmost menu for common operations -->
+        <conl:CommonMenu Grid.ColumnSpan="2" />
+
+        <StackPanel Grid.Row="1" Grid.RowSpan="2">
             <HeaderedContentControl Header="Chart">
                 <StackPanel>
-                    <Button
+                    <!--<Button
                         Click="ButtonClickSwitchChartType"
                         ToolTip="Switch the chart type"
-                        Content="Switch Chart Type"/>
+                        Content="Switch Chart Type"/>-->
                     <Button
                         Click="ButtonClickChangeChartStyle"
                         ToolTip="Change the style of the chart. Currently only applies to line chart."
                         Content="Change Chart Style"/>
-                    <Button
+                    <!--<Button
                         Click="ButtonClickChartOrientation"
                         ToolTip="Toggle the orientation of the chart"
-                        Content="Toggle Orientation"/>
+                        Content="Toggle Orientation"/>-->
                     <Button
                         Click="ButtonClickRestoreChart"
                         ToolTip="Restore the original zoom level and panning. You can also double click the chart"
                         Content="Restore Size/Position"/>
-                    <Button
+                    <!--<Button
                         Click="ButtonClickToggleDisplayAxisGrid"
                         ToolTip="Show or hide the axis grid lines"
-                        Content="Toggle Grid Display"/>
-                    <Button
+                        Content="Toggle Grid Display"/>-->
+                    <!--<Button
                         Click="ButtonClickToggleValuesDisplay"
                         ToolTip="Toggle the display of values on the chart"
-                        Content="Toggle Value Display"/>
+                        Content="Toggle Value Display"/>-->
                 </StackPanel>
             </HeaderedContentControl>
 
@@ -144,7 +150,12 @@
             </HeaderedContentControl>
         </StackPanel>
         
-        <conx:ChartContainer
+        <ContentPresenter 
+            Grid.Column="1" Grid.Row="1"
+            Margin="20"
+            Content="{Binding ChartControl}"/>
+        
+        <!--<conx:ChartContainer
             Name="MainChart"
             Grid.Column="1"
             Grid.Row="1"
@@ -173,14 +184,14 @@
             IsNavigationHelpVisible="{Binding IsNavigationHelpVisible}"
             IsLegendHelpButtonVisible="{Binding IsLegendHelpButtonVisible}"
             IsLegendVisible="{Binding IsLegendVisible}"
-            Content="{Binding Chart}">
+            Content="{Binding Chart}">-->
             <!--
                 For this sample app, we bind Content property to enable switching chart types.
                 Alternatively, could declare a chart directly in the XAML, like so:
             -->
             <!--<conx:BarChart Data="{Binding Data}" DisplayValues="True"/>-->
             
-        </conx:ChartContainer>
+        <!--</conx:ChartContainer>-->
 
     </Grid>
 </Window>
