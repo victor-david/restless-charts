@@ -46,6 +46,15 @@ namespace Restless.Controls.Chart
         {
             get => storage.Count;
         }
+
+        /// <summary>
+        /// Gets the sum of all values in the data sequence.
+        /// </summary>
+        public double Sum
+        {
+            get;
+            private set;
+        }
         #endregion
 
         /************************************************************************/
@@ -58,6 +67,7 @@ namespace Restless.Controls.Chart
         internal void Add(double value)
         {
             storage.Add(value);
+            Sum += value;
         }
         #endregion
 

@@ -375,6 +375,23 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
+        /// Creates a <see cref="DrawingVisual"/> from the specified geometry
+        /// </summary>
+        /// <param name="brush">The brush to fill the geometry</param>
+        /// <param name="pen">A pen to outline the geometry, or null</param>
+        /// <param name="geometry">The geometry to use to create the visual.</param>
+        /// <returns>A drawing visual.</returns>
+        protected DrawingVisual CreateGeometryVisual(Brush brush, Pen pen, Geometry geometry)
+        {
+            DrawingVisual visual = new DrawingVisual();
+            using (DrawingContext dc = visual.RenderOpen())
+            {
+                dc.DrawGeometry(brush, pen, geometry);
+            }
+            return visual;
+        }
+
+        /// <summary>
         /// Gets a formatted text object.
         /// </summary>
         /// <param name="text">The text.</param>

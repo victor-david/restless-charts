@@ -21,6 +21,7 @@ namespace Application.Sample
         private ChartBase chart;
         private BarChart barChart;
         private LineChart lineChart;
+        private PieChart pieChart;
         private int activeDataSet;
         // chart
         private Orientation chartOrientation;
@@ -75,6 +76,8 @@ namespace Application.Sample
                 LineThickness = 1.0,
                 PointSize = 10.0,
             };
+
+            pieChart = new PieChart();
 
             Chart = barChart;
 
@@ -420,6 +423,10 @@ namespace Application.Sample
             {
                 Chart = lineChart;
             }
+            else if (Chart is LineChart)
+            {
+                Chart = pieChart;
+            }
             else
             {
                 Chart = barChart;
@@ -521,7 +528,7 @@ namespace Application.Sample
 
         private void ButtonClickChartUserData5(object sender, RoutedEventArgs e)
         {
-            CreateTestData4();
+            CreateTestData5();
         }
         #endregion
 
