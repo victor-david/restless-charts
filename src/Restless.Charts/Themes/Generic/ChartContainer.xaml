@@ -91,8 +91,8 @@
                 </Grid.RowDefinitions>
 
                 <!-- Titles -->
-                <ContentPresenter Grid.Column="2" Grid.Row="0" HorizontalAlignment="Center" Content="{TemplateBinding TopTitle}"/>
-                <ContentPresenter Grid.Column="2" Grid.Row="4" HorizontalAlignment="Center" Content="{TemplateBinding BottomTitle}"/>
+                <ContentPresenter Grid.Column="2" Grid.Row="0" HorizontalAlignment="Stretch" Content="{TemplateBinding TopTitle}"/>
+                <ContentPresenter Grid.Column="2" Grid.Row="4" HorizontalAlignment="Stretch" Content="{TemplateBinding BottomTitle}"/>
                 <ContentPresenter Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" Content="{TemplateBinding LeftTitle}">
                     <ContentPresenter.LayoutTransform>
                         <RotateTransform Angle="-90"/>
