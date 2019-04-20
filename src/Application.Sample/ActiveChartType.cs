@@ -21,5 +21,9 @@
         /// The active chart is a pie chart.
         /// </summary>
         Pie,
+        /// <summary>
+        /// The active chart is multiple,
+        /// </summary>
+        Multiple,
     }
 }

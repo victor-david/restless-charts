@@ -190,7 +190,7 @@ namespace Restless.Controls.Chart
         private void CreateMultiValueChart(Size size)
         {
             double sum = Data[0].YValues.Sum;
-            double angle = DegreeToRadian(StartAngle - 90);
+            double angle = (StartAngle - 90).ToRadians();
 
             double radius = GetRadius(size);
             Point center = new Point(size.Width / 2.0, size.Height / 2.0);
@@ -221,7 +221,8 @@ namespace Restless.Controls.Chart
 
                 // 2. Arc segment to curve around the outer limit of the pie.
                 double angleShare = value / sum * 360;
-                angle += DegreeToRadian(angleShare);
+                angle += angleShare.ToRadians();
+
                 x = Math.Cos(angle) * radius + radius;
                 y = Math.Sin(angle) * radius + radius;
                 ArcSegment arcSeg = new ArcSegment(new Point(x, y), new Size(radius, radius), angleShare, angleShare > 180, SweepDirection.Clockwise, true);
@@ -246,16 +247,6 @@ namespace Restless.Controls.Chart
         private double GetRadius(Size size)
         {
             return GetRadius(size.Width / 2.0, size.Height / 2.0);
-        }
-
-        private double RadianToDegree(double angle)
-        {
-            return angle * (180.0 / Math.PI);
-        }
-
-        private double DegreeToRadian(double angle)
-        {
-            return Math.PI * angle / 180.0;
         }
         #endregion
     }

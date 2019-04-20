@@ -1,13 +1,9 @@
 ﻿using Restless.Controls.Chart;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace Application.Sample
 {
@@ -18,22 +14,29 @@ namespace Application.Sample
     {
         #region Private
         // data
-        private ActiveChartType chartType;
-        private ChartControlBase chartControl;
 
         //private ChartBase chart;
         //private BarChart barChart;
         //private LineChart lineChart;
         //private PieChart pieChart;
-        private int activeDataSet;
+        // private int activeDataSet;
         // chart
+        private ActiveChartType chartType;
+        private ChartControlBase chartControl;
         private Brush chartBackground;
         private Orientation chartOrientation;
+        private bool displayChartValues;
         private bool isAxisGridVisible;
-        private bool isNavigationHelpButtonVisible;
-        private bool isNavigationHelpVisible;
-        private bool isLegendHelpButtonVisible;
-        private bool isLegendVisible;
+        // menu
+        private bool isOrientationMenuEnabled = true;
+        private bool isAxisMenuEnabled = true;
+        private bool isGridLineMenuEnabled = true;
+
+
+        //private bool isNavigationHelpButtonVisible;
+        //private bool isNavigationHelpVisible;
+        //private bool isLegendHelpButtonVisible;
+        //private bool isLegendVisible;
         // x
         private bool isXAxisPlacementReversed;
         private TickVisibility xAxisTickVisibility;
@@ -41,16 +44,16 @@ namespace Application.Sample
         private string xAxisTextFormat;
         private IDoubleConverter xAxisTextProvider;
         private bool isXAxisValueReversed;
-        private object topTitle;
-        private object bottomTitle;
+        //private object topTitle;
+        //private object bottomTitle;
         // y
         private bool isYAxisPlacementReversed;
         private TickVisibility yAxisTickVisibility;
         private string yAxisTextFormat;
         private IDoubleConverter yAxisTextProvider;
         private bool isYAxisValueReversed;
-        private object leftTitle;
-        private object rightTitle;
+        //private object leftTitle;
+        //private object rightTitle;
 
         #endregion
 
@@ -63,7 +66,6 @@ namespace Application.Sample
             DataContext = this;
             Commands = new CommandDictionary();
             InitializeCommands();
-            
 
             //TopTitle = TryFindResource("TopTitle");
             //LeftTitle = TryFindResource("LeftTitle");
@@ -75,9 +77,10 @@ namespace Application.Sample
             YAxisTickVisibility = TickVisibility.Default;
 
             ChartOrientation = Orientation.Vertical;
+            DisplayChartValues = true;
             IsAxisGridVisible = true;
-            IsNavigationHelpButtonVisible = true;
-            IsLegendHelpButtonVisible = true;
+            //IsNavigationHelpButtonVisible = true;
+            //IsLegendHelpButtonVisible = true;
 
             //barChart = new BarChart() { DisplayValues = true };
             //lineChart = new LineChart()
@@ -93,9 +96,7 @@ namespace Application.Sample
 
             ChartBackground = Brushes.LightGoldenrodYellow;
 
-            //ChartType = ActiveChartType.Bar;
-
-            Loaded += (s, e) => ChartType = ActiveChartType.Bar;
+            ChartType = ActiveChartType.Bar;
         }
         #endregion
 
@@ -115,16 +116,32 @@ namespace Application.Sample
             Commands.Add("ChartBar", (p) => ChartType = ActiveChartType.Bar);
             Commands.Add("ChartLine", (p) => ChartType = ActiveChartType.Line);
             Commands.Add("ChartPie", (p) => ChartType = ActiveChartType.Pie);
+            Commands.Add("ChartMultiple", (p) => ChartType = ActiveChartType.Multiple);
 
             Commands.Add("OrientationVert", (p) => ChartOrientation = Orientation.Vertical);
             Commands.Add("OrientationHorz", (p) => ChartOrientation = Orientation.Horizontal);
-            Commands.Add("ToggleGrid", (p) => IsAxisGridVisible = !IsAxisGridVisible);
+            Commands.Add("ToggleGridLines", (p) => IsAxisGridVisible = !IsAxisGridVisible);
+            Commands.Add("ToggleDisplayValues", (p) => DisplayChartValues = !DisplayChartValues);
+
+            Commands.Add("ChangeXTicks", (p) => { if (p is TickVisibility v) XAxisTickVisibility = v; });
+            Commands.Add("ToggleXPlacement", (p) => IsXAxisPlacementReversed = !IsXAxisPlacementReversed);
+            Commands.Add("ToggleXAlignment", (p) => XAxisTickAlignment = XAxisTickAlignment == TickAlignment.Range ? TickAlignment.Values : TickAlignment.Range);
+            Commands.Add("ToggleXReverse", (p) => IsXAxisValueReversed = !IsXAxisValueReversed);
+
+            // Commands.Add("ChangeYTicks", (p) => YAxisTickVisibility = GetNextTickVisibility(YAxisTickVisibility));
+            Commands.Add("ChangeYTicks", (p) => { if (p is TickVisibility v) YAxisTickVisibility = v; });
+
+            Commands.Add("ToggleYPlacement", (p) => IsYAxisPlacementReversed = !IsYAxisPlacementReversed);
+            Commands.Add("ToggleYReverse", (p) => IsYAxisValueReversed = !IsYAxisValueReversed);
         }
         #endregion
 
         /************************************************************************/
 
         #region Chart properties
+        /// <summary>
+        /// Gets the active chart type.
+        /// </summary>
         public ActiveChartType ChartType
         {
             get => chartType;
@@ -141,18 +158,29 @@ namespace Application.Sample
                             ChartControl = ChartControlBase.GetChartControl<BarChartControl>();
                             break;
                         case ActiveChartType.Line:
-                            ChartControl = null;
+                            ChartControl = ChartControlBase.GetChartControl<LineChartControl>();
                             break;
                         case ActiveChartType.Pie:
-                            ChartControl = null;
+                            ChartControl = ChartControlBase.GetChartControl<PieChartControl>();
+                            break;
+                        case ActiveChartType.Multiple:
+                            ChartControl = ChartControlBase.GetChartControl<MultipleChartControl>();
                             break;
                     }
                     if (ChartControl != null)
                     {
                         ChartControl.CreateChartData();
                     }
+                    SyncMenuItemsToChartType();
                 }
             }
+        }
+
+        private void SyncMenuItemsToChartType()
+        {
+            IsOrientationMenuEnabled = chartType != ActiveChartType.Pie && chartType != ActiveChartType.None;
+            IsAxisMenuEnabled = chartType != ActiveChartType.Pie && chartType != ActiveChartType.None;
+            IsGridLineMenuEnabled = chartType != ActiveChartType.Pie && chartType != ActiveChartType.None;
         }
 
         /// <summary>
@@ -173,21 +201,6 @@ namespace Application.Sample
             private set => SetProperty(ref chartBackground, value);
         }
 
-        //public DataSeries Data
-        //{
-        //    get;
-        //    private set;
-        //}
-
-        ///// <summary>
-        ///// Gets the chart that is used for the chart container.
-        ///// </summary>
-        //public ChartBase Chart
-        //{
-        //    get => chart;
-        //    private set => SetProperty(ref chart, value);
-        //}
-
         /// <summary>
         /// Gets the orientation of the chart.
         /// </summary>
@@ -198,6 +211,15 @@ namespace Application.Sample
         }
 
         /// <summary>
+        /// Gets a boolean value that determines if values are displayed on the chart.
+        /// </summary>
+        public bool DisplayChartValues
+        {
+            get => displayChartValues;
+            private set => SetProperty(ref displayChartValues, value);
+        }
+
+        /// <summary>
         /// Gets a value that determines if the axis grid is displayed.
         /// </summary>
         public bool IsAxisGridVisible
@@ -205,49 +227,25 @@ namespace Application.Sample
             get => isAxisGridVisible;
             private set => SetProperty(ref isAxisGridVisible, value);
         }
+        #endregion
 
-        /// <summary>
-        /// Gets a value that determines if the chart navigation help button is displayed.
-        /// If the button is not visible, you can still control the visibility
-        /// of the help itself programmatically.
-        /// </summary>
-        public bool IsNavigationHelpButtonVisible
+        #region Menu properties
+        public bool IsOrientationMenuEnabled
         {
-            get => isNavigationHelpButtonVisible;
-            private set => SetProperty(ref isNavigationHelpButtonVisible, value);
+            get => isOrientationMenuEnabled;
+            private set => SetProperty(ref isOrientationMenuEnabled, value);
         }
 
-        /// <summary>
-        /// Gets a value that determines if the chart navigation help itself is displayed.
-        /// You can control the display of navigation help programmatically or use
-        /// the built in button if it is visible.
-        /// </summary>
-        public bool IsNavigationHelpVisible
+        public bool IsAxisMenuEnabled
         {
-            get => isNavigationHelpVisible;
-            set => SetProperty(ref isNavigationHelpVisible, value);
+            get => isAxisMenuEnabled;
+            private set => SetProperty(ref isAxisMenuEnabled, value);
         }
 
-        /// <summary>
-        /// Gets a value that determines if the legend help button is displayed.
-        /// If the button is not visible, you can still control the visibility
-        /// of the legend itself programmatically.
-        /// </summary>
-        public bool IsLegendHelpButtonVisible
+        public bool IsGridLineMenuEnabled
         {
-            get => isLegendHelpButtonVisible;
-            private set => SetProperty(ref isLegendHelpButtonVisible, value);
-        }
-
-        /// <summary>
-        /// Gets a value that determines if the legend itself is displayed.
-        /// You can control the display of the legend programmatically or use
-        /// the built in button if it is visible.
-        /// </summary>
-        public bool IsLegendVisible
-        {
-            get => isLegendVisible;
-            set => SetProperty(ref isLegendVisible, value);
+            get => isGridLineMenuEnabled;
+            private set => SetProperty(ref isGridLineMenuEnabled, value);
         }
         #endregion
 
@@ -308,23 +306,23 @@ namespace Application.Sample
             private set => SetProperty(ref isXAxisValueReversed, value);
         }
 
-        /// <summary>
-        /// Gets the top title.
-        /// </summary>
-        public object TopTitle
-        {
-            get => topTitle;
-            private set => SetProperty(ref topTitle, value);
-        }
+        ///// <summary>
+        ///// Gets the top title.
+        ///// </summary>
+        //public object TopTitle
+        //{
+        //    get => topTitle;
+        //    private set => SetProperty(ref topTitle, value);
+        //}
 
-        /// <summary>
-        /// Gets the bottom title.
-        /// </summary>
-        public object BottomTitle
-        {
-            get => bottomTitle;
-            private set => SetProperty(ref bottomTitle, value);
-        }
+        ///// <summary>
+        ///// Gets the bottom title.
+        ///// </summary>
+        //public object BottomTitle
+        //{
+        //    get => bottomTitle;
+        //    private set => SetProperty(ref bottomTitle, value);
+        //}
         #endregion
 
         #region Y Axis properties
@@ -375,23 +373,23 @@ namespace Application.Sample
             private set => SetProperty(ref isYAxisValueReversed, value);
         }
 
-        /// <summary>
-        /// Gets the left title.
-        /// </summary>
-        public object LeftTitle
-        {
-            get => leftTitle;
-            private set => SetProperty(ref leftTitle, value);
-        }
+        ///// <summary>
+        ///// Gets the left title.
+        ///// </summary>
+        //public object LeftTitle
+        //{
+        //    get => leftTitle;
+        //    private set => SetProperty(ref leftTitle, value);
+        //}
 
-        /// <summary>
-        /// Gets the right title.
-        /// </summary>
-        public object RightTitle
-        {
-            get => rightTitle;
-            private set => SetProperty(ref rightTitle, value);
-        }
+        ///// <summary>
+        ///// Gets the right title.
+        ///// </summary>
+        //public object RightTitle
+        //{
+        //    get => rightTitle;
+        //    private set => SetProperty(ref rightTitle, value);
+        //}
         #endregion
 
         #region INotifyPropertyChanged
@@ -419,29 +417,29 @@ namespace Application.Sample
 
         #region X axis click handlers
 
-        private void ButtonClickXAxisPlacement(object sender, RoutedEventArgs e)
-        {
-            IsXAxisPlacementReversed = !IsXAxisPlacementReversed;
-            if (XAxisTickVisibility == TickVisibility.None)
-            {
-                XAxisTickVisibility = TickVisibility.Default;
-            }
-        }
+        //private void ButtonClickXAxisPlacement(object sender, RoutedEventArgs e)
+        //{
+        //    IsXAxisPlacementReversed = !IsXAxisPlacementReversed;
+        //    if (XAxisTickVisibility == TickVisibility.None)
+        //    {
+        //        XAxisTickVisibility = TickVisibility.Default;
+        //    }
+        //}
 
         private void ButtonClickXAxisTicks(object sender, RoutedEventArgs e)
         {
             XAxisTickVisibility = GetNextTickVisibility(XAxisTickVisibility);
         }
 
-        private void ButtonClickXAxisTickAlignment(object sender, RoutedEventArgs e)
-        {
-            XAxisTickAlignment = XAxisTickAlignment == TickAlignment.Range ? TickAlignment.Values : TickAlignment.Range;
-        }
+        //private void ButtonClickXAxisTickAlignment(object sender, RoutedEventArgs e)
+        //{
+        //    XAxisTickAlignment = XAxisTickAlignment == TickAlignment.Range ? TickAlignment.Values : TickAlignment.Range;
+        //}
 
-        private void ButtonClickXAxisReverse(object sender, RoutedEventArgs e)
-        {
-            IsXAxisValueReversed = !IsXAxisValueReversed;
-        }
+        //private void ButtonClickXAxisReverse(object sender, RoutedEventArgs e)
+        //{
+        //    IsXAxisValueReversed = !IsXAxisValueReversed;
+        //}
 
         private void ButtonClickXAxisProvider(object sender, RoutedEventArgs e)
         {
@@ -507,28 +505,28 @@ namespace Application.Sample
         #endregion
 
         #region Chart click handlers
-        private void ButtonClickSwitchChartType(object sender, RoutedEventArgs e)
-        {
-            //if (Chart is BarChart)
-            //{
-            //    Chart = lineChart;
-            //}
-            //else if (Chart is LineChart)
-            //{
-            //    Chart = pieChart;
-            //}
-            //else
-            //{
-            //    Chart = barChart;
-            //}
+        //private void ButtonClickSwitchChartType(object sender, RoutedEventArgs e)
+        //{
+        //    //if (Chart is BarChart)
+        //    //{
+        //    //    Chart = lineChart;
+        //    //}
+        //    //else if (Chart is LineChart)
+        //    //{
+        //    //    Chart = pieChart;
+        //    //}
+        //    //else
+        //    //{
+        //    //    Chart = barChart;
+        //    //}
 
-            //Dispatcher.Invoke(new Action(() =>
-            //{
-            //    CreateActiveData();
-            //    //MainChart.RestoreSizeAndPosition();
+        //    //Dispatcher.Invoke(new Action(() =>
+        //    //{
+        //    //    CreateActiveData();
+        //    //    //MainChart.RestoreSizeAndPosition();
 
-            //}), DispatcherPriority.Loaded);
-        }
+        //    //}), DispatcherPriority.Loaded);
+        //}
 
         private void ButtonClickChangeChartStyle(object sender, RoutedEventArgs e)
         {
@@ -552,10 +550,10 @@ namespace Application.Sample
             //}
         }
 
-        private void ButtonClickChartOrientation(object sender, RoutedEventArgs e)
-        {
-            ChartOrientation = ChartOrientation == Orientation.Vertical ? Orientation.Horizontal : Orientation.Vertical;
-        }
+        //private void ButtonClickChartOrientation(object sender, RoutedEventArgs e)
+        //{
+        //    ChartOrientation = ChartOrientation == Orientation.Vertical ? Orientation.Horizontal : Orientation.Vertical;
+        //}
 
         private void ButtonClickRestoreChart(object sender, RoutedEventArgs e)
         {
@@ -567,58 +565,58 @@ namespace Application.Sample
             IsAxisGridVisible = !IsAxisGridVisible;
         }
 
-        private void ButtonClickToggleValuesDisplay(object sender, RoutedEventArgs e)
-        {
-           //Chart.DisplayValues = !Chart.DisplayValues;
-        }
+        //private void ButtonClickToggleValuesDisplay(object sender, RoutedEventArgs e)
+        //{
+        //   //Chart.DisplayValues = !Chart.DisplayValues;
+        //}
 
-        private void ButtonClickToggleNavigationHelpButton(object sender, RoutedEventArgs e)
-        {
-            IsNavigationHelpButtonVisible = !IsNavigationHelpButtonVisible;
-        }
+        //private void ButtonClickToggleNavigationHelpButton(object sender, RoutedEventArgs e)
+        //{
+        //    IsNavigationHelpButtonVisible = !IsNavigationHelpButtonVisible;
+        //}
 
-        private void ButtonClickToggleNavigationHelp(object sender, RoutedEventArgs e)
-        {
-            IsLegendVisible = false;
-            IsNavigationHelpVisible = !IsNavigationHelpVisible;
-        }
+        //private void ButtonClickToggleNavigationHelp(object sender, RoutedEventArgs e)
+        //{
+        //    IsLegendVisible = false;
+        //    IsNavigationHelpVisible = !IsNavigationHelpVisible;
+        //}
 
-        private void ButtonClickToggleLegendHelpButton(object sender, RoutedEventArgs e)
-        {
-            IsLegendHelpButtonVisible = !IsLegendHelpButtonVisible;
-        }
+        //private void ButtonClickToggleLegendHelpButton(object sender, RoutedEventArgs e)
+        //{
+        //    IsLegendHelpButtonVisible = !IsLegendHelpButtonVisible;
+        //}
 
-        private void ButtonClickToggleLegendDisplay(object sender, RoutedEventArgs e)
-        {
-            IsNavigationHelpVisible = false;
-            IsLegendVisible = !IsLegendVisible;
-        }
+        //private void ButtonClickToggleLegendDisplay(object sender, RoutedEventArgs e)
+        //{
+        //    IsNavigationHelpVisible = false;
+        //    IsLegendVisible = !IsLegendVisible;
+        //}
         #endregion
 
         #region Data click handlers
         private void ButtonClickChartUseData1(object sender, RoutedEventArgs e)
         {
-            CreateTestData1();
+            //CreateTestData1();
         }
 
         private void ButtonClickChartUseData2(object sender, RoutedEventArgs e)
         {
-            CreateTestData2();
+            //CreateTestData2();
         }
 
         private void ButtonClickChartUseData3(object sender, RoutedEventArgs e)
         {
-            CreateTestData3();
+            //CreateTestData3();
         }
 
         private void ButtonClickChartUseData4(object sender, RoutedEventArgs e)
         {
-            CreateTestData4();
+            //CreateTestData4();
         }
 
         private void ButtonClickChartUserData5(object sender, RoutedEventArgs e)
         {
-            CreateTestData5();
+            //CreateTestData5();
         }
         #endregion
 
@@ -628,261 +626,261 @@ namespace Application.Sample
         //    CreateTestData2();
         //}
 
-        /// <summary>
-        /// Creates data - single series.
-        /// </summary>
-        private void CreateTestData1()
-        {
-            activeDataSet = 1;
-            XAxisTextFormat = null;
-            XAxisTextProvider = null;
-            SetTopTitle("Data Set #1");
+        ///// <summary>
+        ///// Creates data - single series.
+        ///// </summary>
+        //private void CreateTestData1()
+        //{
+        //    activeDataSet = 1;
+        //    XAxisTextFormat = null;
+        //    XAxisTextProvider = null;
+        //    SetTopTitle("Data Set #1");
 
-            int maxX = 14;
-            int minY = 100;
-            int maxY = 5000;
+        //    int maxX = 14;
+        //    int minY = 100;
+        //    int maxY = 5000;
             
-            DataSeries data = DataSeries.Create();
-            RandomGenerator generator = new RandomGenerator(minY, maxY);
+        //    DataSeries data = DataSeries.Create();
+        //    RandomGenerator generator = new RandomGenerator(minY, maxY);
 
-            data.DataInfo.SetInfo(0, "Balance", Brushes.Red);
-            data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
-            data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkRed);
+        //    data.DataInfo.SetInfo(0, "Balance", Brushes.Red);
+        //    data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
+        //    data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkRed);
 
-            for (int x = 1; x <= maxX; x++)
-            {
-                int y = generator.GetValue();
-                data.Add(x, y);
-            }
+        //    for (int x = 1; x <= maxX; x++)
+        //    {
+        //        int y = generator.GetValue();
+        //        data.Add(x, y);
+        //    }
 
-            data.ExpandX(1.0);
-            data.DataRange.Y.Include(maxY);
-            data.MakeYAutoZero();
+        //    data.ExpandX(1.0);
+        //    data.DataRange.Y.Include(maxY);
+        //    data.MakeYAutoZero();
 
-            //chart.Data = data;
-        }
+        //    //chart.Data = data;
+        //}
 
-        /// <summary>
-        /// Creates data - faker category data.
-        /// </summary>
-        private void CreateTestData2()
-        {
-            activeDataSet = 2;
-            XAxisTextFormat = null;
-            XAxisTextProvider = new DoubleToLookupConverter();
-            SetTopTitle("Data Set #2");
+        ///// <summary>
+        ///// Creates data - faker category data.
+        ///// </summary>
+        //private void CreateTestData2()
+        //{
+        //    activeDataSet = 2;
+        //    XAxisTextFormat = null;
+        //    XAxisTextProvider = new DoubleToLookupConverter();
+        //    SetTopTitle("Data Set #2");
 
-            DataSeries data = DataSeries.Create();
-            data.DataInfo.SetInfo(0, "Amount", Brushes.Red);
-            data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
-            data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkRed);
-
-
-            CategoryTable catTable = new CategoryTable();
-            foreach (CategoryRow row in catTable.OrderBy((cat) => cat.Name))
-            {
-                data.Add(row.Id, row.Amount);
-            }
-
-            data.ExpandX(1.0);
-            data.MakeYAutoZero();
-
-            //chart.Data = data;
-        }
-
-        /// <summary>
-        /// Create data - multiple series
-        /// </summary>
-        private void CreateTestData3()
-        {
-            activeDataSet = 3;
-            XAxisTextFormat = null;
-            XAxisTextProvider = null;
-            SetTopTitle("Data Set #3");
-
-            int maxX = 20;
-            int minY = 1000;
-            int maxY = 25000;
-
-            DataSeries data = DataSeries.Create(3);
-            RandomGenerator generator = new RandomGenerator(minY, maxY);
-
-            data.DataInfo.SetInfo(0, "Balance", Brushes.SteelBlue);
-            data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
-            data.SecondaryTextBrushes.SetBrush(0, Brushes.Blue);
-
-            data.DataInfo.SetInfo(1, "Transactions", Brushes.Firebrick);
-            data.DataInfo.SetInfo(2, "Callbacks", Brushes.Indigo);
-
-            for (int x = 0; x < maxX; x++)
-            {
-                int y = generator.GetValue();
-                data.Add(x, y);
-
-                y = generator.GetValue();
-                data.Add(x, y);
-
-                y = generator.GetValue();
-                data.Add(x, y);
-            }
-
-            data.ExpandX(1.0);
-            data.DataRange.Y.Include(maxY);
-            data.MakeYAutoZero();
-
-            //chart.Data = data;
-        }
-
-        /// <summary>
-        /// This test data represents dates and amounts.
-        /// </summary>
-        private void CreateTestData4()
-        {
-            activeDataSet = 4;
-            XAxisTextFormat = "MMM-yy";
-            XAxisTextProvider = new DoubleToDateConverter();
-            YAxisTextFormat = "C0";
-            SetTopTitle("Data Set #4");
-
-            int minY = 10000;
-            int maxY = 20000;
-
-            DataSeries data = DataSeries.Create();
-            RandomGenerator generator = new RandomGenerator(minY, maxY);
-
-            //if (Chart is BarChart)
-            //{
-            //    data.DataInfo.SetInfo(0, "Balance", (Brush)TryFindResource("HeaderBrush"));
-            //    data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
-            //    data.SecondaryTextBrushes.SetBrush(0, Brushes.Black);
-            //}
-            //else
-            //{
-            //    data.DataInfo.SetInfo(0, "Balance", Brushes.Firebrick);
-            //    data.PrimaryTextBrushes.SetBrush(0, Brushes.Transparent);
-            //}
-
-            DateTime now = DateTime.Now;
-            DateTime start = GetMonth(now, -12);
-
-            List<DateTime> months = new List<DateTime>();
-
-            for (int k = 0; k < 12; k++)
-            {
-                months.Add(GetMonth(start, k));
-            }
-
-            foreach (DateTime x in months)
-            {
-                int y = generator.GetValue();
-                data.Add(x.Ticks, y);
-            }
-
-            data.ExpandX(GetTicksPerDay() * 15);
-            data.DataRange.Y.Include(maxY);
-
-            data.MakeYAutoZero();
-
-            //chart.Data = data;
-        }
-
-        /// <summary>
-        /// This test data provides logarithms
-        /// </summary>
-        private void CreateTestData5()
-        {
-            activeDataSet = 5;
-
-            XAxisTextFormat = null;
-            XAxisTextProvider = null;
-            YAxisTextFormat = null;
-            SetTopTitle("Logarithms", "Data Set #5");
-
-            int maxX = 25;
-
-            DataSeries data = DataSeries.Create(3);
-
-            data.DataInfo.SetInfo(0, "Natural Logarithm", Brushes.Red);
-            data.PrimaryTextBrushes.SetBrush(0, Brushes.White);
-            data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkBlue);
-
-            data.DataInfo.SetInfo(1, "Log 10", Brushes.Blue);
-            data.DataInfo.SetInfo(2, "Log 16", Brushes.DarkGreen);
-
-            for (int x = 2; x <= maxX; x++)
-            {
-                // Base of Euler's number, about 2.71828.
-                double y = Math.Log(x);
-                data.Add(x, y);
-
-                // base 10
-                y = Math.Log10(x);
-                data.Add(x, y);
-
-                // base 16
-                y = Math.Log(x, 16);
-                data.Add(x, y);
-            }
-
-            data.ExpandX(1.0);
-            data.MakeYAutoZero();
-
-            //chart.Data = data;
-        }
-
-        /// <summary>
-        /// Creates the last used data set.
-        /// </summary>
-        private void CreateActiveData()
-        {
-            switch (activeDataSet)
-            {
-                case 1:
-                    CreateTestData1();
-                    break;
-                case 2:
-                    CreateTestData2();
-                    break;
-                case 3:
-                    CreateTestData3();
-                    break;
-                case 4:
-                    CreateTestData4();
-                    break;
-                case 5:
-                    CreateTestData5();
-                    break;
-                default:
-                    CreateTestData1();
-                    break;
-            }
-        }
+        //    DataSeries data = DataSeries.Create();
+        //    data.DataInfo.SetInfo(0, "Amount", Brushes.Red);
+        //    data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
+        //    data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkRed);
 
 
-        private DateTime GetMonth(DateTime date, int monthsToAdd)
-        {
-            return new DateTime(date.AddMonths(monthsToAdd).Year, date.AddMonths(monthsToAdd).Month, 1);
-        }
+        //    CategoryTable catTable = new CategoryTable();
+        //    foreach (CategoryRow row in catTable.OrderBy((cat) => cat.Name))
+        //    {
+        //        data.Add(row.Id, row.Amount);
+        //    }
 
-        private long GetTicksPerDay()
-        {
-            TimeSpan span = new TimeSpan(24, 0, 0);
-            return span.Ticks;
-        }
+        //    data.ExpandX(1.0);
+        //    data.MakeYAutoZero();
 
-        private void SetTopTitle(string extraText)
-        {
-            SetTopTitle("Balance History", extraText);
-        }
+        //    //chart.Data = data;
+        //}
 
-        private void SetTopTitle(string text, string extraText)
-        {
-            if (TryFindResource("TopTitle") is TextBlock textBlock)
-            {
-                textBlock.Text = $"{text} ({extraText})";
-                TopTitle = textBlock;
-            }
-        }
+        ///// <summary>
+        ///// Create data - multiple series
+        ///// </summary>
+        //private void CreateTestData3()
+        //{
+        //    activeDataSet = 3;
+        //    XAxisTextFormat = null;
+        //    XAxisTextProvider = null;
+        //    SetTopTitle("Data Set #3");
+
+        //    int maxX = 20;
+        //    int minY = 1000;
+        //    int maxY = 25000;
+
+        //    DataSeries data = DataSeries.Create(3);
+        //    RandomGenerator generator = new RandomGenerator(minY, maxY);
+
+        //    data.DataInfo.SetInfo(0, "Balance", Brushes.SteelBlue);
+        //    data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
+        //    data.SecondaryTextBrushes.SetBrush(0, Brushes.Blue);
+
+        //    data.DataInfo.SetInfo(1, "Transactions", Brushes.Firebrick);
+        //    data.DataInfo.SetInfo(2, "Callbacks", Brushes.Indigo);
+
+        //    for (int x = 0; x < maxX; x++)
+        //    {
+        //        int y = generator.GetValue();
+        //        data.Add(x, y);
+
+        //        y = generator.GetValue();
+        //        data.Add(x, y);
+
+        //        y = generator.GetValue();
+        //        data.Add(x, y);
+        //    }
+
+        //    data.ExpandX(1.0);
+        //    data.DataRange.Y.Include(maxY);
+        //    data.MakeYAutoZero();
+
+        //    //chart.Data = data;
+        //}
+
+        ///// <summary>
+        ///// This test data represents dates and amounts.
+        ///// </summary>
+        //private void CreateTestData4()
+        //{
+        //    activeDataSet = 4;
+        //    XAxisTextFormat = "MMM-yy";
+        //    XAxisTextProvider = new DoubleToDateConverter();
+        //    YAxisTextFormat = "C0";
+        //    SetTopTitle("Data Set #4");
+
+        //    int minY = 10000;
+        //    int maxY = 20000;
+
+        //    DataSeries data = DataSeries.Create();
+        //    RandomGenerator generator = new RandomGenerator(minY, maxY);
+
+        //    //if (Chart is BarChart)
+        //    //{
+        //    //    data.DataInfo.SetInfo(0, "Balance", (Brush)TryFindResource("HeaderBrush"));
+        //    //    data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
+        //    //    data.SecondaryTextBrushes.SetBrush(0, Brushes.Black);
+        //    //}
+        //    //else
+        //    //{
+        //    //    data.DataInfo.SetInfo(0, "Balance", Brushes.Firebrick);
+        //    //    data.PrimaryTextBrushes.SetBrush(0, Brushes.Transparent);
+        //    //}
+
+        //    DateTime now = DateTime.Now;
+        //    DateTime start = GetMonth(now, -12);
+
+        //    List<DateTime> months = new List<DateTime>();
+
+        //    for (int k = 0; k < 12; k++)
+        //    {
+        //        months.Add(GetMonth(start, k));
+        //    }
+
+        //    foreach (DateTime x in months)
+        //    {
+        //        int y = generator.GetValue();
+        //        data.Add(x.Ticks, y);
+        //    }
+
+        //    data.ExpandX(GetTicksPerDay() * 15);
+        //    data.DataRange.Y.Include(maxY);
+
+        //    data.MakeYAutoZero();
+
+        //    //chart.Data = data;
+        //}
+
+        ///// <summary>
+        ///// This test data provides logarithms
+        ///// </summary>
+        //private void CreateTestData5()
+        //{
+        //    activeDataSet = 5;
+
+        //    XAxisTextFormat = null;
+        //    XAxisTextProvider = null;
+        //    YAxisTextFormat = null;
+        //    SetTopTitle("Logarithms", "Data Set #5");
+
+        //    int maxX = 25;
+
+        //    DataSeries data = DataSeries.Create(3);
+
+        //    data.DataInfo.SetInfo(0, "Natural Logarithm", Brushes.Red);
+        //    data.PrimaryTextBrushes.SetBrush(0, Brushes.White);
+        //    data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkBlue);
+
+        //    data.DataInfo.SetInfo(1, "Log 10", Brushes.Blue);
+        //    data.DataInfo.SetInfo(2, "Log 16", Brushes.DarkGreen);
+
+        //    for (int x = 2; x <= maxX; x++)
+        //    {
+        //        // Base of Euler's number, about 2.71828.
+        //        double y = Math.Log(x);
+        //        data.Add(x, y);
+
+        //        // base 10
+        //        y = Math.Log10(x);
+        //        data.Add(x, y);
+
+        //        // base 16
+        //        y = Math.Log(x, 16);
+        //        data.Add(x, y);
+        //    }
+
+        //    data.ExpandX(1.0);
+        //    data.MakeYAutoZero();
+
+        //    //chart.Data = data;
+        //}
+
+        ///// <summary>
+        ///// Creates the last used data set.
+        ///// </summary>
+        //private void CreateActiveData()
+        //{
+        //    switch (activeDataSet)
+        //    {
+        //        case 1:
+        //            CreateTestData1();
+        //            break;
+        //        case 2:
+        //            CreateTestData2();
+        //            break;
+        //        case 3:
+        //            CreateTestData3();
+        //            break;
+        //        case 4:
+        //            CreateTestData4();
+        //            break;
+        //        case 5:
+        //            CreateTestData5();
+        //            break;
+        //        default:
+        //            CreateTestData1();
+        //            break;
+        //    }
+        //}
+
+
+        //private DateTime GetMonth(DateTime date, int monthsToAdd)
+        //{
+        //    return new DateTime(date.AddMonths(monthsToAdd).Year, date.AddMonths(monthsToAdd).Month, 1);
+        //}
+
+        //private long GetTicksPerDay()
+        //{
+        //    TimeSpan span = new TimeSpan(24, 0, 0);
+        //    return span.Ticks;
+        //}
+
+        //private void SetTopTitle(string extraText)
+        //{
+        //    SetTopTitle("Balance History", extraText);
+        //}
+
+        //private void SetTopTitle(string text, string extraText)
+        //{
+        //    if (TryFindResource("TopTitle") is TextBlock textBlock)
+        //    {
+        //        textBlock.Text = $"{text} ({extraText})";
+        //        TopTitle = textBlock;
+        //    }
+        //}
         #endregion
     }
 }

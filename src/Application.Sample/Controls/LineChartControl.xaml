@@ -1,5 +1,5 @@
 ﻿<con:ChartControlBase 
-    x:Class="Application.Sample.BarChartControl"
+    x:Class="Application.Sample.LineChartControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -31,9 +31,11 @@
         YAxisTextProvider="{Binding YAxisTextProvider}"
         IsYAxisValueReversed="{Binding IsYAxisValueReversed}">
         
-        <conx:BarChart 
+        <conx:LineChart 
             Data="{Binding Data, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
-            DisplayValues="{Binding DisplayChartValues}"/>
+            DisplayValues="{Binding DisplayChartValues}"
+            ChartStyle="{Binding ChartStyle, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
+            />
 
     </conx:ChartContainer>
 

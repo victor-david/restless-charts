@@ -59,6 +59,16 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ActiveChartType.cs" />
+    <Compile Include="Controls\DropDownMenuButton.cs" />
+    <Compile Include="Controls\PieChartControl.xaml.cs">
+      <DependentUpon>PieChartControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MultipleChartControl.xaml.cs">
+      <DependentUpon>MultipleChartControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\LineChartControl.xaml.cs">
+      <DependentUpon>LineChartControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\BarChartControl.xaml.cs">
       <DependentUpon>BarChartControl.xaml</DependentUpon>
     </Compile>
@@ -72,6 +82,18 @@
     <Compile Include="Converters\DoubleToLookupConverter.cs" />
     <Compile Include="Data\RandomGenerator.cs" />
     <Compile Include="Commands\RelayCommand.cs" />
+    <Page Include="Controls\PieChartControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\MultipleChartControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\LineChartControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Controls\BarChartControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

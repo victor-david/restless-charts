@@ -1,22 +1,31 @@
 ﻿using Restless.Controls.Chart;
-using System.Windows.Controls;
+using System;
 using System.Windows.Media;
 
 namespace Application.Sample
 {
     /// <summary>
-    /// Interaction logic for BarChartControl.xaml
+    /// Interaction logic for LineChartControl.xaml
     /// </summary>
-    public partial class BarChartControl : ChartControlBase
+    public partial class LineChartControl : ChartControlBase
     {
-        public BarChartControl()
+        #region Private
+        private DataSeries data;
+        private LineChartStyle chartStyle;
+        #endregion
+
+        #region Constructor
+        public LineChartControl()
         {
             InitializeComponent();
+            ChartStyle = LineChartStyle.Standard;
         }
+        #endregion
+
+        #region Properties
 
         public override int DataSetCount => 3;
-
-        private DataSeries data;
+        
 
         public DataSeries Data
         {
@@ -24,6 +33,17 @@ namespace Application.Sample
             private set => SetProperty(ref data, value);
         }
 
+        /// <summary>
+        /// Gets or sets the line chart style.
+        /// </summary>
+        public LineChartStyle ChartStyle
+        {
+            get => chartStyle;
+            set => SetProperty(ref chartStyle, value);
+        }
+        #endregion
+
+        #region Protected methods
         /// <summary>
         /// Creates chart data using the specified data set.
         /// </summary>
@@ -43,13 +63,16 @@ namespace Application.Sample
                     break;
             }
         }
+        #endregion
 
+        #region Private methods
         /// <summary>
         /// Creates data - single series.
         /// </summary>
         private void CreateChartData1()
         {
             LastDataSet = 1;
+            TopTitle.Text = "Single Series Line Chart";
             int maxX = 14;
             int minY = 100;
             int maxY = 5000;
@@ -74,14 +97,13 @@ namespace Application.Sample
             Data = data;
         }
 
+        /// <summary>
+        /// Creates data - multiple series.
+        /// </summary>
         private void CreateChartData2()
         {
             LastDataSet = 2;
-        }
-
-        private void CreateChartData3()
-        {
-            LastDataSet = 3;
+            TopTitle.Text = "Multiple Series Line Chart (Filled)";
 
             //XAxisTextFormat = null;
             //XAxisTextProvider = null;
@@ -118,8 +140,69 @@ namespace Application.Sample
             data.MakeYAutoZero();
 
             Data = data;
-
         }
 
+        /// <summary>
+        /// Creates data - logarithms
+        /// </summary>
+        private void CreateChartData3()
+        {
+            LastDataSet = 3;
+            TopTitle.Text = "Logarithms";
+
+            //XAxisTextFormat = null;
+            //XAxisTextProvider = null;
+            //YAxisTextFormat = null;
+
+            int maxX = 25;
+
+            DataSeries data = DataSeries.Create(3);
+
+            data.DataInfo.SetInfo(0, "Natural Logarithm", Brushes.Red);
+            data.PrimaryTextBrushes.SetBrush(0, Brushes.White);
+            data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkBlue);
+
+            data.DataInfo.SetInfo(1, "Log 10", Brushes.Blue);
+            data.DataInfo.SetInfo(2, "Log 16", Brushes.DarkGreen);
+
+            for (int x = 2; x <= maxX; x++)
+            {
+                // Base of Euler's number, about 2.71828.
+                double y = Math.Log(x);
+                data.Add(x, y);
+
+                // base 10
+                y = Math.Log10(x);
+                data.Add(x, y);
+
+                // base 16
+                y = Math.Log(x, 16);
+                data.Add(x, y);
+            }
+
+            data.ExpandX(1.0);
+            data.MakeYAutoZero();
+
+            Data = data;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        #endregion
     }
 }
