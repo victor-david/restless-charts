@@ -7,22 +7,22 @@ namespace Application.Sample
     /// </summary>
     public partial class MultipleChartControl : ChartControlBase
     {
+        #region Constructor
         public MultipleChartControl()
         {
             InitializeComponent();
             Line2.ChartStyle = LineChartStyle.Filled;
         }
+        #endregion
 
+        #region Properties
+        /// <summary>
+        /// Gets the count of data sets that this control supports.
+        /// </summary>
         public override int DataSetCount => 1;
+        #endregion
 
-        private DataSeries data;
-
-        public DataSeries Data
-        {
-            get => data;
-            private set => SetProperty(ref data, value);
-        }
-
+        #region Protected methods
         /// <summary>
         /// Creates chart data using the specified data set.
         /// </summary>
@@ -33,7 +33,7 @@ namespace Application.Sample
             Line1.CreateChartData(dataSet);
             Line2.CreateChartData(Line2.DataSetCount-1);
             Pie1.CreateChartData(Pie1.DataSetCount);
-
         }
+        #endregion
     }
 }

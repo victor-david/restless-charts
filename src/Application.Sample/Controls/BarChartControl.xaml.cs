@@ -1,5 +1,4 @@
 ﻿using Restless.Controls.Chart;
-using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace Application.Sample
@@ -9,21 +8,34 @@ namespace Application.Sample
     /// </summary>
     public partial class BarChartControl : ChartControlBase
     {
+        #region Private
+        private DataSeries data;
+        #endregion
+
+        #region Constructor
         public BarChartControl()
         {
             InitializeComponent();
         }
+        #endregion
 
+        #region Properties
+        /// <summary>
+        /// Gets the count of data sets that this control supports.
+        /// </summary>
         public override int DataSetCount => 3;
 
-        private DataSeries data;
-
+        /// <summary>
+        /// Gets the data.
+        /// </summary>
         public DataSeries Data
         {
             get => data;
             private set => SetProperty(ref data, value);
         }
+        #endregion
 
+        #region Protected methods
         /// <summary>
         /// Creates chart data using the specified data set.
         /// </summary>
@@ -43,7 +55,9 @@ namespace Application.Sample
                     break;
             }
         }
+        #endregion
 
+        #region Private methods
         /// <summary>
         /// Creates data - single series.
         /// </summary>
@@ -118,8 +132,8 @@ namespace Application.Sample
             data.MakeYAutoZero();
 
             Data = data;
-
         }
+        #endregion
 
     }
 }

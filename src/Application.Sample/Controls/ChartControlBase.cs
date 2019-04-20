@@ -28,8 +28,32 @@ namespace Application.Sample
             {
                 FontSize = 20.0,
                 Foreground = Brushes.DarkGray,
-                Margin = new Thickness(5)
+                Margin = new Thickness(5),
+                HorizontalAlignment = HorizontalAlignment.Center,
             };
+
+            BottomTitle = new TextBlock()
+            {
+                FontSize = 20.0,
+                Foreground = Brushes.DarkGray,
+                Margin = new Thickness(5),
+                HorizontalAlignment = HorizontalAlignment.Center,
+            };
+
+            LeftTitle = new TextBlock()
+            {
+                FontSize = 14.0,
+                Foreground = Brushes.Crimson,
+                Margin = new Thickness(5),
+            };
+
+            RightTitle = new TextBlock()
+            {
+                FontSize = 14.0,
+                Foreground = Brushes.Crimson,
+                Margin = new Thickness(5),
+            };
+
         }
 
         /// <summary>

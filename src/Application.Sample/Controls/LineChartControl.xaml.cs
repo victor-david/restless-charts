@@ -23,10 +23,14 @@ namespace Application.Sample
         #endregion
 
         #region Properties
-
+        /// <summary>
+        /// Gets the count of data sets that this control supports.
+        /// </summary>
         public override int DataSetCount => 3;
-        
 
+        /// <summary>
+        /// Gets the data.
+        /// </summary>
         public DataSeries Data
         {
             get => data;
