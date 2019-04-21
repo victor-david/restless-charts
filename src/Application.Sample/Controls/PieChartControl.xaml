@@ -8,7 +8,6 @@
     xmlns:conx="clr-namespace:Restless.Controls.Chart;assembly=Restless.Charts"
     mc:Ignorable="d"
     d:DesignHeight="450" d:DesignWidth="800">
-
     <conx:ChartContainer
         Background="{Binding ChartBackground}"
         BorderBrush="DarkBlue"
@@ -18,11 +17,26 @@
         Orientation="{Binding ChartOrientation}"
         XAxisTickVisibility="None"
         YAxisTickVisibility="None">
-        
-        <conx:PieChart
-            Data="{Binding Data, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
-            DisplayValues="{Binding DisplayChartValues}"/>
 
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <conx:PieChart
+                Data="{Binding Data, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
+                DisplayValues="{Binding DisplayChartValues}"/>
+
+            <conx:ChartLegend
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                Data="{Binding Data, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"/>
+
+        </Grid>
     </conx:ChartContainer>
+
+
+
 
 </con:ChartControlBase>

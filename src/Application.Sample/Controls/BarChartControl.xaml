@@ -8,33 +8,46 @@
     xmlns:conx="clr-namespace:Restless.Controls.Chart;assembly=Restless.Charts"
     mc:Ignorable="d"
     d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <conx:ChartContainer
+            Background="{Binding ChartBackground}"
+            BorderBrush="DarkBlue"
+            IsAxisGridVisible="{Binding IsAxisGridVisible}"
+            BorderThickness="1"
+            TopTitle="{Binding TopTitle, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
+            BottomTitle="{Binding BottomTitle, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
+            LeftTitle="{Binding LeftTitle, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
+            RightTitle="{Binding RightTitle, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
+            Orientation="{Binding ChartOrientation}"
+            IsXAxisPlacementReversed="{Binding IsXAxisPlacementReversed}"
+            XAxisTickVisibility="{Binding XAxisTickVisibility}"
+            XAxisTickAlignment="{Binding XAxisTickAlignment}"
+            XAxisTextFormat="{Binding XAxisTextFormat}"
+            XAxisTextProvider="{Binding XAxisTextProvider}"
+            IsXAxisValueReversed="{Binding IsXAxisValueReversed}"
+            IsYAxisPlacementReversed="{Binding IsYAxisPlacementReversed}"
+            YAxisTickVisibility="{Binding YAxisTickVisibility}"
+            YAxisTextFormat="{Binding YAxisTextFormat}"
+            YAxisTextProvider="{Binding YAxisTextProvider}"
+            IsYAxisValueReversed="{Binding IsYAxisValueReversed}">
 
-    <conx:ChartContainer
-        Background="{Binding ChartBackground}"
-        BorderBrush="DarkBlue"
-        IsAxisGridVisible="{Binding IsAxisGridVisible}"
-        BorderThickness="1"
-        TopTitle="{Binding TopTitle, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
-        BottomTitle="{Binding BottomTitle, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
-        LeftTitle="{Binding LeftTitle, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
-        RightTitle="{Binding RightTitle, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
-        Orientation="{Binding ChartOrientation}"
-        IsXAxisPlacementReversed="{Binding IsXAxisPlacementReversed}"
-        XAxisTickVisibility="{Binding XAxisTickVisibility}"
-        XAxisTickAlignment="{Binding XAxisTickAlignment}"
-        XAxisTextFormat="{Binding XAxisTextFormat}"
-        XAxisTextProvider="{Binding XAxisTextProvider}"
-        IsXAxisValueReversed="{Binding IsXAxisValueReversed}"
-        IsYAxisPlacementReversed="{Binding IsYAxisPlacementReversed}"
-        YAxisTickVisibility="{Binding YAxisTickVisibility}"
-        YAxisTextFormat="{Binding YAxisTextFormat}"
-        YAxisTextProvider="{Binding YAxisTextProvider}"
-        IsYAxisValueReversed="{Binding IsYAxisValueReversed}">
-        
-        <conx:BarChart 
-            Data="{Binding Data, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
-            DisplayValues="{Binding DisplayChartValues}"/>
+            <conx:BarChart 
+                Data="{Binding Data, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
+                DisplayValues="{Binding DisplayChartValues}"/>
+        </conx:ChartContainer>
 
-    </conx:ChartContainer>
+        <conx:ChartLegend
+            VerticalAlignment="Top"
+            HorizontalAlignment="Right"
+            Margin="5,10"
+            Foreground="DarkGray"
+            Background="LightYellow"
+            BorderBrush="LightGray"
+            BorderThickness="1"
+            Padding="10,10,60,10"
+            Data="{Binding Data, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"/>
+
+    </Grid>
+
 
 </con:ChartControlBase>
