@@ -56,13 +56,13 @@ namespace Restless.Controls.Chart
         #region Public methods
         /// <summary>
         /// Sets information for data series at the specified index.
-        /// This overload does not set the <see cref="DataSeriesInfo.Name"/>.
+        /// This overload sets <see cref="DataSeriesInfo.Name"/> to an auto value.
         /// </summary>
         /// <param name="index">The zero based index.</param>
         /// <param name="dataBrush">The brush used for the series data.</param>
         /// <exception cref="IndexOutOfRangeException"><paramref name="index"/> is out of range.</exception>
         /// <remarks>
-        /// This overload does not set the <see cref="DataSeriesInfo.Name"/> property; it will have a value of "Unnamed".
+        /// This overload sets the <see cref="DataSeriesInfo.Name"/> property to a value of "Series [N]".
         /// This can be useful if you aren't going to display the series info in a legend.
         /// </remarks>
         public void SetInfo(int index, Brush dataBrush)
@@ -80,6 +80,7 @@ namespace Restless.Controls.Chart
         public void SetInfo(int index, string name, Brush dataBrush)
         {
             ValidateIndex(index);
+            if (string.IsNullOrEmpty(name)) name = $"Series {index+1}";
             storage[index] = new DataSeriesInfo(name, dataBrush);
         }
 

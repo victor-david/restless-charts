@@ -1,4 +1,5 @@
 ﻿using Restless.Controls.Chart;
+using System;
 
 namespace Application.Sample
 {
@@ -59,23 +60,23 @@ namespace Application.Sample
         #region Private methods
         private void CreateChartData1()
         {
-            TopTitle.Text = "Slices of Pie";
-            CreateChartData(100, 500, 10);
+            TopTitle.Text = "Work Force";
+            CreateChartData(100, 500, 10, GetWorkForceLegend);
         }
 
         private void CreateChartData2()
         {
-            TopTitle.Text = "Pizza";
-            CreateChartData(1000, 25000, 5);
+            TopTitle.Text = "Taxes";
+            CreateChartData(1000, 25000, 5, GetTaxLegend);
         }
 
         private void CreateChartData3()
         {
             TopTitle.Text = "Departments";
-            CreateChartData(500, 1000, 6);
+            CreateChartData(500, 1000, 6, GetDepartmentLegend);
         }
 
-        private void CreateChartData(int minY, int maxY, int sliceCount)
+        private void CreateChartData(int minY, int maxY, int sliceCount, Func<int, string> getLegend)
         {
             DataSeries data = DataSeries.Create(sliceCount);
             RandomGenerator generator = new RandomGenerator(minY, maxY);
@@ -84,10 +85,45 @@ namespace Application.Sample
             {
                 int sliceValue = generator.GetValue();
                 data.Add(0, sliceValue);
-                data.DataInfo.SetInfo(slice, BrushUtility.GetRandomLinearBrush());
+                data.DataInfo.SetInfo(slice, getLegend(slice), BrushUtility.GetRandomLinearBrush());
             }
 
             Data = data;
+        }
+        #endregion
+
+        #region Legend labels (private)
+        private string[] workForce =
+        {
+            "Services", "Wholesale", "Financial", "Health Care",
+            "Federal Goverment", "Agriculture", "Retail", "Transportation",
+            "Information", "Hospitality"
+        };
+
+        private string[] taxes =
+        {
+            "Federal", "State", "Municipality", "Household", "Other"
+        };
+
+        private string[] departments =
+        {
+            "Accounting", "Human Resources", "Shipping",
+            "Information Technology", "Executive", "Legal"
+        };
+
+        private string GetWorkForceLegend(int idx)
+        {
+            return (idx < workForce.Length) ? workForce[idx] : null;
+        }
+
+        private string GetTaxLegend(int idx)
+        {
+            return (idx < taxes.Length) ? taxes[idx] : null;
+        }
+
+        private string GetDepartmentLegend(int idx)
+        {
+            return (idx < departments.Length) ? departments[idx] : null;
         }
         #endregion
     }
