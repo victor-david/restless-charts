@@ -14,7 +14,11 @@ namespace Restless.Controls.Chart
         /// </summary>
         public ChartLegend()
         {
+        }
 
+        static ChartLegend()
+        {
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(ChartLegend), new FrameworkPropertyMetadata(typeof(ChartLegend)));
         }
         #endregion
 
