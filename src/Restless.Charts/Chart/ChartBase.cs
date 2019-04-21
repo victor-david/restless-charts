@@ -112,9 +112,6 @@ namespace Restless.Controls.Chart
                 {
                     c.Owner.XAxis.SetData(c.Data);
                     c.Owner.YAxis.SetData(c.Data);
-                    //c.Owner.XAxis.Range.CreateSnapshot();
-                    //c.Owner.YAxis.Range.CreateSnapshot();
-                    c.Owner.CreateLegend(c.Data);
                     c.Owner.InvalidateMeasure();
                 }
             }
@@ -405,11 +402,6 @@ namespace Restless.Controls.Chart
             FormattedText ftext = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface(fontFamilyName), fontSize, brush);
             return ftext;
         }
-        #endregion
-
-        /************************************************************************/
-
-        #region Private methods
         #endregion
     }
 }

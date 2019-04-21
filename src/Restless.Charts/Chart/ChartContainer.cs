@@ -54,7 +54,6 @@ namespace Restless.Controls.Chart
             SnapsToDevicePixels = true;
 
             CommandBindings.Add(new CommandBinding(NavigationHelpCommand, ExecuteNavigationHelpCommand));
-            CommandBindings.Add(new CommandBinding(LegendHelpCommand, ExecuteLegendHelpCommand));
         }
 
         static ChartContainer()
@@ -910,7 +909,6 @@ namespace Restless.Controls.Chart
 
         private void ExecuteNavigationHelpCommand(object sender, ExecutedRoutedEventArgs e)
         {
-            IsLegendVisible = false;
             IsNavigationHelpVisible = !IsNavigationHelpVisible;
         }
 
@@ -952,79 +950,6 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
-        #region Legend Help
-        /// <summary>
-        /// Gets the command used to display the legend.
-        /// </summary>
-        public static readonly RoutedCommand LegendHelpCommand = new RoutedCommand();
-
-        private void ExecuteLegendHelpCommand(object sender, ExecutedRoutedEventArgs e)
-        {
-            IsNavigationHelpVisible = false;
-            IsLegendVisible = !IsLegendVisible;
-        }
-
-        /// <summary>
-        /// Gets or sets a value that determines if the legend help button is visible.
-        /// </summary>
-        public bool IsLegendHelpButtonVisible
-        {
-            get => (bool)GetValue(IsLegendHelpButtonVisibleProperty);
-            set => SetValue(IsLegendHelpButtonVisibleProperty, value);
-        }
-
-        /// <summary>
-        /// Identifies the <see cref="IsLegendHelpButtonVisible"/> dependency property.
-        /// </summary>
-        public static readonly DependencyProperty IsLegendHelpButtonVisibleProperty = DependencyProperty.Register
-            (
-                nameof(IsLegendHelpButtonVisible), typeof(bool), typeof(ChartContainer), new PropertyMetadata(true)
-            );
-
-        /// <summary>
-        /// Gets or sets a value that determines if the legend is visible.
-        /// </summary>
-        public bool IsLegendVisible
-        {
-            get => (bool)GetValue(IsLegendVisibleProperty);
-            set => SetValue(IsLegendVisibleProperty, value);
-        }
-
-        /// <summary>
-        /// Identifies the <see cref="IsLegendVisible"/> dependency property.
-        /// </summary>
-        public static readonly DependencyProperty IsLegendVisibleProperty = DependencyProperty.Register
-            (
-                nameof(IsLegendVisible), typeof(bool), typeof(ChartContainer),
-                new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault)
-            );
-        #endregion
-
-        /************************************************************************/
-
-        #region LegendContent (read only)
-        /// <summary>
-        /// Gets the legend content.
-        /// </summary>
-        public UIElement LegendContent
-        {
-            get => (UIElement)GetValue(LegendContentProperty);
-            private set => SetValue(LegendContentPropertyKey, value);
-        }
-        
-        private static readonly DependencyPropertyKey LegendContentPropertyKey = DependencyProperty.RegisterReadOnly
-            (
-                nameof(LegendContent), typeof(UIElement), typeof(ChartContainer), new PropertyMetadata(null)
-            );
-
-        /// <summary>
-        /// Identifies the <see cref="LegendContent"/> dependency property.
-        /// </summary>
-        public static readonly DependencyProperty LegendContentProperty = LegendContentPropertyKey.DependencyProperty;
-        #endregion
-
-        /************************************************************************/
-
         #region Chart
         /// <summary>
         /// Gets the chart that is currently assigned to the content of this container, or null.
@@ -1059,56 +984,6 @@ namespace Restless.Controls.Chart
             }
 
             return base.MeasureOverride(constraint);
-        }
-        #endregion
-
-        /************************************************************************/
-
-        #region Internal methods
-        /// <summary>
-        /// Creates the legend element. This method is called by <see cref="ChartBase"/>
-        /// when it receives data.
-        /// </summary>
-        /// <param name="data">The data.</param>
-        internal void CreateLegend(DataSeries data)
-        {
-            double size = 24;
-
-            Grid grid = new Grid();
-            grid.ColumnDefinitions.Add(new ColumnDefinition()
-            {
-                Width = new GridLength(size, GridUnitType.Pixel)
-            });
-            grid.ColumnDefinitions.Add(new ColumnDefinition());
-
-            int rowIdx = 0;
-            foreach (DataSeriesInfo info in data.DataInfo)
-            {
-                grid.RowDefinitions.Add(new RowDefinition()
-                {
-                    Height = new GridLength(size, GridUnitType.Pixel)
-                });
-                Border b = new Border()
-                {
-                    Background = info.DataBrush,
-                    Margin = new Thickness(2),
-                    CornerRadius = new CornerRadius(2)
-                };
-                b.SetValue(Grid.RowProperty, rowIdx);
-                grid.Children.Add(b);
-
-                TextBlock text = new TextBlock()
-                {
-                    Text = info.Name,
-                    Margin = new Thickness(2),
-                    VerticalAlignment = VerticalAlignment.Center,
-                };
-                text.SetValue(Grid.RowProperty, rowIdx);
-                text.SetValue(Grid.ColumnProperty, 1);
-                grid.Children.Add(text);
-                rowIdx++;
-            }
-            LegendContent = grid;
         }
         #endregion
 
