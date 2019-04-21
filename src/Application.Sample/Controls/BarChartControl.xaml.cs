@@ -23,7 +23,7 @@ namespace Application.Sample
         /// <summary>
         /// Gets the count of data sets that this control supports.
         /// </summary>
-        public override int DataSetCount => 3;
+        public override int DataSetCount => 2;
 
         /// <summary>
         /// Gets the data.
@@ -50,9 +50,6 @@ namespace Application.Sample
                 case 2:
                     CreateChartData2();
                     break;
-                case 3:
-                    CreateChartData3();
-                    break;
             }
         }
         #endregion
@@ -63,7 +60,8 @@ namespace Application.Sample
         /// </summary>
         private void CreateChartData1()
         {
-            LastDataSet = 1;
+            TopTitle.Text = "Bar Chart Single Data Series";
+
             int maxX = 14;
             int minY = 100;
             int maxY = 5000;
@@ -90,16 +88,7 @@ namespace Application.Sample
 
         private void CreateChartData2()
         {
-            LastDataSet = 2;
-        }
-
-        private void CreateChartData3()
-        {
-            LastDataSet = 3;
-
-            //XAxisTextFormat = null;
-            //XAxisTextProvider = null;
-            //SetTopTitle("Data Set #3");
+            TopTitle.Text = "Bar Chart Multiple Data Series";
 
             int maxX = 20;
             int minY = 1000;

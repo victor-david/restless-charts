@@ -75,7 +75,6 @@ namespace Application.Sample
         /// </summary>
         private void CreateChartData1()
         {
-            LastDataSet = 1;
             TopTitle.Text = "Single Series Line Chart";
             int maxX = 14;
             int minY = 100;
@@ -106,12 +105,7 @@ namespace Application.Sample
         /// </summary>
         private void CreateChartData2()
         {
-            LastDataSet = 2;
-            TopTitle.Text = "Multiple Series Line Chart (Filled)";
-
-            //XAxisTextFormat = null;
-            //XAxisTextProvider = null;
-            //SetTopTitle("Data Set #3");
+            TopTitle.Text = "Multiple Series Line Chart";
 
             int maxX = 20;
             int minY = 1000;
@@ -151,12 +145,8 @@ namespace Application.Sample
         /// </summary>
         private void CreateChartData3()
         {
-            LastDataSet = 3;
+            //LastDataSet = 3;
             TopTitle.Text = "Logarithms";
-
-            //XAxisTextFormat = null;
-            //XAxisTextProvider = null;
-            //YAxisTextFormat = null;
 
             int maxX = 25;
 
@@ -189,24 +179,6 @@ namespace Application.Sample
 
             Data = data;
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         #endregion
     }
 }

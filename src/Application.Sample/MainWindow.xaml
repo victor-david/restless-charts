@@ -15,10 +15,13 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="182"/>
+            <ColumnDefinition Width="186"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
@@ -26,9 +29,9 @@
         <!-- Topmost menu for common operations -->
         <conl:CommonMenu Grid.ColumnSpan="2" />
 
-        <StackPanel Grid.Row="1" Grid.RowSpan="2">
+        <!--<StackPanel Grid.Row="1" Grid.RowSpan="5">-->
             <!-- State -->
-            <HeaderedContentControl Header="State">
+            <HeaderedContentControl Grid.Row="1" Grid.RowSpan="5" Header="State">
                 <StackPanel>
                     <StackPanel.Resources>
                         <Style TargetType="HeaderedContentControl" BasedOn="{StaticResource StateHeader}"/>
@@ -41,158 +44,58 @@
                     <HeaderedContentControl Header="Y Ticks" Content="{Binding YAxisTickVisibility}"/>
                     <HeaderedContentControl Header="X Reversed" Content="{Binding IsXAxisValueReversed}"/>
                     <HeaderedContentControl Header="Y Reversed" Content="{Binding IsYAxisValueReversed}"/>
+                    <HeaderedContentControl Header="X Alignment" Content="{Binding XAxisTickAlignment}"/>
                 </StackPanel>
             </HeaderedContentControl>
-            
-            <HeaderedContentControl Header="Chart">
-                <StackPanel>
-                    <Button
-                        Click="ButtonClickChangeChartStyle"
-                        ToolTip="Change the style of the chart. Currently only applies to line chart."
-                        Content="Change Chart Style"/>
-                    <Button
-                        Click="ButtonClickRestoreChart"
-                        ToolTip="Restore the original zoom level and panning. You can also double click the chart"
-                        Content="Restore Size/Position"/>
-                </StackPanel>
-            </HeaderedContentControl>
+        <!--</StackPanel>-->
 
-            <!--<HeaderedContentControl Header="Help">
-                <StackPanel>
-                    <Button
-                        Click="ButtonClickToggleNavigationHelpButton"
-                        ToolTip="Toggle the help button off and on"
-                        Content="Toggle Help Button"/>
-                    <Button
-                        Click="ButtonClickToggleLegendHelpButton"
-                        ToolTip="Toggle the legend button on and off"
-                        Content="Toggle Legend Button"/>
-                    <Button
-                        Click="ButtonClickToggleNavigationHelp"
-                        ToolTip="Control the display of navigation help programmatically"
-                        Content="Toggle Help Popout"/>
-                    <Button
-                        Click="ButtonClickToggleLegendDisplay"
-                        ToolTip="Control the display of the legend programmatically"
-                        Content="Toggle Legend Popout"/>
-                </StackPanel>
-            </HeaderedContentControl>-->
-            
-            <!--<HeaderedContentControl Header="Data">
-                <StackPanel>
-                    <Button
-                        Click="ButtonClickChartUseData1"
-                        ToolTip="Use data set #1, a single series"
-                        Content="Use Data 1 (Single)"/>
-                    <Button
-                        Click="ButtonClickChartUseData2"
-                        ToolTip="Use data set #2, categories"
-                        Content="Use Data 2 (Category)"/>
-                    <Button
-                        Click="ButtonClickChartUseData3"
-                        ToolTip="Use data set #2, multiple series"
-                        Content="Use Data 3 (Multiple)"/>
-                    <Button
-                        Click="ButtonClickChartUseData4"
-                        ToolTip="Use data set #3, X represents dates"
-                        Content="Use Data 4 (Dates)"/>
-                    <Button
-                        Click="ButtonClickChartUserData5"
-                        ToolTip="Use data set # 4, logarithms"
-                        Content="Use Data 5 (Log)"
-                        />
-                </StackPanel>
-            </HeaderedContentControl>-->
+        <!-- Choices for bar chart -->
+        <StackPanel
+            Grid.Column="1" Grid.Row="1"
+            Style="{StaticResource StackPanelSubMenu}"
+            Visibility="{Binding IsBarChartMenuVisible, Converter={StaticResource BoolToVisibility}}">
 
-            <HeaderedContentControl Header="X Axis">
-                <StackPanel>
-                    <!--<Button 
-                        Click="ButtonClickXAxisPlacement"
-                        ToolTip="Toggle the placement of the X axis between bottom and top"
-                        Content="Toggle Placement"/>-->
-                    <!--<Button 
-                        Click="ButtonClickXAxisTicks"
-                        ToolTip="Change tick display for the X axis between major and minor, major only, and none"
-                        Content="Change Tick Display"/>-->
-                    <!--<Button
-                        Click="ButtonClickXAxisTickAlignment"
-                        ToolTip="Change the tick alignment between aligned to range / aligned to values"
-                        Content="Change Tick Alignment"/>-->
-                    <!--<Button 
-                        Click="ButtonClickXAxisReverse"
-                        ToolTip="Reverse the direction of the X axis"
-                        Content="Reverse Values"/>-->
-                    <Button
-                        Click="ButtonClickXAxisProvider"
-                        ToolTip="Change the text provider and format of the X axis"
-                        Content="Change Provider"/>
-                </StackPanel>
-            </HeaderedContentControl>
-
-            <HeaderedContentControl Header="Y Axis">
-                <StackPanel>
-                    <!--<Button
-                        Click="ButtonClickYAxisPlacement"
-                        ToolTip="Toggle the placement of the Y axis between left and right"
-                        Content="Toggle Placement"/>-->
-                    <!--<Button
-                        Click="ButtonClickYAxisTicks"
-                        ToolTip="Change tick display for the Y axis between major and minor, major only, and none"
-                        Content="Change Tick Display"/>-->
-                    <!--<Button 
-                        Click="ButtonClickYAxisReverse"
-                        ToolTip="Reverse the direction of the Y axis"
-                        Content="Reverse Values"/>-->
-                    <Button
-                        Click="ButtonClickYAxisProvider"
-                        ToolTip="Change the text provider and format of the Y axis"
-                        Content="Change Provider"/>
-                </StackPanel>
-            </HeaderedContentControl>
+            <TextBlock Text="Data"/>
+            <Button Content="Set #1" Command="{Binding Commands[SetChartData]}" CommandParameter="1"/>
+            <Button Content="Set #2" Command="{Binding Commands[SetChartData]}" CommandParameter="2"/>
         </StackPanel>
         
-        <ContentPresenter 
-            Grid.Column="1" Grid.Row="1"
-            Margin="15"
-            Content="{Binding ChartControl}"/>
-        
-        <!--<conx:ChartContainer
-            Name="MainChart"
-            Grid.Column="1"
-            Grid.Row="1"
-            Margin="20"
-            Background="LightGoldenrodYellow"
-            BorderBrush="DarkBlue"
-            IsAxisGridVisible="{Binding IsAxisGridVisible}"
-            BorderThickness="1"
-            TopTitle="{Binding TopTitle}"
-            BottomTitle="{Binding BottomTitle}"
-            LeftTitle="{Binding LeftTitle}"
-            RightTitle="{Binding RightTitle}"
-            Orientation="{Binding ChartOrientation}"
-            IsXAxisPlacementReversed="{Binding IsXAxisPlacementReversed}"
-            XAxisTickVisibility="{Binding XAxisTickVisibility}"
-            XAxisTickAlignment="{Binding XAxisTickAlignment}"
-            XAxisTextFormat="{Binding XAxisTextFormat}"
-            XAxisTextProvider="{Binding XAxisTextProvider}"
-            IsXAxisValueReversed="{Binding IsXAxisValueReversed}"
-            IsYAxisPlacementReversed="{Binding IsYAxisPlacementReversed}"
-            YAxisTickVisibility="{Binding YAxisTickVisibility}"
-            YAxisTextFormat="{Binding YAxisTextFormat}"
-            YAxisTextProvider="{Binding YAxisTextProvider}"
-            IsYAxisValueReversed="{Binding IsYAxisValueReversed}"
-            IsNavigationHelpButtonVisible="{Binding IsNavigationHelpButtonVisible}"
-            IsNavigationHelpVisible="{Binding IsNavigationHelpVisible}"
-            IsLegendHelpButtonVisible="{Binding IsLegendHelpButtonVisible}"
-            IsLegendVisible="{Binding IsLegendVisible}"
-            Content="{Binding Chart}">-->
-            <!--
-                For this sample app, we bind Content property to enable switching chart types.
-                Alternatively, could declare a chart directly in the XAML, like so:
-            -->
-            <!--<conx:BarChart Data="{Binding Data}" DisplayValues="True"/>-->
-            
-        <!--</conx:ChartContainer>-->
+        <!-- Choices for line chart -->
+        <StackPanel 
+            Grid.Column="1" Grid.Row="2" 
+            Style="{StaticResource StackPanelSubMenu}"
+            Visibility="{Binding IsLineChartMenuVisible, Converter={StaticResource BoolToVisibility}}">
 
+            <TextBlock Text="Data"/>
+            <Button Content="Set #1" Command="{Binding Commands[SetChartData]}" CommandParameter="1"/>
+            <Button Content="Set #2" Command="{Binding Commands[SetChartData]}" CommandParameter="2"/>
+            <Button Content="Set #3" Command="{Binding Commands[SetChartData]}" CommandParameter="3"/>
+
+            <Border/>
+
+            <TextBlock Text="Line Style"/>
+            <Button Content="Standard" Command="{Binding Commands[SetLineStyle]}" CommandParameter="{StaticResource LineStandard}" />
+            <Button Content="Circle" Command="{Binding Commands[SetLineStyle]}" CommandParameter="{StaticResource LineCircle}" />
+            <Button Content="Square" Command="{Binding Commands[SetLineStyle]}" CommandParameter="{StaticResource LineSquare}" />
+            <Button Content="Filled" Command="{Binding Commands[SetLineStyle]}" CommandParameter="{StaticResource LineFilled}" />
+            
+        </StackPanel>
+        
+        <!-- Choice for pie chart -->
+        <StackPanel
+            Grid.Column="1" Grid.Row="3"
+            Style="{StaticResource StackPanelSubMenu}"
+            Visibility="{Binding IsPieChartMenuVisible, Converter={StaticResource BoolToVisibility}}">
+
+            <TextBlock Text="Data"/>
+            <Button Content="Set #1" Command="{Binding Commands[SetChartData]}" CommandParameter="1"/>
+            <Button Content="Set #2" Command="{Binding Commands[SetChartData]}" CommandParameter="2"/>
+            <Button Content="Set #3" Command="{Binding Commands[SetChartData]}" CommandParameter="3"/>
+        </StackPanel>
+
+        <ContentPresenter 
+            Grid.Column="1" Grid.Row="4"
+            Margin="15,5,15,15"
+            Content="{Binding ChartControl}"/>
     </Grid>
 </Window>

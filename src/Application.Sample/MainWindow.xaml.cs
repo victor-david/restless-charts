@@ -13,13 +13,6 @@ namespace Application.Sample
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         #region Private
-        // data
-
-        //private ChartBase chart;
-        //private BarChart barChart;
-        //private LineChart lineChart;
-        //private PieChart pieChart;
-        // private int activeDataSet;
         // chart
         private ActiveChartType chartType;
         private ChartControlBase chartControl;
@@ -31,7 +24,9 @@ namespace Application.Sample
         private bool isOrientationMenuEnabled = true;
         private bool isAxisMenuEnabled = true;
         private bool isGridLineMenuEnabled = true;
-
+        private bool isBarChartMenuVisible = false;
+        private bool isLineChartMenuVisible = false;
+        private bool isPieChartMenuVisible = false;
 
         //private bool isNavigationHelpButtonVisible;
         //private bool isNavigationHelpVisible;
@@ -44,17 +39,12 @@ namespace Application.Sample
         private string xAxisTextFormat;
         private IDoubleConverter xAxisTextProvider;
         private bool isXAxisValueReversed;
-        //private object topTitle;
-        //private object bottomTitle;
         // y
         private bool isYAxisPlacementReversed;
         private TickVisibility yAxisTickVisibility;
         private string yAxisTextFormat;
         private IDoubleConverter yAxisTextProvider;
         private bool isYAxisValueReversed;
-        //private object leftTitle;
-        //private object rightTitle;
-
         #endregion
 
         /************************************************************************/
@@ -67,11 +57,6 @@ namespace Application.Sample
             Commands = new CommandDictionary();
             InitializeCommands();
 
-            //TopTitle = TryFindResource("TopTitle");
-            //LeftTitle = TryFindResource("LeftTitle");
-            //RightTitle = TryFindResource("LeftTitle");
-
-            //IsXAxisPlacementReversed = true;
             XAxisTickVisibility = TickVisibility.Default;
             XAxisTickAlignment = TickAlignment.Default;
             YAxisTickVisibility = TickVisibility.Default;
@@ -81,18 +66,6 @@ namespace Application.Sample
             IsAxisGridVisible = true;
             //IsNavigationHelpButtonVisible = true;
             //IsLegendHelpButtonVisible = true;
-
-            //barChart = new BarChart() { DisplayValues = true };
-            //lineChart = new LineChart()
-            //{
-            //    DisplayValues = true,
-            //    LineThickness = 1.0,
-            //    PointSize = 10.0,
-            //};
-
-            //pieChart = new PieChart();
-
-            //Chart = barChart;
 
             ChartBackground = Brushes.LightGoldenrodYellow;
 
@@ -123,16 +96,36 @@ namespace Application.Sample
             Commands.Add("ToggleGridLines", (p) => IsAxisGridVisible = !IsAxisGridVisible);
             Commands.Add("ToggleDisplayValues", (p) => DisplayChartValues = !DisplayChartValues);
 
-            Commands.Add("ChangeXTicks", (p) => { if (p is TickVisibility v) XAxisTickVisibility = v; });
+            Commands.Add("SetXTicks", (p) => { if (p is TickVisibility v) XAxisTickVisibility = v; });
             Commands.Add("ToggleXPlacement", (p) => IsXAxisPlacementReversed = !IsXAxisPlacementReversed);
             Commands.Add("ToggleXAlignment", (p) => XAxisTickAlignment = XAxisTickAlignment == TickAlignment.Range ? TickAlignment.Values : TickAlignment.Range);
             Commands.Add("ToggleXReverse", (p) => IsXAxisValueReversed = !IsXAxisValueReversed);
 
-            // Commands.Add("ChangeYTicks", (p) => YAxisTickVisibility = GetNextTickVisibility(YAxisTickVisibility));
-            Commands.Add("ChangeYTicks", (p) => { if (p is TickVisibility v) YAxisTickVisibility = v; });
-
+            Commands.Add("SetYTicks", (p) => { if (p is TickVisibility v) YAxisTickVisibility = v; });
             Commands.Add("ToggleYPlacement", (p) => IsYAxisPlacementReversed = !IsYAxisPlacementReversed);
             Commands.Add("ToggleYReverse", (p) => IsYAxisValueReversed = !IsYAxisValueReversed);
+            Commands.Add("SetYTicksFormat", (p) => YAxisTextFormat = (string)p);
+
+            Commands.Add("SetChartData", SetChartData);
+            Commands.Add("SetLineStyle", SetLineStyle);
+        }
+
+        private void SetChartData(object parm)
+        {
+            if (parm is string str)
+            {
+                if (int.TryParse(str, out int dataSet))
+                {
+                    ChartControl.CreateChartData(dataSet);
+                }
+            }
+        }
+        private void SetLineStyle(object parm)
+        {
+            if (ChartControl is LineChartControl lc && parm is LineChartStyle s)
+            {
+                lc.ChartStyle = s;
+            }
         }
         #endregion
 
@@ -181,6 +174,9 @@ namespace Application.Sample
             IsOrientationMenuEnabled = chartType != ActiveChartType.Pie && chartType != ActiveChartType.None;
             IsAxisMenuEnabled = chartType != ActiveChartType.Pie && chartType != ActiveChartType.None;
             IsGridLineMenuEnabled = chartType != ActiveChartType.Pie && chartType != ActiveChartType.None;
+            IsBarChartMenuVisible = chartType == ActiveChartType.Bar;
+            IsLineChartMenuVisible = chartType == ActiveChartType.Line;
+            IsPieChartMenuVisible = chartType == ActiveChartType.Pie;
         }
 
         /// <summary>
@@ -229,6 +225,8 @@ namespace Application.Sample
         }
         #endregion
 
+        /************************************************************************/
+
         #region Menu properties
         public bool IsOrientationMenuEnabled
         {
@@ -247,7 +245,27 @@ namespace Application.Sample
             get => isGridLineMenuEnabled;
             private set => SetProperty(ref isGridLineMenuEnabled, value);
         }
+
+        public bool IsBarChartMenuVisible
+        {
+            get => isBarChartMenuVisible;
+            private set => SetProperty(ref isBarChartMenuVisible, value);
+        }
+
+        public bool IsLineChartMenuVisible
+        {
+            get => isLineChartMenuVisible;
+            private set => SetProperty(ref isLineChartMenuVisible, value);
+        }
+
+        public bool IsPieChartMenuVisible
+        {
+            get => isPieChartMenuVisible;
+            private set => SetProperty(ref isPieChartMenuVisible, value);
+        }
         #endregion
+
+        /************************************************************************/
 
         #region X Axis properties
         /// <summary>
@@ -305,25 +323,9 @@ namespace Application.Sample
             get => isXAxisValueReversed;
             private set => SetProperty(ref isXAxisValueReversed, value);
         }
-
-        ///// <summary>
-        ///// Gets the top title.
-        ///// </summary>
-        //public object TopTitle
-        //{
-        //    get => topTitle;
-        //    private set => SetProperty(ref topTitle, value);
-        //}
-
-        ///// <summary>
-        ///// Gets the bottom title.
-        ///// </summary>
-        //public object BottomTitle
-        //{
-        //    get => bottomTitle;
-        //    private set => SetProperty(ref bottomTitle, value);
-        //}
         #endregion
+
+        /************************************************************************/
 
         #region Y Axis properties
         /// <summary>
@@ -372,25 +374,9 @@ namespace Application.Sample
             get => isYAxisValueReversed;
             private set => SetProperty(ref isYAxisValueReversed, value);
         }
-
-        ///// <summary>
-        ///// Gets the left title.
-        ///// </summary>
-        //public object LeftTitle
-        //{
-        //    get => leftTitle;
-        //    private set => SetProperty(ref leftTitle, value);
-        //}
-
-        ///// <summary>
-        ///// Gets the right title.
-        ///// </summary>
-        //public object RightTitle
-        //{
-        //    get => rightTitle;
-        //    private set => SetProperty(ref rightTitle, value);
-        //}
         #endregion
+
+        /************************************************************************/
 
         #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
@@ -415,6 +401,8 @@ namespace Application.Sample
         }
         #endregion
 
+        /************************************************************************/
+
         #region X axis click handlers
 
         //private void ButtonClickXAxisPlacement(object sender, RoutedEventArgs e)
@@ -426,10 +414,10 @@ namespace Application.Sample
         //    }
         //}
 
-        private void ButtonClickXAxisTicks(object sender, RoutedEventArgs e)
-        {
-            XAxisTickVisibility = GetNextTickVisibility(XAxisTickVisibility);
-        }
+        //private void ButtonClickXAxisTicks(object sender, RoutedEventArgs e)
+        //{
+        //    XAxisTickVisibility = GetNextTickVisibility(XAxisTickVisibility);
+        //}
 
         //private void ButtonClickXAxisTickAlignment(object sender, RoutedEventArgs e)
         //{
@@ -461,6 +449,8 @@ namespace Application.Sample
             }
         }
         #endregion
+
+        /************************************************************************/
 
         #region Y axis click handlers
         private void ButtonClickYAxisPlacement(object sender, RoutedEventArgs e)
@@ -504,94 +494,17 @@ namespace Application.Sample
         }
         #endregion
 
+        /************************************************************************/
+
         #region Chart click handlers
-        //private void ButtonClickSwitchChartType(object sender, RoutedEventArgs e)
-        //{
-        //    //if (Chart is BarChart)
-        //    //{
-        //    //    Chart = lineChart;
-        //    //}
-        //    //else if (Chart is LineChart)
-        //    //{
-        //    //    Chart = pieChart;
-        //    //}
-        //    //else
-        //    //{
-        //    //    Chart = barChart;
-        //    //}
-
-        //    //Dispatcher.Invoke(new Action(() =>
-        //    //{
-        //    //    CreateActiveData();
-        //    //    //MainChart.RestoreSizeAndPosition();
-
-        //    //}), DispatcherPriority.Loaded);
-        //}
-
-        private void ButtonClickChangeChartStyle(object sender, RoutedEventArgs e)
-        {
-            //if (Chart is LineChart chart)
-            //{
-            //    switch (chart.ChartStyle)
-            //    {
-            //        case LineChartStyle.Standard:
-            //            chart.ChartStyle = LineChartStyle.StandardCirclePoint;
-            //            break;
-            //        case LineChartStyle.StandardCirclePoint:
-            //            chart.ChartStyle = LineChartStyle.StandardSquarePoint;
-            //            break;
-            //        case LineChartStyle.StandardSquarePoint:
-            //            chart.ChartStyle = LineChartStyle.Filled;
-            //            break;
-            //        case LineChartStyle.Filled:
-            //            chart.ChartStyle = LineChartStyle.Standard;
-            //            break;
-            //    }
-            //}
-        }
-
-        //private void ButtonClickChartOrientation(object sender, RoutedEventArgs e)
-        //{
-        //    ChartOrientation = ChartOrientation == Orientation.Vertical ? Orientation.Horizontal : Orientation.Vertical;
-        //}
 
         private void ButtonClickRestoreChart(object sender, RoutedEventArgs e)
         {
             //MainChart.RestoreSizeAndPosition();
         }
-
-        private void ButtonClickToggleDisplayAxisGrid(object sender, RoutedEventArgs e)
-        {
-            IsAxisGridVisible = !IsAxisGridVisible;
-        }
-
-        //private void ButtonClickToggleValuesDisplay(object sender, RoutedEventArgs e)
-        //{
-        //   //Chart.DisplayValues = !Chart.DisplayValues;
-        //}
-
-        //private void ButtonClickToggleNavigationHelpButton(object sender, RoutedEventArgs e)
-        //{
-        //    IsNavigationHelpButtonVisible = !IsNavigationHelpButtonVisible;
-        //}
-
-        //private void ButtonClickToggleNavigationHelp(object sender, RoutedEventArgs e)
-        //{
-        //    IsLegendVisible = false;
-        //    IsNavigationHelpVisible = !IsNavigationHelpVisible;
-        //}
-
-        //private void ButtonClickToggleLegendHelpButton(object sender, RoutedEventArgs e)
-        //{
-        //    IsLegendHelpButtonVisible = !IsLegendHelpButtonVisible;
-        //}
-
-        //private void ButtonClickToggleLegendDisplay(object sender, RoutedEventArgs e)
-        //{
-        //    IsNavigationHelpVisible = false;
-        //    IsLegendVisible = !IsLegendVisible;
-        //}
         #endregion
+
+        /************************************************************************/
 
         #region Data click handlers
         private void ButtonClickChartUseData1(object sender, RoutedEventArgs e)
@@ -620,6 +533,8 @@ namespace Application.Sample
         }
         #endregion
 
+        /************************************************************************/
+
         #region Create data
         //private void MainWindowLoaded(object sender, RoutedEventArgs e)
         //{
@@ -639,7 +554,7 @@ namespace Application.Sample
         //    int maxX = 14;
         //    int minY = 100;
         //    int maxY = 5000;
-            
+
         //    DataSeries data = DataSeries.Create();
         //    RandomGenerator generator = new RandomGenerator(minY, maxY);
 

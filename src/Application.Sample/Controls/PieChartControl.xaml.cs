@@ -22,7 +22,7 @@ namespace Application.Sample
         /// <summary>
         /// Gets the count of data sets that this control supports.
         /// </summary>
-        public override int DataSetCount => 2;
+        public override int DataSetCount => 3;
         
         /// <summary>
         /// Gets the data.
@@ -49,45 +49,34 @@ namespace Application.Sample
                 case 2:
                     CreateChartData2();
                     break;
+                case 3:
+                    CreateChartData3();
+                    break;
             }
         }
         #endregion
 
         #region Private methods
-        /// <summary>
-        /// Creates data - single series.
-        /// </summary>
         private void CreateChartData1()
         {
-            LastDataSet = 1;
             TopTitle.Text = "Slices of Pie";
-            
-            int minY = 100;
-            int maxY = 500;
-            int sliceCount = 10;
-
-            DataSeries data = DataSeries.Create(sliceCount);
-            RandomGenerator generator = new RandomGenerator(minY, maxY);
-
-            for (int slice = 0; slice < sliceCount; slice++)
-            {
-                int y = generator.GetValue();
-                data.Add(0, y);
-                data.DataInfo.SetInfo(slice, BrushUtility.GetRandomLinearBrush());
-            }
-
-            Data = data;
+            CreateChartData(100, 500, 10);
         }
 
         private void CreateChartData2()
         {
-            LastDataSet = 2;
             TopTitle.Text = "Pizza";
+            CreateChartData(1000, 25000, 5);
+        }
 
-            int minY = 1000;
-            int maxY = 25000;
-            int sliceCount = 5;
+        private void CreateChartData3()
+        {
+            TopTitle.Text = "Departments";
+            CreateChartData(500, 1000, 6);
+        }
 
+        private void CreateChartData(int minY, int maxY, int sliceCount)
+        {
             DataSeries data = DataSeries.Create(sliceCount);
             RandomGenerator generator = new RandomGenerator(minY, maxY);
 

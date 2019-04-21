@@ -8,12 +8,6 @@
     xmlns:conx="clr-namespace:Restless.Controls.Chart;assembly=Restless.Charts"
     mc:Ignorable="d" 
     d:DesignHeight="52" d:DesignWidth="1200">
-    <UserControl.Resources>
-        <conx:TickVisibility x:Key="TickNone">None</conx:TickVisibility>
-        <conx:TickVisibility x:Key="TickMajor">Major</conx:TickVisibility>
-        <conx:TickVisibility x:Key="TickMajorMinor">MajorMinor</conx:TickVisibility>
-        <conx:TickVisibility x:Key="TickMajorMinorEdge">MajorMinorEdge</conx:TickVisibility>
-    </UserControl.Resources>
     
     <ToolBarTray HorizontalAlignment="Stretch">
         <ToolBar Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ToolBarTray}}}">
@@ -50,10 +44,10 @@
                 <con:DropDownMenuButton Content="Ticks">
                     <con:DropDownMenuButton.Menu>
                         <ContextMenu>
-                            <MenuItem Header="None" Command="{Binding Commands[ChangeXTicks]}" CommandParameter="{StaticResource TickNone}"/>
-                            <MenuItem Header="Major" Command="{Binding Commands[ChangeXTicks]}" CommandParameter="{StaticResource TickMajor}"/>
-                            <MenuItem Header="Major/Minor" Command="{Binding Commands[ChangeXTicks]}" CommandParameter="{StaticResource TickMajorMinor}"/>
-                            <MenuItem Header="Major/Minor/Edge" Command="{Binding Commands[ChangeXTicks]}" CommandParameter="{StaticResource TickMajorMinorEdge}"/>
+                            <MenuItem Header="None" Command="{Binding Commands[SetXTicks]}" CommandParameter="{StaticResource TickNone}"/>
+                            <MenuItem Header="Major" Command="{Binding Commands[SetXTicks]}" CommandParameter="{StaticResource TickMajor}"/>
+                            <MenuItem Header="Major/Minor" Command="{Binding Commands[SetXTicks]}" CommandParameter="{StaticResource TickMajorMinor}"/>
+                            <MenuItem Header="Major/Minor/Edge" Command="{Binding Commands[SetXTicks]}" CommandParameter="{StaticResource TickMajorMinorEdge}"/>
                         </ContextMenu>
                     </con:DropDownMenuButton.Menu>
                 </con:DropDownMenuButton>
@@ -70,10 +64,13 @@
                 <con:DropDownMenuButton Content="Ticks">
                     <con:DropDownMenuButton.Menu>
                         <ContextMenu>
-                            <MenuItem Header="None" Command="{Binding Commands[ChangeYTicks]}" CommandParameter="{StaticResource TickNone}"/>
-                            <MenuItem Header="Major" Command="{Binding Commands[ChangeYTicks]}" CommandParameter="{StaticResource TickMajor}"/>
-                            <MenuItem Header="Major/Minor" Command="{Binding Commands[ChangeYTicks]}" CommandParameter="{StaticResource TickMajorMinor}"/>
-                            <MenuItem Header="Major/Minor/Edge" Command="{Binding Commands[ChangeYTicks]}" CommandParameter="{StaticResource TickMajorMinorEdge}"/>
+                            <MenuItem Header="None" Command="{Binding Commands[SetYTicks]}" CommandParameter="{StaticResource TickNone}"/>
+                            <MenuItem Header="Major" Command="{Binding Commands[SetYTicks]}" CommandParameter="{StaticResource TickMajor}"/>
+                            <MenuItem Header="Major/Minor" Command="{Binding Commands[SetYTicks]}" CommandParameter="{StaticResource TickMajorMinor}"/>
+                            <MenuItem Header="Major/Minor/Edge" Command="{Binding Commands[SetYTicks]}" CommandParameter="{StaticResource TickMajorMinorEdge}"/>
+                            <Separator/>
+                            <MenuItem Header="Numeric Format" Command="{Binding Commands[SetYTicksFormat]}"/>
+                            <MenuItem Header="Currency Format" Command="{Binding Commands[SetYTicksFormat]}" CommandParameter="C2"/>
                         </ContextMenu>
                     </con:DropDownMenuButton.Menu>
                 </con:DropDownMenuButton>

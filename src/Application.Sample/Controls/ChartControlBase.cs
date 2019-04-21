@@ -22,7 +22,7 @@ namespace Application.Sample
         protected ChartControlBase()
         {
             deferredDataSet = 0;
-            LastDataSet = 1;
+            LastDataSet = 0;
             AddHandler(LoadedEvent, new RoutedEventHandler(ChartControlBaseLoaded));
             TopTitle = new TextBlock()
             {
@@ -91,7 +91,7 @@ namespace Application.Sample
         public int LastDataSet
         {
             get;
-            protected set;
+            private set;
         }
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace Application.Sample
         /// </summary>
         public void CreateChartData()
         {
-            CreateChartData(LastDataSet);
+            CreateChartData(LastDataSet > 0 ? LastDataSet : 1);
         }
 
         /// <summary>
@@ -168,7 +168,11 @@ namespace Application.Sample
             }
             else
             {
-                OnCreateChartData(dataSet);
+                if (LastDataSet != dataSet)
+                {
+                    OnCreateChartData(dataSet);
+                    LastDataSet = dataSet;
+                }
             }
         }
 
@@ -214,11 +218,11 @@ namespace Application.Sample
         #endregion
 
         #region Private methods
-        private void ChartControlBaseLoaded(object sender, System.Windows.RoutedEventArgs e)
+        private void ChartControlBaseLoaded(object sender, RoutedEventArgs e)
         {
             if (deferredDataSet > 0)
             {
-                OnCreateChartData(deferredDataSet);
+                CreateChartData(deferredDataSet);
                 deferredDataSet = 0;
             }
         }
