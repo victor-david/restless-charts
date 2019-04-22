@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Restless.Controls.Chart;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,6 +17,8 @@ namespace Application.Sample
     {
         #region Private
         private int deferredDataSet;
+        private object selectedLegendItem;
+        private int selectedLegendIndex = -1;
         private static Dictionary<Type, ChartControlBase> controlCache = new Dictionary<Type, ChartControlBase>();
         #endregion
 
@@ -145,6 +149,39 @@ namespace Application.Sample
         {
             get;
         }
+
+        /// <summary>
+        /// Gets or sets the selected legend item. See remarks.
+        /// </summary>
+        /// <remarks>
+        /// Derived classes that use an interactive legend can bind <see cref="ChartLegend.SelectedItem"/>
+        /// to this property. When it changes, <see cref="OnSelectedLegendItemChanged(DataSeriesInfo)"/>
+        /// will be called.
+        /// </remarks>
+        public object SelectedLegendItem
+        {
+            get => selectedLegendItem;
+            set
+            {
+                if (SetProperty(ref selectedLegendItem, value))
+                {
+                    OnSelectedLegendItemChanged(selectedLegendItem as DataSeriesInfo);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Gets the selected legend index.
+        /// </summary>
+        /// <remarks>
+        /// Derived classes that use an interactive legend should bind
+        /// </remarks>
+        public int SelectedLegendIndex
+        {
+            get => selectedLegendIndex;
+            protected set => SetProperty(ref selectedLegendIndex, value);
+        }
         #endregion
 
         #region Public and protected methods
@@ -181,6 +218,16 @@ namespace Application.Sample
         /// </summary>
         /// <param name="dataSet">The data set number. Between 1 and <see cref="DataSetCount"/>.</param>
         protected abstract void OnCreateChartData(int dataSet);
+
+        /// <summary>
+        /// Called when <see cref="SelectedLegendItem"/> changes. 
+        /// Override in a derived class to take appropiate action.
+        /// The base implementation does nothing.
+        /// </summary>
+        /// <param name="info">The info. May be null.</param>
+        protected virtual void OnSelectedLegendItemChanged(DataSeriesInfo info)
+        {
+        }
         #endregion
 
         #region INotifyPropertyChanged

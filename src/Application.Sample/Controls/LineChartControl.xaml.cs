@@ -1,5 +1,6 @@
 ﻿using Restless.Controls.Chart;
 using System;
+using System.Diagnostics;
 using System.Windows.Media;
 
 namespace Application.Sample
@@ -66,6 +67,12 @@ namespace Application.Sample
                     CreateChartData3();
                     break;
             }
+        }
+
+        protected override void OnSelectedLegendItemChanged(DataSeriesInfo info)
+        {
+            //Debug.WriteLine($"OnSelected {info}");
+            SelectedLegendIndex = (info != null) ? info.Index : -1;
         }
         #endregion
 

@@ -37,17 +37,18 @@
         </conx:ChartContainer>
 
         <conx:ChartLegend
+            Width="220"
             VerticalAlignment="Top"
             HorizontalAlignment="Right"
             Margin="5,10"
+            HeaderText="Legend"
+            HeaderTextForeground="DarkGray"
             Foreground="DarkGray"
             Background="LightYellow"
             BorderBrush="LightGray"
             BorderThickness="1"
-            Padding="10,10,60,10"
+            Padding="10"
+            IsInteractive="False"
             Data="{Binding Data, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"/>
-
     </Grid>
-
-
 </con:ChartControlBase>

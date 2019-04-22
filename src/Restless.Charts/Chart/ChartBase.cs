@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
@@ -192,6 +193,28 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
+        #region SelectedSeriesIndex
+        /// <summary>
+        /// Gets or sets the selected series index.
+        /// </summary>
+        public int SelectedSeriesIndex
+        {
+            get => (int)GetValue(SelectedSeriesIndexProperty);
+            set => SetValue(SelectedSeriesIndexProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="SelectedSeriesIndex"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty SelectedSeriesIndexProperty = DependencyProperty.Register
+            (
+                nameof(SelectedSeriesIndex), typeof(int), typeof(ChartBase), 
+                new FrameworkPropertyMetadata(-1, FrameworkPropertyMetadataOptions.AffectsMeasure)
+            );
+        #endregion
+
+        /************************************************************************/
+
         #region Public methods
         #endregion
 
@@ -254,10 +277,14 @@ namespace Restless.Controls.Chart
         /// <param name="startY">The Y start coordinate.</param>
         /// <param name="endX">The X end coordinate.</param>
         /// <param name="endY">The Y end coordinate.</param>
+        /// <param name="opacity">The opacity to apply to the visual.</param>
         /// <returns>The visual</returns>
-        protected DrawingVisual CreateLineVisual(Pen pen, double startX, double startY, double endX, double endY)
+        protected DrawingVisual CreateLineVisual(Pen pen, double startX, double startY, double endX, double endY, double opacity = 1.0)
         {
-            DrawingVisual visual = new DrawingVisual();
+            DrawingVisual visual = new DrawingVisual()
+            {
+                Opacity = opacity
+            };
 
             using (DrawingContext dc = visual.RenderOpen())
             {
@@ -274,10 +301,14 @@ namespace Restless.Controls.Chart
         /// <param name="x">The X center of the ellipse.</param>
         /// <param name="y">The Y center of the ellipse.</param>
         /// <param name="radius">The radius</param>
+        /// <param name="opacity">The opacity to apply to the visual.</param>
         /// <returns>A drawing visual.</returns>
-        protected DrawingVisual CreateEllipseVisual(Brush brush, Pen pen, double x, double y, double radius)
+        protected DrawingVisual CreateEllipseVisual(Brush brush, Pen pen, double x, double y, double radius, double opacity = 1.0)
         {
-            DrawingVisual visual = new DrawingVisual();
+            DrawingVisual visual = new DrawingVisual()
+            {
+                Opacity = opacity
+            };
 
             using (DrawingContext dc = visual.RenderOpen())
             {
@@ -305,10 +336,14 @@ namespace Restless.Controls.Chart
         /// <param name="y">The Y coordinate of the rectangle. The rectange will be centered on this value.</param>
         /// <param name="width">The width of the rectangle.</param>
         /// <param name="height">The height of the rectange.</param>
+        /// <param name="opacity">The opacity to apply to the visual.</param>
         /// <returns>A drawing visual.</returns>
-        protected DrawingVisual CreateRectangleVisual(Brush brush, Pen pen, double x, double y, double width, double height)
+        protected DrawingVisual CreateRectangleVisual(Brush brush, Pen pen, double x, double y, double width, double height, double opacity = 1.0)
         {
-            DrawingVisual visual = new DrawingVisual();
+            DrawingVisual visual = new DrawingVisual()
+            {
+                Opacity = opacity
+            };
 
             using (DrawingContext dc = visual.RenderOpen())
             {
@@ -337,10 +372,11 @@ namespace Restless.Controls.Chart
         /// <param name="x">The X coordinate of the rectangle. The rectange will be centered on this value.</param>
         /// <param name="y">The Y coordinate of the rectangle. The rectange will be centered on this value.</param>
         /// <param name="size">The width and height of the rectangle.</param>
+        /// <param name="opacity">The opacity to apply to the visual.</param>
         /// <returns>A drawing visual.</returns>
-        protected DrawingVisual CreateRectangleVisual(Brush brush, Pen pen, double x, double y, double size)
+        protected DrawingVisual CreateRectangleVisual(Brush brush, Pen pen, double x, double y, double size, double opacity = 1.0)
         {
-            return CreateRectangleVisual(brush, pen, x, y, size, size);
+            return CreateRectangleVisual(brush, pen, x, y, size, size, opacity);
         }
 
         /// <summary>
@@ -350,11 +386,15 @@ namespace Restless.Controls.Chart
         /// <param name="x">The X coordinate.</param>
         /// <param name="y">The Y coordinate.</param>
         /// <param name="rotation">The rotation.</param>
+        /// <param name="opacity">The opacity to apply to the visual.</param>
         /// <returns>A drawing visual.</returns>
-        protected DrawingVisual CreateTextVisual(FormattedText text, double x, double y, double rotation)
+        protected DrawingVisual CreateTextVisual(FormattedText text, double x, double y, double rotation, double opacity = 1.0)
         {
             if (text == null) throw new ArgumentNullException(nameof(text));
-            DrawingVisual visual = new DrawingVisual();
+            DrawingVisual visual = new DrawingVisual()
+            {
+                Opacity = opacity
+            };
 
             double rx = x + text.Width / 2.0;
             double ry = y + text.Height / 2.0;
@@ -377,10 +417,14 @@ namespace Restless.Controls.Chart
         /// <param name="brush">The brush to fill the geometry</param>
         /// <param name="pen">A pen to outline the geometry, or null</param>
         /// <param name="geometry">The geometry to use to create the visual.</param>
+        /// <param name="opacity">The opacity to apply to the visual.</param>
         /// <returns>A drawing visual.</returns>
-        protected DrawingVisual CreateGeometryVisual(Brush brush, Pen pen, Geometry geometry)
+        protected DrawingVisual CreateGeometryVisual(Brush brush, Pen pen, Geometry geometry, double opacity = 1.0)
         {
-            DrawingVisual visual = new DrawingVisual();
+            DrawingVisual visual = new DrawingVisual()
+            {
+                Opacity = opacity
+            };
             using (DrawingContext dc = visual.RenderOpen())
             {
                 dc.DrawGeometry(brush, pen, geometry);

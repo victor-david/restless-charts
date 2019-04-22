@@ -8,9 +8,11 @@
     xmlns:conx="clr-namespace:Restless.Controls.Chart;assembly=Restless.Charts"
     mc:Ignorable="d"
     d:DesignHeight="450" d:DesignWidth="800">
+
     <conx:ChartContainer
         Background="{Binding ChartBackground}"
         BorderBrush="DarkBlue"
+        IsNavigationEnabled="False"
         IsAxisGridVisible="False"
         BorderThickness="1"
         TopTitle="{Binding TopTitle, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
@@ -20,7 +22,7 @@
 
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="2.25*"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
@@ -31,12 +33,13 @@
             <conx:ChartLegend
                 Grid.Column="1"
                 VerticalAlignment="Center"
+                Margin="0,0,8,0"
+                HeaderText="Legend"
+                HeaderTextForeground="DarkGray"
+                Foreground="DarkGray"
+                SelectedItem="{Binding SelectedLegendItem, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
                 Data="{Binding Data, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"/>
-
         </Grid>
     </conx:ChartContainer>
-
-
-
 
 </con:ChartControlBase>

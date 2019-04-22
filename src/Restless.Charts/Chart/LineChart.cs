@@ -199,13 +199,16 @@ namespace Restless.Controls.Chart
                         double xc = Owner.Orientation == Orientation.Vertical ? x : y;
                         double yc = Owner.Orientation == Orientation.Vertical ? y : x;
 
+                        double pointSize = GetPointSize(yIdx);
+                        double opacity = GetOpacity(yIdx);
+
                         if (ChartStyle == LineChartStyle.StandardSquarePoint)
                         {
-                            Children.Add(CreateRectangleVisual(Data.DataInfo[yIdx].DataBrush, null, xc, yc, PointSize));
+                            Children.Add(CreateRectangleVisual(Data.DataInfo[yIdx].DataBrush, null, xc, yc, pointSize, opacity));
                         }
                         else
                         {
-                            Children.Add(CreateEllipseVisual(Data.DataInfo[yIdx].DataBrush, null, xc, yc, PointSize / 2.0));
+                            Children.Add(CreateEllipseVisual(Data.DataInfo[yIdx].DataBrush, null, xc, yc, pointSize / 2.0, opacity));
                         }
                     }
                 }
@@ -222,7 +225,7 @@ namespace Restless.Controls.Chart
 
         private void CreateLines(int yIdx, double xMax, double yMax, Size desiredSize)
         {
-            Pen pen = new Pen(Data.DataInfo[yIdx].DataBrush, LineThickness);
+            Pen pen = new Pen(Data.DataInfo[yIdx].DataBrush, GetLineThickness(yIdx));
             double yZero = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
 
             for (int dpIdx = 0; dpIdx < Data.Count; dpIdx++)
@@ -240,13 +243,15 @@ namespace Restless.Controls.Chart
                     if (IsVisualCreatable(xStart, yStart, yZero, xMax, yMax, LineThickness) || 
                         IsVisualCreatable(xEnd, yEnd, yZero, xMax, yMax, LineThickness))
                     {
+                        double opacity = GetOpacity(yIdx);
+
                         if (Owner.Orientation == Orientation.Vertical)
                         {
-                            Children.Add(CreateLineVisual(pen, xStart, yStart, xEnd, yEnd));
+                            Children.Add(CreateLineVisual(pen, xStart, yStart, xEnd, yEnd, opacity));
                         }
                         else
                         {
-                            Children.Add(CreateLineVisual(pen, yStart, xStart, yEnd, xEnd));
+                            Children.Add(CreateLineVisual(pen, yStart, xStart, yEnd, xEnd, opacity));
                         }
                     }
                 }
@@ -307,7 +312,10 @@ namespace Restless.Controls.Chart
 
             geo.Freeze();
 
-            DrawingVisual visual = new DrawingVisual();
+            DrawingVisual visual = new DrawingVisual()
+            {
+                Opacity = GetOpacity(yIdx)
+            };
 
             using (DrawingContext dc = visual.RenderOpen())
             {
@@ -315,6 +323,25 @@ namespace Restless.Controls.Chart
             }
 
             Children.Add(visual);
+        }
+
+        private double GetLineThickness(int yIdx)
+        {
+            return yIdx == SelectedSeriesIndex ? LineThickness * 2.0 : LineThickness;
+        }
+
+        private double GetPointSize(int yIdx)
+        {
+            return yIdx == SelectedSeriesIndex ? PointSize * 1.5 : PointSize;
+        }
+
+        private double GetOpacity(int yIdx)
+        {
+            if (SelectedSeriesIndex != -1)
+            {
+                return yIdx == SelectedSeriesIndex ? 1.0 : 0.125;
+            }
+            return 1.0;
         }
 
         private bool IsVisualCreatable(double xc, double yc, double ycz, double xMax, double yMax, double lineWidth)

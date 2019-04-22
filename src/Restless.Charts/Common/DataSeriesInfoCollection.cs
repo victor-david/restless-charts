@@ -25,9 +25,9 @@ namespace Restless.Controls.Chart
         internal DataSeriesInfoCollection(int capacity, Brush defaultBrush)
         {
             storage = new List<DataSeriesInfo>();
-            for (int k = 0; k < capacity; k++)
+            for (int idx = 0; idx < capacity; idx++)
             {
-                storage.Add(new DataSeriesInfo(null, defaultBrush));
+                storage.Add(new DataSeriesInfo(idx, $"Series {idx+1}", defaultBrush));
             }
         }
         #endregion
@@ -81,7 +81,7 @@ namespace Restless.Controls.Chart
         {
             ValidateIndex(index);
             if (string.IsNullOrEmpty(name)) name = $"Series {index+1}";
-            storage[index] = new DataSeriesInfo(name, dataBrush);
+            storage[index] = new DataSeriesInfo(index, name, dataBrush);
         }
 
         /// <summary>

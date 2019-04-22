@@ -707,7 +707,36 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
-        #region IsKeyboardNavigationEnabled
+        #region NavigationEnabled
+        /// <summary>
+        /// Gets or sets a value that determines if chart navigation is enabled.
+        /// When this property is false, all navigation is disabled. This is a dependency property.
+        /// </summary>
+        public bool IsNavigationEnabled
+        {
+            get => (bool)GetValue(IsNavigationEnabledProperty);
+            set => SetValue(IsNavigationEnabledProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="IsNavigationEnabled"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty IsNavigationEnabledProperty = DependencyProperty.Register
+            (
+                nameof(IsNavigationEnabled), typeof(bool), typeof(ChartContainer), new PropertyMetadata
+                    (
+                        ChartNavigation.IsNavigationEnabledDefault, OnIsNavigationEnabledChanged
+                    )
+            );
+
+        private static void OnIsNavigationEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is ChartContainer c)
+            {
+                c.Navigation.IsNavigationEnabled = c.IsNavigationEnabled;
+            }
+        }
+
         /// <summary>
         /// Gets or sets a value that determines if chart navigation can be performed using the keyboard.
         /// This is a dependency property.
