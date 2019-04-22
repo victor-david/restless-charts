@@ -88,15 +88,39 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
-        /// Sets border brush and border thickness for all series
+        /// Sets the primary text brush for all series.
         /// </summary>
-        /// <param name="border">The border brush.</param>
-        /// <param name="borderThickness">The border thickness.</param>
-        public void SetInfo(Brush border, double borderThickness)
+        /// <param name="brush">The brush.</param>
+        public void SetPrimaryText(Brush brush)
         {
             foreach (DataSeriesInfo info in this)
             {
-                info.Visual.Border = border;
+                info.Visual.PrimaryText = brush;
+            }
+        }
+
+        /// <summary>
+        /// Sets the secondary text brush for all series.
+        /// </summary>
+        /// <param name="brush">The brush.</param>
+        public void SetSecondaryText(Brush brush)
+        {
+            foreach (DataSeriesInfo info in this)
+            {
+                info.Visual.SecondaryText = brush;
+            }
+        }
+
+        /// <summary>
+        /// Sets the border brush and border thickness for all series
+        /// </summary>
+        /// <param name="brush">The brush.</param>
+        /// <param name="borderThickness">The border thickness.</param>
+        public void SetBorder(Brush brush, double borderThickness)
+        {
+            foreach (DataSeriesInfo info in this)
+            {
+                info.Visual.Border = brush;
                 info.Visual.BorderThickness = borderThickness;
             }
         }

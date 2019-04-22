@@ -99,7 +99,7 @@ namespace Application.Sample
                 data.Add(0, sliceValue);
                 data.DataInfo.SetInfo(slice, getLegend(slice), BrushUtility.GetRandomLinearBrush());
             }
-            data.DataInfo.SetInfo(Brushes.Black, 2.0);
+            data.DataInfo.SetBorder(Brushes.Black, 2.0);
             Data = data;
         }
         #endregion
