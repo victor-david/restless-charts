@@ -214,19 +214,21 @@ namespace Application.Sample
         }
 
         /// <summary>
-        /// When overriden in a derived class, creates chart data using the specified data set.
+        /// When overridden in a derived class, creates chart data using the specified data set.
         /// </summary>
         /// <param name="dataSet">The data set number. Between 1 and <see cref="DataSetCount"/>.</param>
         protected abstract void OnCreateChartData(int dataSet);
 
         /// <summary>
         /// Called when <see cref="SelectedLegendItem"/> changes. 
-        /// Override in a derived class to take appropiate action.
-        /// The base implementation does nothing.
+        /// The base implementation sets <see cref="SelectedLegendIndex"/>
+        /// from <paramref name="info"/>. Override in a derived class to take
+        /// other action.
         /// </summary>
         /// <param name="info">The info. May be null.</param>
         protected virtual void OnSelectedLegendItemChanged(DataSeriesInfo info)
         {
+            SelectedLegendIndex = (info != null) ? info.Index : -1;
         }
         #endregion
 

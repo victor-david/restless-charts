@@ -46,6 +46,36 @@ namespace Restless.Controls.Chart
         /// Gets the default value for <see cref="StartAngle"/>.
         /// </summary>
         public const double DefaultStartAngle = 45.0;
+
+        /// <summary>
+        /// Gets the minimum allowed value for <see cref="HoleSize"/>.
+        /// </summary>
+        public const double MinHoleSize = 0.0;
+
+        /// <summary>
+        /// Gets the maximum allowed value for <see cref="HoleSize"/>.
+        /// </summary>
+        public const double MaxHoleSize = 0.9;
+
+        /// <summary>
+        /// Gets the default value for <see cref="HoleSize"/>.
+        /// </summary>
+        public const double DefaultHoleSize = 0.10;
+
+        /// <summary>
+        /// Gets the minimum allowed value for <see cref="SelectedOffset"/>.
+        /// </summary>
+        public const double MinSelectedOffset = 10.0;
+
+        /// <summary>
+        /// Gets the maximum allowed value for <see cref="SelectedOffset"/>.
+        /// </summary>
+        public const double MaxSelectedOffset = 50.0;
+
+        /// <summary>
+        /// Gets the default value for <see cref="SelectedOffset"/>.
+        /// </summary>
+        public const double DefaultSelectedOffset = 35.0;
         #endregion
 
         /************************************************************************/
@@ -120,13 +150,80 @@ namespace Restless.Controls.Chart
             (
                 nameof(StartAngle), typeof(double), typeof(PieChart), 
                 new FrameworkPropertyMetadata(DefaultStartAngle,
-                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsParentMeasure,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender,
                     null, OnCoerceStartAngle)
             );
 
         private static object OnCoerceStartAngle(DependencyObject d, object value)
         {
             return ((double)value).Clamp(MinStartAngle, MaxStartAngle);
+        }
+        #endregion
+
+        /************************************************************************/
+
+        #region HoleSize
+        /// <summary>
+        /// Gets or sets the inner hole size expressed as a percentage.
+        /// This value is clamped between <see cref="MinHoleSize"/> and <see cref="MaxHoleSize"/>.
+        /// </summary>
+        public double HoleSize
+        {
+            get => (double)GetValue(HoleSizeProperty);
+            set => SetValue(HoleSizeProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="HoleSize"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty HoleSizeProperty = DependencyProperty.Register
+            (
+                nameof(HoleSize), typeof(double), typeof(PieChart), 
+                new FrameworkPropertyMetadata(DefaultHoleSize,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender, 
+                    null, OnCoerceHoleSize)
+            );
+
+        private static object OnCoerceHoleSize(DependencyObject d, object value)
+        {
+            return ((double)value).Clamp(MinHoleSize, MaxHoleSize);
+        }
+        #endregion
+
+        /************************************************************************/
+
+        #region SelectedOffset
+        /// <summary>
+        /// Gets the amount that a pie piece is offset when selected.
+        /// See remarks for more. This is a dependency property.
+        /// </summary>
+        /// <remarks>
+        /// This property controls how far pushed out from the center a selected pie piece is.
+        /// A pie piece may be selected by using a <see cref="ChartLegend"/> with its <see cref="ChartLegend.IsInteractive"/>
+        /// property set to true, and appropiate handlers established that react to a legend selection
+        /// by setting the <see cref="ChartBase.SelectedSeriesIndex"/> property.
+        /// This value is clamped between <see cref="MinSelectedOffset"/> and <see cref="MaxSelectedOffset"/>.
+        /// </remarks>
+        public double SelectedOffset
+        {
+            get => (double)GetValue(SelectedOffsetProperty);
+            set => SetValue(SelectedOffsetProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="SelectedOffset"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty SelectedOffsetProperty = DependencyProperty.Register
+            (
+                nameof(SelectedOffset), typeof(double), typeof(PieChart), 
+                new FrameworkPropertyMetadata(DefaultSelectedOffset,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender,
+                    null, OnCoerceSelectedOffset)
+            );
+
+        private static object OnCoerceSelectedOffset(DependencyObject d, object value)
+        {
+            return ((double)value).Clamp(MinSelectedOffset, MaxSelectedOffset);
         }
         #endregion
 
@@ -190,53 +287,78 @@ namespace Restless.Controls.Chart
         private void CreateMultiValueChart(Size size)
         {
             double sum = Data[0].YValues.Sum;
-            double angle = (StartAngle - 90).ToRadians();
-
             double radius = GetRadius(size);
             Point center = new Point(size.Width / 2.0, size.Height / 2.0);
 
+            double innerRadius = radius * HoleSize;
+
+            double rotationAngle = StartAngle - 90;
             int yIdx = 0;
 
-            // Data[0] exists or this method is not called.
             foreach (double value in Data[0].YValues)
             {
-                // PathFigure and segments are created in a way that puts the chart in the upper left of the available space.
-                // PathGeometry gets a transform that pushes the geometry into the center of the space.
-                PathGeometry pathGeometry = new PathGeometry()
-                {
-                    Transform = new TranslateTransform(center.X - radius, center.Y - radius)
-                };
+                double wedgeAngle = value * 360 / sum;
 
-                PathFigure figure = new PathFigure()
-                {
-                    IsClosed = true,
-                    StartPoint = new Point(radius, radius)
-                };
+                double pushOffset = yIdx == SelectedSeriesIndex ? SelectedOffset : 0;
+                MakeOneSlice(yIdx, center, radius, innerRadius, wedgeAngle, rotationAngle, pushOffset);
 
-                double x = Math.Cos(angle) * radius + radius;
-                double y = Math.Sin(angle) * radius + radius;
-
-                // 1. Line segment from center of pie to its outer limit. 
-                figure.Segments.Add(new LineSegment(new Point(x, y), true));
-
-                // 2. Arc segment to curve around the outer limit of the pie.
-                double angleShare = value / sum * 360;
-                angle += angleShare.ToRadians();
-
-                x = Math.Cos(angle) * radius + radius;
-                y = Math.Sin(angle) * radius + radius;
-                ArcSegment arcSeg = new ArcSegment(new Point(x, y), new Size(radius, radius), angleShare, angleShare > 180, SweepDirection.Clockwise, true);
-                figure.Segments.Add(arcSeg);
-
-                // 3. Line segment back to center
-                figure.Segments.Add(new LineSegment(new Point(radius, radius), true));
-               
-                // add the figure and create the child visual.
-                pathGeometry.Figures.Add(figure);
-                Children.Add(CreateGeometryVisual(Data.DataInfo[yIdx].DataBrush, null, pathGeometry));
-
+                rotationAngle += wedgeAngle;
                 yIdx++;
             }
+        }
+
+        private void MakeOneSlice(int yIdx, Point center, double radius, double innerRadius, double wedgeAngle, double rotationAngle, double pushOffset)
+        {
+            Point innerArcStartPoint = ComputeCartesianCoordinate(rotationAngle, innerRadius);
+            innerArcStartPoint.Offset(center.X, center.Y);
+
+            Point innerArcEndPoint = ComputeCartesianCoordinate(rotationAngle + wedgeAngle, innerRadius);
+            innerArcEndPoint.Offset(center.X, center.Y);
+
+            Point outerArcStartPoint = ComputeCartesianCoordinate(rotationAngle, radius);
+            outerArcStartPoint.Offset(center.X, center.Y);
+
+            Point outerArcEndPoint = ComputeCartesianCoordinate(rotationAngle + wedgeAngle, radius);
+            outerArcEndPoint.Offset(center.X, center.Y);
+
+            bool largeArc = wedgeAngle > 180.0;
+
+            if (pushOffset > 0)
+            {
+                Point offset = ComputeCartesianCoordinate(rotationAngle + wedgeAngle / 2.0, pushOffset);
+                innerArcStartPoint.Offset(offset.X, offset.Y);
+                innerArcEndPoint.Offset(offset.X, offset.Y);
+                outerArcStartPoint.Offset(offset.X, offset.Y);
+                outerArcEndPoint.Offset(offset.X, offset.Y);
+            }
+
+            Size outerArcSize = new Size(radius, radius);
+            Size innerArcSize = new Size(innerRadius, innerRadius);
+
+            StreamGeometry streamGeometry = new StreamGeometry();
+
+            using (var context = streamGeometry.Open())
+            {
+                context.BeginFigure(innerArcStartPoint, true, true);
+                context.LineTo(outerArcStartPoint, true, true);
+                context.ArcTo(outerArcEndPoint, outerArcSize, 0, largeArc, SweepDirection.Clockwise, true, true);
+                context.LineTo(innerArcEndPoint, true, true);
+                context.ArcTo(innerArcStartPoint, innerArcSize, 0, largeArc, SweepDirection.Counterclockwise, true, true);
+            }
+
+            // Pen pen = new Pen(Brushes.DarkGreen, 2);
+
+
+            Children.Add(CreateGeometryVisual(Data.DataInfo[yIdx].DataBrush, null, streamGeometry));
+        }
+
+
+        private Point ComputeCartesianCoordinate(double angle, double radius)
+        {
+            double angleRad = angle.ToRadians();
+            double x = radius * Math.Cos(angleRad);
+            double y = radius * Math.Sin(angleRad);
+            return new Point(x, y);
         }
 
         private double GetRadius(double x, double y)

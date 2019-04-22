@@ -68,12 +68,6 @@ namespace Application.Sample
                     break;
             }
         }
-
-        protected override void OnSelectedLegendItemChanged(DataSeriesInfo info)
-        {
-            //Debug.WriteLine($"OnSelected {info}");
-            SelectedLegendIndex = (info != null) ? info.Index : -1;
-        }
         #endregion
 
         #region Private methods

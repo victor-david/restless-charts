@@ -36,7 +36,7 @@
                 Data="{Binding Data, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
                 DisplayValues="{Binding DisplayChartValues}"
                 PointSize="10"
-                SelectedSeriesIndex="{Binding SelectedLegendIndex, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"                
+                SelectedSeriesIndex="{Binding SelectedLegendIndex, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
                 ChartStyle="{Binding ChartStyle, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"/>
 
         </conx:ChartContainer>

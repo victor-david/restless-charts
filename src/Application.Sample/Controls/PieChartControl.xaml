@@ -28,6 +28,7 @@
 
             <conx:PieChart
                 Data="{Binding Data, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
+                SelectedSeriesIndex="{Binding SelectedLegendIndex, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
                 DisplayValues="{Binding DisplayChartValues}"/>
 
             <conx:ChartLegend
