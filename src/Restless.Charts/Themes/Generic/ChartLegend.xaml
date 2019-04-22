@@ -90,7 +90,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="24"/>
                         </Grid.RowDefinitions>
-                        <Border Margin="2" CornerRadius="2" Background="{Binding DataBrush}"/>
+                        <Border Margin="2" CornerRadius="2" Background="{Binding Visual.Data}"/>
                         <TextBlock 
                             Grid.Column="1"
                             Margin="2"

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Windows.Media;
-
-namespace Restless.Controls.Chart
+﻿namespace Restless.Controls.Chart
 {
     /// <summary>
     /// Represents information for a single data series.
@@ -14,16 +11,11 @@ namespace Restless.Controls.Chart
         /// </summary>
         /// <param name="index">The index of data series.</param>
         /// <param name="name">The name of the data series.</param>
-        /// <param name="dataBrush">The brush associated with the data series.</param>
-        internal DataSeriesInfo(int index, string name, Brush dataBrush)
+        internal DataSeriesInfo(int index, string name)
         {
             Index = index;
             Name = string.IsNullOrEmpty(name) ? "Unnamed" : name;
-            DataBrush = dataBrush ?? throw new ArgumentNullException(nameof(dataBrush));
-            if (DataBrush.CanFreeze)
-            {
-                DataBrush.Freeze();
-            }
+            Visual = new DataSeriesVisual();
         }
         #endregion
 
@@ -39,17 +31,18 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
-        /// Gets the name of the data series.
+        /// Gets or sets the name of the data series.
         /// </summary>
         public string Name
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the brush associated with the data series.
+        /// Gets the visual components of the data series.
         /// </summary>
-        public Brush DataBrush
+        public DataSeriesVisual Visual
         {
             get;
         }
@@ -64,7 +57,7 @@ namespace Restless.Controls.Chart
         /// <returns>A string that describes the state of this object.</returns>
         public override string ToString()
         {
-            return $"Index: {Index} Name: {Name} Brush: {DataBrush}";
+            return $"Index: {Index} Name: {Name}";
         }
         #endregion
     }

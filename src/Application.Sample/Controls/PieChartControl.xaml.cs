@@ -1,5 +1,6 @@
 ﻿using Restless.Controls.Chart;
 using System;
+using System.Windows.Media;
 
 namespace Application.Sample
 {
@@ -10,12 +11,14 @@ namespace Application.Sample
     {
         #region Private
         private DataSeries data;
+        private double holeSize;
         #endregion
 
         #region Constructor
         public PieChartControl()
         {
             InitializeComponent();
+            HoleSize = PieChart.DefaultHoleSize;
         }
         #endregion
 
@@ -32,6 +35,15 @@ namespace Application.Sample
         {
             get => data;
             private set => SetProperty(ref data, value);
+        }
+
+        /// <summary>
+        /// Gets or sets the hole size.
+        /// </summary>
+        public double HoleSize
+        {
+            get => holeSize;
+            set => SetProperty(ref holeSize, value);
         }
         #endregion
 
@@ -87,7 +99,7 @@ namespace Application.Sample
                 data.Add(0, sliceValue);
                 data.DataInfo.SetInfo(slice, getLegend(slice), BrushUtility.GetRandomLinearBrush());
             }
-
+            data.DataInfo.SetInfo(Brushes.Black, 2.0);
             Data = data;
         }
         #endregion

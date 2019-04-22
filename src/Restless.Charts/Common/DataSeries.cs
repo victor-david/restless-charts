@@ -55,9 +55,7 @@ namespace Restless.Controls.Chart
             DataRange = DataRange.EmptyDataRange();
             MinXValue = double.NaN;
             MaxXValue = double.NaN;
-            DataInfo = new DataSeriesInfoCollection(MaxYSeries, Brushes.Black);
-            PrimaryTextBrushes = new BrushCollection(MaxYSeries, Brushes.White);
-            SecondaryTextBrushes = new BrushCollection(MaxYSeries, Brushes.Black);
+            DataInfo = new DataSeriesInfoCollection(MaxYSeries);
         }
         #endregion
 
@@ -121,24 +119,6 @@ namespace Restless.Controls.Chart
         /// Gets the collection of <see cref="DataSeriesInfo"/> objects used for this series.
         /// </summary>
         public DataSeriesInfoCollection DataInfo
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets the brush collection used for the primary text brush of the Y data series.
-        /// This property is used when <see cref="ChartBase.DisplayValues"/> is true.
-        /// </summary>
-        public BrushCollection PrimaryTextBrushes
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets the brush collection used for the secondary text brush of the Y data series.
-        /// This property is used when <see cref="ChartBase.DisplayValues"/> is true.
-        /// </summary>
-        public BrushCollection SecondaryTextBrushes
         {
             get;
         }

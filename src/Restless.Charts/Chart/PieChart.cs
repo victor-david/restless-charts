@@ -244,7 +244,7 @@ namespace Restless.Controls.Chart
 
             if (Data[0].YValues.Sum == 0)
             {
-                CreateNoDataChart(size, "Zero", Data.DataInfo[0].DataBrush);
+                CreateNoDataChart(size, "Zero", Data.DataInfo[0].Visual.Data);
                 return;
             }
 
@@ -281,7 +281,7 @@ namespace Restless.Controls.Chart
         {
             double x = size.Width / 2.0;
             double y = size.Height / 2.0;
-            Children.Add(CreateEllipseVisual(Data.DataInfo[0].DataBrush, null, x, y, GetRadius(x, y)));
+            Children.Add(CreateEllipseVisual(Data.DataInfo[0].Visual.Data, null, x, y, GetRadius(x, y)));
         }
 
         private void CreateMultiValueChart(Size size)
@@ -346,10 +346,8 @@ namespace Restless.Controls.Chart
                 context.ArcTo(innerArcStartPoint, innerArcSize, 0, largeArc, SweepDirection.Counterclockwise, true, true);
             }
 
-            // Pen pen = new Pen(Brushes.DarkGreen, 2);
-
-
-            Children.Add(CreateGeometryVisual(Data.DataInfo[yIdx].DataBrush, null, streamGeometry));
+            Pen pen = Data.DataInfo[yIdx].Visual.GetBorderPen();
+            Children.Add(CreateGeometryVisual(Data.DataInfo[yIdx].Visual.Data, pen, streamGeometry));
         }
 
 

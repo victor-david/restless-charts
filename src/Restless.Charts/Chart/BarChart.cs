@@ -116,7 +116,7 @@ namespace Restless.Controls.Chart
 
                 foreach (double yValue in point.YValues.OrderByDescending((v) => Math.Abs(v)))
                 {
-                    Pen pen = new Pen(Data.DataInfo[yIndex].DataBrush, barWidth);
+                    Pen pen = new Pen(Data.DataInfo[yIndex].Visual.Data, barWidth);
                     
                     double y = Owner.YAxis.GetCoordinateFromTick(yValue, desiredSize);
                     
@@ -152,13 +152,13 @@ namespace Restless.Controls.Chart
         {
             if (DisplayValues && yIndex == 0)
             {
-                FormattedText text = GetFormattedText(Owner.GetFormattedYValue(yValue), ValuesFontFamily, ValuesFontSize, Data.PrimaryTextBrushes.GetBrush(yIndex));
+                FormattedText text = GetFormattedText(Owner.GetFormattedYValue(yValue), ValuesFontFamily, ValuesFontSize, Data.DataInfo[yIndex].Visual.PrimaryText);
 
                 if (TextFitsInWidth(text, barWidth))
                 {
                     if (!TextFitsInLength(text, barLength))
                     {
-                        text.SetForegroundBrush(Data.SecondaryTextBrushes.GetBrush(yIndex));
+                        text.SetForegroundBrush(Data.DataInfo[yIndex].Visual.SecondaryText);
                     }
                     bool isNegative = Owner.Orientation == Orientation.Vertical ? y > yZero : x < yZero;
                     x = GetAdjustedTextX(x, barLength, isNegative, text);

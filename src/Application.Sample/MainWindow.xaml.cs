@@ -105,6 +105,8 @@ namespace Application.Sample
 
             Commands.Add("SetChartData", SetChartData);
             Commands.Add("SetLineStyle", SetLineStyle);
+            Commands.Add("SetHoleSize", SetHoleSize);
+
         }
 
         private void SetChartData(object parm)
@@ -117,11 +119,23 @@ namespace Application.Sample
                 }
             }
         }
+
         private void SetLineStyle(object parm)
         {
             if (ChartControl is LineChartControl lc && parm is LineChartStyle s)
             {
                 lc.ChartStyle = s;
+            }
+        }
+
+        private void SetHoleSize(object parm)
+        {
+            if (ChartControl is PieChartControl pc && parm is string s)
+            {
+                if (double.TryParse(s, out double holeSize))
+                {
+                    pc.HoleSize = holeSize;
+                }
             }
         }
         #endregion

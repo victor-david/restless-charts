@@ -27,6 +27,7 @@
             </Grid.ColumnDefinitions>
 
             <conx:PieChart
+                HoleSize="{Binding HoleSize, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
                 Data="{Binding Data, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
                 SelectedSeriesIndex="{Binding SelectedLegendIndex, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
                 DisplayValues="{Binding DisplayChartValues}"/>

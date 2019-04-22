@@ -69,9 +69,7 @@ namespace Application.Sample
             DataSeries data = DataSeries.Create();
             RandomGenerator generator = new RandomGenerator(minY, maxY);
 
-            data.DataInfo.SetInfo(0, "Balance", Brushes.Red);
-            data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
-            data.SecondaryTextBrushes.SetBrush(0, Brushes.DarkRed);
+            data.DataInfo.SetInfo(0, "Balance", Brushes.Red, Brushes.WhiteSmoke, Brushes.DarkRed);
 
             for (int x = 1; x <= maxX; x++)
             {
@@ -97,9 +95,7 @@ namespace Application.Sample
             DataSeries data = DataSeries.Create(3);
             RandomGenerator generator = new RandomGenerator(minY, maxY);
 
-            data.DataInfo.SetInfo(0, "Balance", Brushes.SteelBlue);
-            data.PrimaryTextBrushes.SetBrush(0, Brushes.WhiteSmoke);
-            data.SecondaryTextBrushes.SetBrush(0, Brushes.Blue);
+            data.DataInfo.SetInfo(0, "Balance", Brushes.SteelBlue, Brushes.WhiteSmoke, Brushes.Blue);
 
             data.DataInfo.SetInfo(1, "Transactions", Brushes.Firebrick);
             data.DataInfo.SetInfo(2, "Callbacks", Brushes.Indigo);

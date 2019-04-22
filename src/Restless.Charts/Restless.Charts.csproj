@@ -68,8 +68,8 @@
     <Compile Include="Chart\LineChartStyle.cs" />
     <Compile Include="Chart\PieChart.cs" />
     <Compile Include="Common\BrushUtility.cs" />
+    <Compile Include="Common\DataSeriesVisual.cs" />
     <Compile Include="Common\DataSeriesInfoCollection.cs" />
-    <Compile Include="Common\BrushCollection.cs" />
     <Compile Include="Common\DataSeriesInfo.cs" />
     <Compile Include="Common\DataPoint.cs" />
     <Compile Include="Common\DataRange.cs" />

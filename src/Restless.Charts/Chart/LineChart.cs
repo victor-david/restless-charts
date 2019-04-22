@@ -204,11 +204,11 @@ namespace Restless.Controls.Chart
 
                         if (ChartStyle == LineChartStyle.StandardSquarePoint)
                         {
-                            Children.Add(CreateRectangleVisual(Data.DataInfo[yIdx].DataBrush, null, xc, yc, pointSize, opacity));
+                            Children.Add(CreateRectangleVisual(Data.DataInfo[yIdx].Visual.Data, null, xc, yc, pointSize, opacity));
                         }
                         else
                         {
-                            Children.Add(CreateEllipseVisual(Data.DataInfo[yIdx].DataBrush, null, xc, yc, pointSize / 2.0, opacity));
+                            Children.Add(CreateEllipseVisual(Data.DataInfo[yIdx].Visual.Data, null, xc, yc, pointSize / 2.0, opacity));
                         }
                     }
                 }
@@ -225,7 +225,7 @@ namespace Restless.Controls.Chart
 
         private void CreateLines(int yIdx, double xMax, double yMax, Size desiredSize)
         {
-            Pen pen = new Pen(Data.DataInfo[yIdx].DataBrush, GetLineThickness(yIdx));
+            Pen pen = new Pen(Data.DataInfo[yIdx].Visual.Data, GetLineThickness(yIdx));
             double yZero = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
 
             for (int dpIdx = 0; dpIdx < Data.Count; dpIdx++)
@@ -319,7 +319,7 @@ namespace Restless.Controls.Chart
 
             using (DrawingContext dc = visual.RenderOpen())
             {
-                dc.DrawGeometry(Data.DataInfo[yIdx].DataBrush, null, geo);
+                dc.DrawGeometry(Data.DataInfo[yIdx].Visual.Data, null, geo);
             }
 
             Children.Add(visual);
