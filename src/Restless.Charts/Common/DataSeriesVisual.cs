@@ -21,9 +21,9 @@ namespace Restless.Controls.Chart
         internal DataSeriesVisual()
         {
             Data = Brushes.Black;
-            PrimaryText = Brushes.White;
-            SecondaryText = Brushes.White;
-            Border = Brushes.DarkRed;
+            PrimaryText = Brushes.Black;
+            SecondaryText = Brushes.Black;
+            Border = Brushes.Black;
             BorderThickness = 2.0;
         }
         #endregion
@@ -86,6 +86,42 @@ namespace Restless.Controls.Chart
 
         #region Public methods
         /// <summary>
+        /// Gets a pen based on <see cref="Data"/> and the specified thickness.
+        /// if <see cref="Data"/> is null, or <paramref name="thickness"/> is zero,
+        /// returns null.
+        /// </summary>
+        /// <param name="thickness">The desired thickness of the pen.</param>
+        /// <returns>A pen object or null.</returns>
+        public Pen GetDataPen(double thickness)
+        {
+            return GetPen(Data, thickness);
+        }
+
+        /// <summary>
+        /// Gets a pen based on <see cref="PrimaryText"/> and the specified thickness.
+        /// if <see cref="PrimaryText"/> is null, or <paramref name="thickness"/> is zero,
+        /// returns null.
+        /// </summary>
+        /// <param name="thickness">The desired thickness of the pen.</param>
+        /// <returns>A pen object or null.</returns>
+        public Pen GetPrimaryTextPen(double thickness)
+        {
+            return GetPen(PrimaryText, thickness);
+        }
+
+        /// <summary>
+        /// Gets a pen based on <see cref="SecondaryText"/> and the specified thickness.
+        /// if <see cref="SecondaryText"/> is null, or <paramref name="thickness"/> is zero,
+        /// returns null.
+        /// </summary>
+        /// <param name="thickness">The desired thickness of the pen.</param>
+        /// <returns>A pen object or null.</returns>
+        public Pen GetSecondaryTextPen(double thickness)
+        {
+            return GetPen(SecondaryText, thickness);
+        }
+
+        /// <summary>
         /// Gets a pen based on <see cref="Border"/> and <see cref="BorderThickness"/>.
         /// If <see cref="Border"/> is null or <see cref="BorderThickness"/> is zero,
         /// returns null.
@@ -93,11 +129,7 @@ namespace Restless.Controls.Chart
         /// <returns>A Pen object, or null.</returns>
         public Pen GetBorderPen()
         {
-            if (Border != null && BorderThickness > 0.0)
-            {
-                return new Pen(Border, BorderThickness);
-            }
-            return null;
+            return GetPen(Border, BorderThickness);
         }
         #endregion
         
@@ -111,6 +143,20 @@ namespace Restless.Controls.Chart
             {
                 brush.Freeze();
             }
+        }
+
+        private Pen GetPen(Brush brush, double thickness)
+        {
+            if (brush != null && thickness > 0.0)
+            {
+                Pen pen = new Pen(brush, thickness);
+                if (pen.CanFreeze)
+                {
+                    pen.Freeze();
+                }
+                return pen;
+            }
+            return null;
         }
         #endregion
     }

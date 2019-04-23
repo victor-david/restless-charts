@@ -229,6 +229,26 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
+        #region LabelDisplay
+        /// <summary>
+        /// Gets or sets a value that determines how labels are placed on the chart.
+        /// </summary>
+        public LabelDisplay LabelDisplay
+        {
+            get => (LabelDisplay)GetValue(LabelDisplayProperty);
+            set => SetValue(LabelDisplayProperty, value);
+        }
+        
+        public static readonly DependencyProperty LabelDisplayProperty = DependencyProperty.Register
+            (
+                nameof(LabelDisplay), typeof(LabelDisplay), typeof(PieChart), 
+                new FrameworkPropertyMetadata(LabelDisplay.NameValue,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender)
+            );
+        #endregion
+
+        /************************************************************************/
+
         #region Protected methods
         /// <summary>
         /// Called by <see cref="ChartBase"/> to create child visuals.
@@ -291,8 +311,8 @@ namespace Restless.Controls.Chart
             Point center = new Point(size.Width / 2.0, size.Height / 2.0);
 
             double innerRadius = radius * HoleSize;
-
             double rotationAngle = StartAngle - 90;
+
             int yIdx = 0;
 
             foreach (double value in Data[0].YValues)
@@ -301,6 +321,11 @@ namespace Restless.Controls.Chart
 
                 double pushOffset = yIdx == SelectedSeriesIndex ? SelectedOffset : 0;
                 MakeOneSlice(yIdx, center, radius, innerRadius, wedgeAngle, rotationAngle, pushOffset);
+                if (LabelDisplay != LabelDisplay.None)
+                {
+                    double lineAngle = GetNormalizedAngle(rotationAngle + wedgeAngle / 2.0);
+                    MakeOneSliceLabel(sum, value, Data.DataInfo[yIdx], center, radius + pushOffset, lineAngle);
+                }
 
                 rotationAngle += wedgeAngle;
                 yIdx++;
@@ -309,23 +334,23 @@ namespace Restless.Controls.Chart
 
         private void MakeOneSlice(int yIdx, Point center, double radius, double innerRadius, double wedgeAngle, double rotationAngle, double pushOffset)
         {
-            Point innerArcStartPoint = ComputeCartesianCoordinate(rotationAngle, innerRadius);
+            Point innerArcStartPoint = GetCartesianCoordinate(rotationAngle, innerRadius);
             innerArcStartPoint.Offset(center.X, center.Y);
 
-            Point innerArcEndPoint = ComputeCartesianCoordinate(rotationAngle + wedgeAngle, innerRadius);
+            Point innerArcEndPoint = GetCartesianCoordinate(rotationAngle + wedgeAngle, innerRadius);
             innerArcEndPoint.Offset(center.X, center.Y);
 
-            Point outerArcStartPoint = ComputeCartesianCoordinate(rotationAngle, radius);
+            Point outerArcStartPoint = GetCartesianCoordinate(rotationAngle, radius);
             outerArcStartPoint.Offset(center.X, center.Y);
 
-            Point outerArcEndPoint = ComputeCartesianCoordinate(rotationAngle + wedgeAngle, radius);
+            Point outerArcEndPoint = GetCartesianCoordinate(rotationAngle + wedgeAngle, radius);
             outerArcEndPoint.Offset(center.X, center.Y);
 
             bool largeArc = wedgeAngle > 180.0;
 
             if (pushOffset > 0)
             {
-                Point offset = ComputeCartesianCoordinate(rotationAngle + wedgeAngle / 2.0, pushOffset);
+                Point offset = GetCartesianCoordinate(rotationAngle + wedgeAngle / 2.0, pushOffset);
                 innerArcStartPoint.Offset(offset.X, offset.Y);
                 innerArcEndPoint.Offset(offset.X, offset.Y);
                 outerArcStartPoint.Offset(offset.X, offset.Y);
@@ -350,8 +375,45 @@ namespace Restless.Controls.Chart
             Children.Add(CreateGeometryVisual(Data.DataInfo[yIdx].Visual.Data, pen, streamGeometry));
         }
 
+        private void MakeOneSliceLabel(double sum, double value, DataSeriesInfo info, Point center, double radius, double lineAngle)
+        {
+            Point startPoint = GetCartesianCoordinate(lineAngle, radius + (info.Visual.BorderThickness / 2.0) + 2.0);
+            startPoint.Offset(center.X, center.Y);
+            Point endPoint = GetCartesianCoordinate(lineAngle, radius * 1.075);
+            endPoint.Offset(center.X, center.Y);
 
-        private Point ComputeCartesianCoordinate(double angle, double radius)
+            StreamGeometry streamGeometry = new StreamGeometry();
+            using (var context = streamGeometry.Open())
+            {
+                context.BeginFigure(startPoint, false, false);
+                context.LineTo(endPoint, true, true);
+            }
+
+            Pen pen = info.Visual.GetPrimaryTextPen(2.0);
+            Children.Add(CreateGeometryVisual(null, pen, streamGeometry));
+
+            string labelText = GetLabelText(info.Name, sum, value);
+            FormattedText text = GetFormattedText(labelText, FontFamily, FontSize, info.Visual.PrimaryText);
+            text.LineHeight = text.Baseline / 2.0;
+            Point offset = GetTextLabelOffset(text, lineAngle);
+            endPoint.Offset(offset.X, offset.Y);
+            Children.Add(CreateTextVisual(text, endPoint.X, endPoint.Y, 0));
+        }
+
+        private string GetLabelText(string seriesName, double sum, double value)
+        {
+            switch (LabelDisplay)
+            {
+                case LabelDisplay.NameValue:
+                    return $"{seriesName} ({Owner.YAxis.GetFormattedValue(value)})";
+                case LabelDisplay.NamePercentage:
+                    return $"{seriesName} ({Owner.YAxis.GetFormattedValue(value / sum)})";
+                default:
+                    return seriesName;
+            }
+        }
+
+        private Point GetCartesianCoordinate(double angle, double radius)
         {
             double angleRad = angle.ToRadians();
             double x = radius * Math.Cos(angleRad);
@@ -367,6 +429,34 @@ namespace Restless.Controls.Chart
         private double GetRadius(Size size)
         {
             return GetRadius(size.Width / 2.0, size.Height / 2.0);
+        }
+
+        private Point GetTextLabelOffset(FormattedText text, double lineAngle)
+        {
+            Point point = new Point();
+            if (IsWithin(lineAngle, 0, 90)) point.Offset(4, 0);
+            if (IsWithin(lineAngle, 90, 180)) point.Offset(-4 - text.Width, 0);
+            if (IsWithin(lineAngle, 180, 270)) point.Offset(-4 - text.Width, -text.Height / 2.0);
+            if (IsWithin(lineAngle, 270, 360)) point.Offset(4, -text.Height / 2.0);
+            return point;
+        }
+
+        private bool IsWithin(double value, double min, double max)
+        {
+            return value > min && value <= max;
+        }
+
+        /// <summary>
+        /// Gets a normalized angle. Although it doesn't matter to geometry (10 and 370 are the same)
+        /// this enables us to identify the quadrant that a label is in, as that affects how we place that label.
+        /// </summary>
+        /// <param name="angle">The angle.</param>
+        /// <returns>Angle between 0 and 360.</returns>
+        private double GetNormalizedAngle(double angle)
+        {
+            while (angle < 0.0) angle += 360.0;
+            while (angle > 360.0) angle -= 360.0;
+            return angle;
         }
         #endregion
     }

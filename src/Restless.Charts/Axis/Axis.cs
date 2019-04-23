@@ -439,6 +439,16 @@ namespace Restless.Controls.Chart
         {
             return ValueToScreen(DataTransform.DataToPlot(tick), layoutSize, Range);
         }
+
+        /// <summary>
+        /// Gets the specified value formatted according to <see cref="TextProvider"/> and <see cref="TextFormat"/>.
+        /// </summary>
+        /// <param name="value">The value to format.</param>
+        /// <returns>A string representation of value.</returns>
+        public string GetFormattedValue(double value)
+        {
+            return TextProvider != null ? TextProvider.Convert(value, TextFormat) : value.ToString(TextFormat);
+        }
         #endregion
 
         /************************************************************************/
@@ -465,8 +475,6 @@ namespace Restless.Controls.Chart
         #endregion
 
         /************************************************************************/
-
-        
 
         #region Protected methods
         /// <summary>
@@ -855,7 +863,7 @@ namespace Restless.Controls.Chart
         {
             TickText tickText = new TickText()
             {
-                Text = (TextProvider != null) ? TextProvider.Convert(tickValue, TextFormat) : tickValue.ToString(TextFormat)
+                Text = GetFormattedValue(tickValue)
             };
             return tickText;
         }

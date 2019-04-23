@@ -17,6 +17,7 @@
         BorderThickness="1"
         TopTitle="{Binding TopTitle, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
         Orientation="{Binding ChartOrientation}"
+        YAxisTextFormat="{Binding ValueFormat, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
         XAxisTickVisibility="None"
         YAxisTickVisibility="None">
 
@@ -27,16 +28,17 @@
             </Grid.ColumnDefinitions>
 
             <conx:PieChart
+                FontFamily="Calibri"
                 HoleSize="{Binding HoleSize, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
                 Data="{Binding Data, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
                 SelectedSeriesIndex="{Binding SelectedLegendIndex, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
-                DisplayValues="{Binding DisplayChartValues}"/>
+                />
 
             <conx:ChartLegend
                 Grid.Column="1"
                 VerticalAlignment="Center"
                 Margin="0,0,8,0"
-                HeaderText="Legend"
+                HeaderText="{Binding LegendHeader, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
                 HeaderTextForeground="DarkGray"
                 Foreground="DarkGray"
                 SelectedItem="{Binding SelectedLegendItem, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"

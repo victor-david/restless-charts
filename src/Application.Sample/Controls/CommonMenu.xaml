@@ -31,9 +31,8 @@
             <Separator/>
 
             <!-- Grid lines -->
-            <HeaderedItemsControl Style="{StaticResource MenuButtonGroup}" Header="Display Toggle">
-                <Button Content="Grid Lines" Command="{Binding Commands[ToggleGridLines]}" IsEnabled="{Binding IsGridLineMenuEnabled}"/>
-                <Button Content="Values" Command="{Binding Commands[ToggleDisplayValues]}"/>
+            <HeaderedItemsControl Style="{StaticResource MenuButtonGroup}" Header="Grid Lines" IsEnabled="{Binding IsGridLineMenuEnabled}">
+                <Button Content="Toggle" Command="{Binding Commands[ToggleGridLines]}"/>
             </HeaderedItemsControl>
 
             <Separator/>

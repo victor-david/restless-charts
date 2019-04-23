@@ -12,6 +12,8 @@ namespace Application.Sample
         #region Private
         private DataSeries data;
         private double holeSize;
+        private string valueFormat;
+        private string legendHeader;
         #endregion
 
         #region Constructor
@@ -45,6 +47,24 @@ namespace Application.Sample
             get => holeSize;
             set => SetProperty(ref holeSize, value);
         }
+
+        /// <summary>
+        /// Gets the value format.
+        /// </summary>
+        public string ValueFormat
+        {
+            get => valueFormat;
+            private set => SetProperty(ref valueFormat, value);
+        }
+
+        /// <summary>
+        /// Gets the legend header.
+        /// </summary>
+        public string LegendHeader
+        {
+            get => legendHeader;
+            private set => SetProperty(ref legendHeader, value);
+        }
         #endregion
 
         #region Protected methods
@@ -72,34 +92,42 @@ namespace Application.Sample
         #region Private methods
         private void CreateChartData1()
         {
-            TopTitle.Text = "Work Force";
-            CreateChartData(100, 500, 10, GetWorkForceLegend);
+            TopTitle.Text = "Work Force Distribution (Millions)";
+            LegendHeader = "Work Force Sector";
+            ValueFormat = "N2";
+            CreateChartData(100, 500, 10, 100.0, GetWorkForceLegend);
         }
 
         private void CreateChartData2()
         {
             TopTitle.Text = "Taxes";
-            CreateChartData(1000, 25000, 5, GetTaxLegend);
+            LegendHeader = "Tax Type";
+            ValueFormat = "C0";
+            CreateChartData(1000, 25000, 5, 0, GetTaxLegend);
         }
 
         private void CreateChartData3()
         {
-            TopTitle.Text = "Departments";
-            CreateChartData(500, 1000, 6, GetDepartmentLegend);
+            TopTitle.Text = "Employees Per Departments";
+            LegendHeader = "Department";
+            ValueFormat = null;
+            CreateChartData(500, 1000, 6, 0, GetDepartmentLegend);
         }
 
-        private void CreateChartData(int minY, int maxY, int sliceCount, Func<int, string> getLegend)
+        private void CreateChartData(int minY, int maxY, int sliceCount, double divFactor, Func<int, string> getLegend)
         {
             DataSeries data = DataSeries.Create(sliceCount);
             RandomGenerator generator = new RandomGenerator(minY, maxY);
 
             for (int slice = 0; slice < sliceCount; slice++)
             {
-                int sliceValue = generator.GetValue();
+                double sliceValue = generator.GetValue();
+                if (divFactor > 0) sliceValue = sliceValue / divFactor;
                 data.Add(0, sliceValue);
                 data.DataInfo.SetInfo(slice, getLegend(slice), BrushUtility.GetRandomLinearBrush());
             }
             data.DataInfo.SetBorder(Brushes.Black, 2.0);
+            data.DataInfo.SetPrimaryText(Brushes.DarkGray);
             Data = data;
         }
         #endregion

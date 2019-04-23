@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -95,6 +94,28 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
+        #region DisplayValues
+        /// <summary>
+        /// Gets or sets a value that determines if Y axis values are displayed inside the chart.
+        /// </summary>
+        public bool ValueDisplay
+        {
+            get => (bool)GetValue(ValueDisplayProperty);
+            set => SetValue(ValueDisplayProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="ValueDisplay"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty ValueDisplayProperty = DependencyProperty.Register
+            (
+                nameof(ValueDisplay), typeof(bool), typeof(BarChart),
+                new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsMeasure)
+            );
+        #endregion
+
+        /************************************************************************/
+
         #region Protected methods
         /// <summary>
         /// Called by <see cref="ChartBase"/> to create child visuals.
@@ -150,9 +171,9 @@ namespace Restless.Controls.Chart
 
         private void CreateTextDisplayIf(int yIndex, double yValue, double x, double y, double yZero, double barWidth, double barLength)
         {
-            if (DisplayValues && yIndex == 0)
+            if (ValueDisplay && yIndex == 0)
             {
-                FormattedText text = GetFormattedText(Owner.GetFormattedYValue(yValue), ValuesFontFamily, ValuesFontSize, Data.DataInfo[yIndex].Visual.PrimaryText);
+                FormattedText text = GetFormattedText(Owner.GetFormattedYValue(yValue), FontFamily, FontSize, Data.DataInfo[yIndex].Visual.PrimaryText);
 
                 if (TextFitsInWidth(text, barWidth))
                 {

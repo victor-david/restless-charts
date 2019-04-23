@@ -39,7 +39,7 @@
                     <HeaderedContentControl Header="Chart" Content="{Binding ChartType}"/>
                     <HeaderedContentControl Header="Orientation" Content="{Binding ChartOrientation}"/>
                     <HeaderedContentControl Header="Grid Lines" Content="{Binding IsAxisGridVisible}"/>
-                    <HeaderedContentControl Header="Values" Content="{Binding DisplayChartValues}"/>
+                    <HeaderedContentControl Header="Bar Values" Content="{Binding DisplayChartValues}"/>
                     <HeaderedContentControl Header="X Ticks" Content="{Binding XAxisTickVisibility}"/>
                     <HeaderedContentControl Header="Y Ticks" Content="{Binding YAxisTickVisibility}"/>
                     <HeaderedContentControl Header="X Reversed" Content="{Binding IsXAxisValueReversed}"/>
@@ -58,6 +58,11 @@
             <TextBlock Text="Data"/>
             <Button Content="Set #1" Command="{Binding Commands[SetChartData]}" CommandParameter="1"/>
             <Button Content="Set #2" Command="{Binding Commands[SetChartData]}" CommandParameter="2"/>
+
+            <Border/>
+
+            <TextBlock Text="Values"/>
+            <Button Content="Toggle" Command="{Binding Commands[ToggleDisplayValues]}" />
         </StackPanel>
         
         <!-- Choices for line chart -->

@@ -24,17 +24,17 @@ namespace Restless.Controls.Chart
         public const string DefaultValueFontFamily = "Verdana";
 
         /// <summary>
-        /// Gets the minimum allowed value for <see cref="ValuesFontSize"/>.
+        /// Gets the minimum allowed value for <see cref="FontSize"/>.
         /// </summary>
         public const double MinValuesFontSize = 8.0;
 
         /// <summary>
-        /// Gets the maximum allowed value for <see cref="ValuesFontSize"/>.
+        /// Gets the maximum allowed value for <see cref="FontSize"/>.
         /// </summary>
         public const double MaxValuesFontSize = 32.0;
 
         /// <summary>
-        /// Gets the default value for <see cref="ValuesFontSize"/>.
+        /// Gets the default value for <see cref="FontSize"/>.
         /// </summary>
         public const double DefaultValuesFontSize = 13.0;
         #endregion
@@ -121,73 +121,50 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
-        #region DisplayValues
-        /// <summary>
-        /// Gets or sets a value that determines if Y axis values are displayed inside the chart.
-        /// </summary>
-        public bool DisplayValues
-        {
-            get => (bool)GetValue(DisplayValuesProperty);
-            set => SetValue(DisplayValuesProperty, value);
-        }
-
-        /// <summary>
-        /// Identifies the <see cref="DisplayValues"/> dependency property.
-        /// </summary>
-        public static readonly DependencyProperty DisplayValuesProperty = DependencyProperty.Register
-            (
-                nameof(DisplayValues), typeof(bool), typeof(ChartBase), new PropertyMetadata(false, OnDisplayValuesPropertyChanged)
-            );
-
+        #region Font
         /// <summary>
         /// Gets or sets the name of the font family to use when <see cref="DisplayValues"/> is true.
         /// </summary>
-        public string ValuesFontFamily
+        public string FontFamily
         {
-            get => (string)GetValue(ValuesFontFamilyProperty);
-            set => SetValue(ValuesFontFamilyProperty, value);
+            get => (string)GetValue(FontFamilyProperty);
+            set => SetValue(FontFamilyProperty, value);
         }
 
         /// <summary>
-        /// Identifies the <see cref="ValuesFontFamily"/> dependency property.
+        /// Identifies the <see cref="FontFamily"/> dependency property.
         /// </summary>
-        public static readonly DependencyProperty ValuesFontFamilyProperty = DependencyProperty.Register
+        public static readonly DependencyProperty FontFamilyProperty = DependencyProperty.Register
             (
-                nameof(ValuesFontFamily), typeof(string), typeof(ChartBase), new PropertyMetadata(DefaultValueFontFamily, OnDisplayValuesPropertyChanged)
+                nameof(FontFamily), typeof(string), typeof(ChartBase), 
+                new FrameworkPropertyMetadata(DefaultValueFontFamily, FrameworkPropertyMetadataOptions.AffectsMeasure)
             );
 
         /// <summary>
-        /// Gets or sets the size of the font when <see cref="DisplayValues"/> is true.
+        /// Gets or sets the size of the font.
         /// </summary>
         /// <remarks>
         /// This value is clamped between <see cref="MinValuesFontSize"/> and <see cref="MaxValuesFontSize"/>.
         /// </remarks>
-        public double ValuesFontSize
+        public double FontSize
         {
-            get => (double)GetValue(ValuesFontSizeProperty);
-            set => SetValue(ValuesFontSizeProperty, value);
+            get => (double)GetValue(FontSizeProperty);
+            set => SetValue(FontSizeProperty, value);
         }
 
         /// <summary>
-        /// Identifies the <see cref="ValuesFontSize"/> dependency property.
+        /// Identifies the <see cref="FontSize"/> dependency property.
         /// </summary>
-        public static readonly DependencyProperty ValuesFontSizeProperty = DependencyProperty.Register
+        public static readonly DependencyProperty FontSizeProperty = DependencyProperty.Register
             (
-                nameof(ValuesFontSize), typeof(double), typeof(ChartBase), new PropertyMetadata(DefaultValuesFontSize, OnDisplayValuesPropertyChanged, OnCoerceValuesFontSize)
+                nameof(FontSize), typeof(double), typeof(ChartBase), 
+                new FrameworkPropertyMetadata(DefaultValuesFontSize, FrameworkPropertyMetadataOptions.AffectsMeasure, null, OnCoerceFontSize)
             );
 
-        private static object OnCoerceValuesFontSize(DependencyObject d, object value)
+        private static object OnCoerceFontSize(DependencyObject d, object value)
         {
             double dval = (double)value;
             return dval.Clamp(MinValuesFontSize, MaxValuesFontSize);
-        }
-
-        private static void OnDisplayValuesPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is ChartBase c)
-            {
-                c.InvalidateMeasure();
-            }
         }
         #endregion
 
@@ -404,7 +381,9 @@ namespace Restless.Controls.Chart
             using (DrawingContext dc = visual.RenderOpen())
             {
                 dc.PushTransform(rotateTransform);
+                // visual debugging aides
                 //dc.DrawEllipse(Brushes.Red, null, new Point(rx, ry), 3, 3);
+                //dc.DrawEllipse(Brushes.Red, null, new Point(x, y), 1, 1);
                 dc.DrawText(text, new Point(x, y));
                 dc.Pop();
             }

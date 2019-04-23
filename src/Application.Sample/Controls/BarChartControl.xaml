@@ -33,7 +33,7 @@
 
             <conx:BarChart 
                 Data="{Binding Data, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
-                DisplayValues="{Binding DisplayChartValues}"/>
+                ValueDisplay="{Binding DisplayChartValues}"/>
         </conx:ChartContainer>
 
         <conx:ChartLegend

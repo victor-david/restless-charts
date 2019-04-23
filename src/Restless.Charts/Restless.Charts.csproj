@@ -63,6 +63,7 @@
     <Compile Include="Chart\ChartContainer.cs" />
     <Compile Include="Chart\ChartBase.cs" />
     <Compile Include="Chart\ChartLegend.cs" />
+    <Compile Include="Chart\LabelDisplay.cs" />
     <Compile Include="Chart\HelpControl.cs" />
     <Compile Include="Chart\LineChart.cs" />
     <Compile Include="Chart\LineChartStyle.cs" />
