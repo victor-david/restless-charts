@@ -28,7 +28,7 @@ namespace Application.Sample
         /// <summary>
         /// Gets the count of data sets that this control supports.
         /// </summary>
-        public override int DataSetCount => 3;
+        public override int DataSetCount => 4;
         
         /// <summary>
         /// Gets the data.
@@ -85,6 +85,9 @@ namespace Application.Sample
                 case 3:
                     CreateChartData3();
                     break;
+                case 4:
+                    CreateChartData4();
+                    break;
             }
         }
         #endregion
@@ -95,7 +98,7 @@ namespace Application.Sample
             TopTitle.Text = "Work Force Distribution (Millions)";
             LegendHeader = "Work Force Sector";
             ValueFormat = "N2";
-            CreateChartData(100, 500, 10, 100.0, GetWorkForceLegend);
+            CreateChartData(100, 500, workForce.Length, 100.0, GetWorkForceLegend);
         }
 
         private void CreateChartData2()
@@ -103,7 +106,7 @@ namespace Application.Sample
             TopTitle.Text = "Taxes";
             LegendHeader = "Tax Type";
             ValueFormat = "C0";
-            CreateChartData(1000, 25000, 5, 0, GetTaxLegend);
+            CreateChartData(1000, 25000, taxes.Length, 0, GetTaxLegend);
         }
 
         private void CreateChartData3()
@@ -111,7 +114,15 @@ namespace Application.Sample
             TopTitle.Text = "Employees Per Departments";
             LegendHeader = "Department";
             ValueFormat = null;
-            CreateChartData(500, 1000, 6, 0, GetDepartmentLegend);
+            CreateChartData(500, 1000, departments.Length, 0, GetDepartmentLegend);
+        }
+
+        private void CreateChartData4()
+        {
+            TopTitle.Text = "Widget Sales";
+            LegendHeader = "Widget";
+            ValueFormat = "C0";
+            CreateChartData(500, 50000, widgets.Length, 0, GetWidgetLegend);
         }
 
         private void CreateChartData(int minY, int maxY, int sliceCount, double divFactor, Func<int, string> getLegend)
@@ -151,6 +162,14 @@ namespace Application.Sample
             "Information Technology", "Executive", "Legal"
         };
 
+        private string[] widgets =
+        {
+            "Forks", "Knives", "Cups", "Toasters",
+            "Computers", "Radios", "SIM Cards", "Telephones",
+            "Frying Pans", "Pans", "Clocks", "Combs",
+            "Lamps", "Washers", "Dryers", "Sushi Bars"
+        };
+
         private string GetWorkForceLegend(int idx)
         {
             return (idx < workForce.Length) ? workForce[idx] : null;
@@ -164,6 +183,11 @@ namespace Application.Sample
         private string GetDepartmentLegend(int idx)
         {
             return (idx < departments.Length) ? departments[idx] : null;
+        }
+
+        private string GetWidgetLegend(int idx)
+        {
+            return (idx < widgets.Length) ? widgets[idx] : null;
         }
         #endregion
     }
