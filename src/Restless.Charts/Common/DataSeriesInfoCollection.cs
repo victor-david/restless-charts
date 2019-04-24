@@ -35,6 +35,11 @@ namespace Restless.Controls.Chart
 
         #region Properties
         /// <summary>
+        /// Gets the count of items in this collection.
+        /// </summary>
+        public int Count => storage.Count;
+
+        /// <summary>
         /// Gets the <see cref="DataSeriesInfo"/> at the specified index.
         /// </summary>
         /// <param name="index">The index.</param>
@@ -122,6 +127,28 @@ namespace Restless.Controls.Chart
             {
                 info.Visual.Border = brush;
                 info.Visual.BorderThickness = borderThickness;
+            }
+        }
+
+        /// <summary>
+        /// Copies the data series information of this collection to another specified collection.
+        /// </summary>
+        /// <param name="other">The other collection.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="other"/> is null.</exception>
+        public void CopyTo(DataSeriesInfoCollection other)
+        {
+            if (other == null) throw new ArgumentNullException(nameof(other));
+
+            int maxIdx = Math.Min(Count, other.Count);
+            for (int idx = 0; idx < maxIdx; idx++)
+            {
+                other.SetInfo(idx, 
+                    this[idx].Name, 
+                    this[idx].Visual.Data, 
+                    this[idx].Visual.PrimaryText,
+                    this[idx].Visual.SecondaryText,
+                    this[idx].Visual.Border,
+                    this[idx].Visual.BorderThickness);
             }
         }
         #endregion

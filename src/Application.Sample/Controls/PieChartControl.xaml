@@ -21,7 +21,7 @@
         XAxisTickVisibility="None"
         YAxisTickVisibility="None">
 
-        <Grid>
+        <conx:ChartConnectorGrid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2.25*"/>
                 <ColumnDefinition/>
@@ -30,9 +30,8 @@
             <conx:PieChart
                 FontFamily="Calibri"
                 HoleSize="{Binding HoleSize, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
-                Data="{Binding Data, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
-                SelectedSeriesIndex="{Binding SelectedLegendIndex, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
-                />
+                Data="{Binding Data, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}, Mode=TwoWay}"
+                SelectedSeriesIndex="{Binding SelectedLegendIndex, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"/>
 
             <conx:ChartLegend
                 Grid.Column="1"
@@ -41,9 +40,8 @@
                 HeaderText="{Binding LegendHeader, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
                 HeaderTextForeground="DarkGray"
                 Foreground="DarkGray"
-                SelectedItem="{Binding SelectedLegendItem, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
-                Data="{Binding Data, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"/>
-        </Grid>
+                SelectedItem="{Binding SelectedLegendItem, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"/>
+        </conx:ChartConnectorGrid>
     </conx:ChartContainer>
 
 </con:ChartControlBase>

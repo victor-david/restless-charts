@@ -76,6 +76,21 @@ namespace Restless.Controls.Chart
         /// Gets the default value for <see cref="SelectedOffset"/>.
         /// </summary>
         public const double DefaultSelectedOffset = 35.0;
+
+        /// <summary>
+        /// Gets the minimum allowed value for <see cref="MaxSlice"/>.
+        /// </summary>
+        public const int MinMaxSlice = 6;
+
+        /// <summary>
+        /// Gets the maximum allowed value for <see cref="MaxSlice"/>.
+        /// </summary>
+        public const int MaxMaxSlice = 72;
+
+        /// <summary>
+        /// Gets the default value for <see cref="MaxSlice"/>.
+        /// </summary>
+        public const int DefaultMaxSlice = 10;
         #endregion
 
         /************************************************************************/
@@ -249,6 +264,65 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
+        #region MaxSlice
+        /// <summary>
+        /// Gets or sets a value that determines the maximum number of slices allowed on the chart. 
+        /// This property is clamped between <see cref="MinMaxSlice"/> and <see cref="MaxMaxSlice"/>.
+        /// </summary>
+        /// <remarks>
+        /// This property controls the maximum number of slices that the chart may have.
+        /// If the data has more slices than this property specifies, slices with the smallest
+        /// percentages of the total are combined in an "Other" slice. The name used by the "Other"
+        /// slice is specified by the <see cref="OtherSliceName"/> property.
+        /// </remarks>
+        public int MaxSlice
+        {
+            get => (int)GetValue(MaxSliceProperty);
+            set => SetValue(MaxSliceProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="MaxSlice"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty MaxSliceProperty = DependencyProperty.Register
+            (
+                nameof(MaxSlice), typeof(int), typeof(PieChart),
+                new FrameworkPropertyMetadata(DefaultMaxSlice,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsMeasure,
+                    null, OnCoerceMaxSlice)
+            );
+
+        private static object OnCoerceMaxSlice(DependencyObject d, object value)
+        {
+            return ((int)value).Clamp(MinMaxSlice, MaxMaxSlice);
+        }
+        #endregion
+
+        /************************************************************************/
+
+        #region OtherSliceName
+        /// <summary>
+        /// Gets or sets a value that determines the name of the slice
+        /// that is used when <see cref="MaxSlice"/> is exceeded.
+        /// The default value is "Other"
+        /// </summary>
+        public string OtherSliceName
+        {
+            get => (string)GetValue(OtherSliceNameProperty);
+            set => SetValue(OtherSliceNameProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="OtherSliceName"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty OtherSliceNameProperty = DependencyProperty.Register
+            (
+                nameof(OtherSliceName), typeof(string), typeof(PieChart), new PropertyMetadata("Other")
+            );
+        #endregion
+
+        /************************************************************************/
+
         #region Protected methods
         /// <summary>
         /// Called by <see cref="ChartBase"/> to create child visuals.
@@ -277,6 +351,29 @@ namespace Restless.Controls.Chart
             // most common code path.
             CreateMultiValueChart(size);
 
+        }
+        #endregion
+
+        /************************************************************************/
+
+        #region Internal methods
+        /// <summary>
+        /// Adjusts <see cref="ChartBase.Data"/> according to <see cref="MaxSlice"/> if needed.
+        /// </summary>
+        internal void AdjustDataSeriesIf()
+        {
+            // no adjustment needed
+            if (Data == null) return;
+            if (Data.MaxYSeries <= MaxSlice) return;
+
+            // too many slices.
+            DataSeries adjData = DataSeries.Create(MaxSlice);
+            int extra = Data.MaxYSeries - MaxSlice;
+
+            Data.DataInfo.CopyTo(adjData.DataInfo);
+            adjData.DataInfo.SetInfo(MaxSlice - 1, OtherSliceName);
+
+            Data = adjData;
         }
         #endregion
 
