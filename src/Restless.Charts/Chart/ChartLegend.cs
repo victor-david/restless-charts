@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -9,7 +10,7 @@ namespace Restless.Controls.Chart
     /// <summary>
     /// Represents a chart legend.
     /// </summary>
-    public class ChartLegend : ListBox
+    public class ChartLegend : ListBox, IDataConnector
     {
         #region Constructors
         /// <summary>
@@ -99,36 +100,6 @@ namespace Restless.Controls.Chart
         #endregion
 
         /************************************************************************/
-
-        #region Data
-        /// <summary>
-        /// Gets or sets the data series for the legend.
-        /// </summary>
-        public DataSeries Data
-        {
-            get => (DataSeries)GetValue(DataProperty);
-            set => SetValue(DataProperty, value);
-        }
-
-        /// <summary>
-        /// Identifies the <see cref="Data"/> dependency property.
-        /// </summary>
-        public static readonly DependencyProperty DataProperty = DependencyProperty.Register
-            (
-                nameof(Data), typeof(DataSeries), typeof(ChartLegend), new PropertyMetadata(null, OnDataChanged)
-            );
-
-        private static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is ChartLegend c && c.Data != null)
-            {
-                c.ItemsSource = c.Data.DataInfo;
-            }
-        }
-        #endregion
-
-        /************************************************************************/
-
         #region IsInteractive
         /// <summary>
         /// Gets or sets a value that determines if the legend is interactive.
@@ -169,6 +140,28 @@ namespace Restless.Controls.Chart
         private void ExecuteClearLegendSelectionCommand(object sender, ExecutedRoutedEventArgs e)
         {
             SelectedItem = null;
+        }
+
+
+        #endregion
+
+        /************************************************************************/
+
+        #region IDataConnector
+        /// <summary>
+        /// Called when <see cref="DataSeries"/> has changed.
+        /// </summary>
+        /// <param name="chart">The chart</param>
+        public void OnDataSeriesChanged(ChartBase chart)
+        {
+            if (chart != null && chart.Data != null)
+            {
+                if (chart is PieChart pie)
+                {
+                    pie.AdjustDataSeriesIf();
+                }
+                ItemsSource = chart.Data.DataInfo;
+            }
         }
         #endregion
 

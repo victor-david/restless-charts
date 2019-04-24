@@ -12,14 +12,14 @@ namespace Restless.Controls.Chart
     /// </summary>
     /// <remarks>
     /// The <see cref="DataSeries"/> class is esentially a matrix.
-    /// It stores X values which each have a corresponding <see cref="DataSequence"/>
+    /// It stores X values which each have a corresponding <see cref="DataPointYCollection"/>
     /// of Y values. X values cannot be duplicated.
     /// </remarks>
-    public class DataSeries : IEnumerable<DataPoint>
+    public class DataSeries : IEnumerable<DataPointX>
     {
         #region Private
         private readonly HashSet<double> xValues;
-        private readonly List<DataPoint> storage;
+        private readonly List<DataPointX> storage;
         #endregion
 
         /************************************************************************/
@@ -51,7 +51,7 @@ namespace Restless.Controls.Chart
         {
             MaxYSeries = Math.Max(1, maxYSeries);
             xValues = new HashSet<double>();
-            storage = new List<DataPoint>();
+            storage = new List<DataPointX>();
             DataRange = DataRange.EmptyDataRange();
             MinXValue = double.NaN;
             MaxXValue = double.NaN;
@@ -71,7 +71,7 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
-        /// Gets the minimum X value of all <see cref="DataPoint"/> objects that have been added to the series.
+        /// Gets the minimum X value of all <see cref="DataPointX"/> objects that have been added to the series.
         /// </summary>
         public double MinXValue
         {
@@ -80,7 +80,7 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
-        /// Gets the maximum X value of all <see cref="DataPoint"/> objects that have been added to the series.
+        /// Gets the maximum X value of all <see cref="DataPointX"/> objects that have been added to the series.
         /// </summary>
         public double MaxXValue
         {
@@ -102,7 +102,7 @@ namespace Restless.Controls.Chart
         /// <param name="index">The index</param>
         /// <returns>The data point.</returns>
         /// <exception cref="IndexOutOfRangeException">An attempt was made to use an index that is out of range.</exception>
-        public DataPoint this[int index]
+        public DataPointX this[int index]
         {
             get => storage[index];
         }
@@ -143,7 +143,7 @@ namespace Restless.Controls.Chart
             DataRange.Include(xValue, yValue);
             MinXValue = double.IsNaN(MinXValue) ? xValue : Math.Min(MinXValue, xValue);
             MaxXValue = double.IsNaN(MaxXValue) ? xValue : Math.Max(MaxXValue, xValue);
-            DataPoint point = GetDataPointAt(xValue);
+            DataPointX point = GetDataPointAt(xValue);
             if (point.YValues.Count < MaxYSeries)
             {
                 point.AddY(yValue);
@@ -210,13 +210,13 @@ namespace Restless.Controls.Chart
         #region IEnumerable implementation
         /// <summary>
         /// Gets the generic enumerator. This enumerator
-        /// returns <see cref="DataPoint"/> objects in ascending
-        /// order of <see cref="DataPoint.XValue"/>.
+        /// returns <see cref="DataPointX"/> objects in ascending
+        /// order of <see cref="DataPointX.Value"/>.
         /// </summary>
         /// <returns>The enumerator.</returns>
-        public IEnumerator<DataPoint> GetEnumerator()
+        public IEnumerator<DataPointX> GetEnumerator()
         {
-            foreach (DataPoint point in storage.OrderBy((dp) => dp.XValue))
+            foreach (DataPointX point in storage.OrderBy((dp) => dp.Value))
             {
                 yield return point;
             }
@@ -242,9 +242,9 @@ namespace Restless.Controls.Chart
         /// <returns>The enumerable.</returns>
         public IEnumerable<double> EnumerateX()
         {
-            foreach (DataPoint point in this)
+            foreach (DataPointX point in this)
             {
-                yield return point.XValue;
+                yield return point.Value;
             }
         }
 
@@ -263,9 +263,9 @@ namespace Restless.Controls.Chart
             {
                 throw new IndexOutOfRangeException($"Y series index {ySeriesIndex} is out of range");
             }
-            foreach (DataPoint point in this)
+            foreach (DataPointX point in this)
             {
-                yield return point.YValues[ySeriesIndex];
+                yield return point.YValues[ySeriesIndex].Value;
             }
         }
 
@@ -282,9 +282,9 @@ namespace Restless.Controls.Chart
         {
             for (int yIdx = 0; yIdx < MaxYSeries; yIdx++)
             {
-                foreach (DataPoint point in this)
+                foreach (DataPointX point in this)
                 {
-                    yield return point.YValues[yIdx];
+                    yield return point.YValues[yIdx].Value;
                 }
             }
         }
@@ -296,9 +296,9 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Called during <see cref="Add(double, double)"/> to keep X values sorted.
         /// </summary>
-        private int SortByXValue(DataPoint dp1, DataPoint dp2)
+        private int SortByXValue(DataPointX dp1, DataPointX dp2)
         {
-            return dp1.XValue.CompareTo(dp2.XValue);
+            return dp1.Value.CompareTo(dp2.Value);
         }
 
         /// <summary>
@@ -307,14 +307,14 @@ namespace Restless.Controls.Chart
         /// </summary>
         /// <param name="xValue">The x value</param>
         /// <returns>A DataPoint, either already in storage or freshly added.</returns>
-        private DataPoint GetDataPointAt(double xValue)
+        private DataPointX GetDataPointAt(double xValue)
         {
             if (xValues.Contains(xValue))
             {
                 return GetDataPointFromStorage(xValue);
             }
 
-            DataPoint newPoint = new DataPoint(xValue);
+            DataPointX newPoint = new DataPointX(MaxYSeries, xValue);
             storage.Add(newPoint);
             xValues.Add(xValue);
             return newPoint;
@@ -326,11 +326,11 @@ namespace Restless.Controls.Chart
         /// </summary>
         /// <param name="xValue">The value.</param>
         /// <returns>A DataPoint.</returns>
-        private DataPoint GetDataPointFromStorage(double xValue)
+        private DataPointX GetDataPointFromStorage(double xValue)
         {
-            foreach (DataPoint point in this)
+            foreach (DataPointX point in this)
             {
-                if (point.XValue == xValue) return point;
+                if (point.Value == xValue) return point;
             }
             throw new ArgumentOutOfRangeException(nameof(xValue), xValue, "Internal error");
         }
@@ -339,11 +339,11 @@ namespace Restless.Controls.Chart
         {
             double min = double.MaxValue;
 
-            foreach (DataPoint point in this)
+            foreach (DataPointX pointX in this)
             {
-                foreach (double value in point.YValues)
+                foreach (DataPointY pointY in pointX.YValues)
                 {
-                    min = Math.Min(min, value);
+                    min = Math.Min(min, pointY.Value);
                 }
             }
             return min;

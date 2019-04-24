@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
@@ -13,6 +12,7 @@ namespace Restless.Controls.Chart
     {
         #region Private
         private ChartContainer owner;
+        private bool dataChangedEventInProgress;
         #endregion
 
         /************************************************************************/
@@ -43,7 +43,7 @@ namespace Restless.Controls.Chart
 
         #region Constructors
         /// <summary>
-        /// Initializes new instance of <see cref="ChartBase"/> class
+        /// Initializes a new instance of <see cref="ChartBase"/> class
         /// </summary>
         protected ChartBase()
         {
@@ -102,14 +102,40 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty DataProperty = DependencyProperty.Register
             (
-                nameof(Data), typeof(DataSeries), typeof(ChartBase), new PropertyMetadata(null, OnDataChanged)
+                nameof(Data), typeof(DataSeries), typeof(ChartBase), new FrameworkPropertyMetadata(null, OnDataChanged)
+            );
+
+
+        /// <summary>
+        /// Provides notification when the <see cref="Data"/> property changes.
+        /// </summary>
+        public event RoutedEventHandler DataChanged
+        {
+            add => AddHandler(DataChangedEvent, value);
+            remove => RemoveHandler(DataChangedEvent, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="DataChanged"/> routed event.
+        /// </summary>
+        public static readonly RoutedEvent DataChangedEvent = EventManager.RegisterRoutedEvent
+            (
+                nameof(DataChanged), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(ChartBase)
             );
 
         private static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is ChartBase c && c.Data != null)
+            if (d is ChartBase c)
             {
-                if (TreeHelper.TrySetParent(c, ref c.owner))
+                // avoid reentrancy
+                if (!c.dataChangedEventInProgress)
+                {
+                    c.dataChangedEventInProgress = true;
+                    c.RaiseEvent(new RoutedEventArgs(DataChangedEvent));
+                    c.dataChangedEventInProgress = false;
+                }
+
+                if (c.Data != null && TreeHelper.TrySetParent(c, ref c.owner))
                 {
                     c.Owner.XAxis.SetData(c.Data);
                     c.Owner.YAxis.SetData(c.Data);
@@ -123,7 +149,7 @@ namespace Restless.Controls.Chart
 
         #region Font
         /// <summary>
-        /// Gets or sets the name of the font family to use when <see cref="DisplayValues"/> is true.
+        /// Gets or sets the name of the font family to use.
         /// </summary>
         public string FontFamily
         {

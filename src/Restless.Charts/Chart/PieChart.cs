@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 
@@ -9,8 +10,8 @@ namespace Restless.Controls.Chart
     /// </summary>
     /// <remarks>
     /// As with other charts, a PieChart uses a <see cref="DataSeries"/> object to obtains its values.
-    /// However, unlike other charts, PieChart uses only the <see cref="DataSequence"/> provided by the first
-    /// <see cref="DataPoint"/>. The value of <see cref="DataPoint.XValue"/> is not used. To create data for
+    /// However, unlike other charts, PieChart uses only the <see cref="DataPointYCollection"/> provided by the first
+    /// <see cref="DataPointX"/>. The value of <see cref="DataPointX.Value"/> is not used. To create data for
     /// PieChart, create a <see cref="DataSeries"/> with the number of Y series set to the number of pie slices needed.
     /// Call <see cref="DataSeries.Add(double, double)"/> for each pie value, passing the same X value each time.
     /// </remarks>
@@ -76,6 +77,21 @@ namespace Restless.Controls.Chart
         /// Gets the default value for <see cref="SelectedOffset"/>.
         /// </summary>
         public const double DefaultSelectedOffset = 35.0;
+
+        /// <summary>
+        /// Gets the minimum allowed value for <see cref="MaxSlice"/>.
+        /// </summary>
+        public const int MinMaxSlice = 6;
+
+        /// <summary>
+        /// Gets the maximum allowed value for <see cref="MaxSlice"/>.
+        /// </summary>
+        public const int MaxMaxSlice = 72;
+
+        /// <summary>
+        /// Gets the default value for <see cref="MaxSlice"/>.
+        /// </summary>
+        public const int DefaultMaxSlice = 12;
         #endregion
 
         /************************************************************************/
@@ -239,11 +255,73 @@ namespace Restless.Controls.Chart
             set => SetValue(LabelDisplayProperty, value);
         }
         
+        /// <summary>
+        /// Identifies the <see cref="LabelDisplay"/> dependency property.
+        /// </summary>
         public static readonly DependencyProperty LabelDisplayProperty = DependencyProperty.Register
             (
                 nameof(LabelDisplay), typeof(LabelDisplay), typeof(PieChart), 
                 new FrameworkPropertyMetadata(LabelDisplay.NameValue,
                     FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender)
+            );
+        #endregion
+
+        /************************************************************************/
+
+        #region MaxSlice
+        /// <summary>
+        /// Gets or sets a value that determines the maximum number of slices allowed on the chart. 
+        /// This property is clamped between <see cref="MinMaxSlice"/> and <see cref="MaxMaxSlice"/>.
+        /// </summary>
+        /// <remarks>
+        /// This property controls the maximum number of slices that the chart may have.
+        /// If the data has more slices than this property specifies, slices with the smallest
+        /// percentages of the total are combined in an "Other" slice. The name used by the "Other"
+        /// slice is specified by the <see cref="OtherSliceName"/> property.
+        /// </remarks>
+        public int MaxSlice
+        {
+            get => (int)GetValue(MaxSliceProperty);
+            set => SetValue(MaxSliceProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="MaxSlice"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty MaxSliceProperty = DependencyProperty.Register
+            (
+                nameof(MaxSlice), typeof(int), typeof(PieChart),
+                new FrameworkPropertyMetadata(DefaultMaxSlice,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsMeasure,
+                    null, OnCoerceMaxSlice)
+            );
+
+        private static object OnCoerceMaxSlice(DependencyObject d, object value)
+        {
+            return ((int)value).Clamp(MinMaxSlice, MaxMaxSlice);
+        }
+        #endregion
+
+        /************************************************************************/
+
+        #region OtherSliceName
+        /// <summary>
+        /// Gets or sets a value that determines the name of the slice
+        /// that is used when <see cref="MaxSlice"/> is exceeded.
+        /// The default value is "Other"
+        /// </summary>
+        public string OtherSliceName
+        {
+            get => (string)GetValue(OtherSliceNameProperty);
+            set => SetValue(OtherSliceNameProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="OtherSliceName"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty OtherSliceNameProperty = DependencyProperty.Register
+            (
+                nameof(OtherSliceName), typeof(string), typeof(PieChart), new PropertyMetadata("Other")
             );
         #endregion
 
@@ -282,6 +360,46 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
+        #region Internal methods
+        /// <summary>
+        /// Adjusts <see cref="ChartBase.Data"/> according to <see cref="MaxSlice"/> if needed.
+        /// </summary>
+        internal void AdjustDataSeriesIf()
+        {
+            // no adjustment needed
+            if (Data == null) return;
+            if (Data.MaxYSeries <= MaxSlice) return;
+
+            // too many slices.
+            DataSeries adjData = DataSeries.Create(MaxSlice);
+            double smallestSum = 0;
+
+            var smallest = Data[0].YValues.GetSmallestValueDataPoints(Data.MaxYSeries - MaxSlice + 1);
+            smallest.ForEach((p) => smallestSum += p.Value);
+
+            int adjIdx = 0;
+            foreach (DataPointY point in Data[0].YValues)
+            {
+                if (!smallest.Contains(point))
+                {
+                    adjData.Add(0, point.Value);
+                    Data.DataInfo.CopyTo(point.SeriesIndex, adjIdx, adjData.DataInfo);
+                    adjIdx++;
+                }
+            }
+            // add the final value for the "other" slice,
+            adjData.Add(0, smallestSum);
+            // copy data info (name, colors) from the first smallest to the "other".
+            Data.DataInfo.CopyTo(smallest[0].SeriesIndex, MaxSlice - 1, adjData.DataInfo);
+            // don't want the name from the previous statement. set the name of the "other" to the property value.
+            adjData.DataInfo.SetInfo(MaxSlice - 1, OtherSliceName);
+
+            Data = adjData;
+        }
+        #endregion
+
+        /************************************************************************/
+
         #region Private methods
         private void CreateNoDataChart(Size size, string message, Brush brush)
         {
@@ -315,16 +433,16 @@ namespace Restless.Controls.Chart
 
             int yIdx = 0;
 
-            foreach (double value in Data[0].YValues)
+            foreach (DataPointY dataPoint in Data[0].YValues)
             {
-                double wedgeAngle = value * 360 / sum;
+                double wedgeAngle = dataPoint.Value * 360 / sum;
 
                 double pushOffset = yIdx == SelectedSeriesIndex ? SelectedOffset : 0;
                 MakeOneSlice(yIdx, center, radius, innerRadius, wedgeAngle, rotationAngle, pushOffset);
                 if (LabelDisplay != LabelDisplay.None)
                 {
                     double lineAngle = GetNormalizedAngle(rotationAngle + wedgeAngle / 2.0);
-                    MakeOneSliceLabel(sum, value, Data.DataInfo[yIdx], center, radius + pushOffset, lineAngle);
+                    MakeOneSliceLabel(sum, dataPoint.Value, Data.DataInfo[yIdx], center, radius + pushOffset, lineAngle);
                 }
 
                 rotationAngle += wedgeAngle;

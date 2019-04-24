@@ -36,7 +36,7 @@ namespace Application.Sample
         public DataSeries Data
         {
             get => data;
-            private set => SetProperty(ref data, value);
+            set => SetProperty(ref data, value);
         }
 
         /// <summary>
