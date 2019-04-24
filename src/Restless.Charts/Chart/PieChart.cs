@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 
@@ -9,8 +10,8 @@ namespace Restless.Controls.Chart
     /// </summary>
     /// <remarks>
     /// As with other charts, a PieChart uses a <see cref="DataSeries"/> object to obtains its values.
-    /// However, unlike other charts, PieChart uses only the <see cref="DataSequence"/> provided by the first
-    /// <see cref="DataPoint"/>. The value of <see cref="DataPoint.XValue"/> is not used. To create data for
+    /// However, unlike other charts, PieChart uses only the <see cref="DataPointYCollection"/> provided by the first
+    /// <see cref="DataPointX"/>. The value of <see cref="DataPointX.Value"/> is not used. To create data for
     /// PieChart, create a <see cref="DataSeries"/> with the number of Y series set to the number of pie slices needed.
     /// Call <see cref="DataSeries.Add(double, double)"/> for each pie value, passing the same X value each time.
     /// </remarks>
@@ -370,6 +371,12 @@ namespace Restless.Controls.Chart
             DataSeries adjData = DataSeries.Create(MaxSlice);
             int extra = Data.MaxYSeries - MaxSlice;
 
+            var smallestIdices = Data[0].YValues.GetSmallestValueIndices(extra);
+            foreach (int idx in smallestIdices)
+            {
+                Debug.WriteLine($"{idx}. {Data[0].YValues[idx].Value}");
+            }
+
             Data.DataInfo.CopyTo(adjData.DataInfo);
             adjData.DataInfo.SetInfo(MaxSlice - 1, OtherSliceName);
 
@@ -412,16 +419,16 @@ namespace Restless.Controls.Chart
 
             int yIdx = 0;
 
-            foreach (double value in Data[0].YValues)
+            foreach (DataPointY dataPoint in Data[0].YValues)
             {
-                double wedgeAngle = value * 360 / sum;
+                double wedgeAngle = dataPoint.Value * 360 / sum;
 
                 double pushOffset = yIdx == SelectedSeriesIndex ? SelectedOffset : 0;
                 MakeOneSlice(yIdx, center, radius, innerRadius, wedgeAngle, rotationAngle, pushOffset);
                 if (LabelDisplay != LabelDisplay.None)
                 {
                     double lineAngle = GetNormalizedAngle(rotationAngle + wedgeAngle / 2.0);
-                    MakeOneSliceLabel(sum, value, Data.DataInfo[yIdx], center, radius + pushOffset, lineAngle);
+                    MakeOneSliceLabel(sum, dataPoint.Value, Data.DataInfo[yIdx], center, radius + pushOffset, lineAngle);
                 }
 
                 rotationAngle += wedgeAngle;

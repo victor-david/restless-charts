@@ -129,17 +129,17 @@ namespace Restless.Controls.Chart
 
             textVisuals.Clear();
 
-            foreach (DataPoint point in Data)
+            foreach (DataPointX point in Data)
             {
                 int yIndex = 0;
-                double x = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
+                double x = Owner.XAxis.GetCoordinateFromTick(point.Value, desiredSize);
                 double yZero = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
 
-                foreach (double yValue in point.YValues.OrderByDescending((v) => Math.Abs(v)))
+                foreach (DataPointY dataPoint in point.YValues.OrderByDescending((v) => Math.Abs(v.Value)))
                 {
                     Pen pen = new Pen(Data.DataInfo[yIndex].Visual.Data, barWidth);
                     
-                    double y = Owner.YAxis.GetCoordinateFromTick(yValue, desiredSize);
+                    double y = Owner.YAxis.GetCoordinateFromTick(dataPoint.Value, desiredSize);
                     
                     double barLength = Math.Abs(y - yZero);
 
@@ -148,12 +148,12 @@ namespace Restless.Controls.Chart
                         if (Owner.Orientation == Orientation.Vertical)
                         {
                             Children.Add(CreateLineVisual(pen, x, yZero, x, y));
-                            CreateTextDisplayIf(yIndex, yValue, x, y, yZero, barWidth, barLength);
+                            CreateTextDisplayIf(yIndex, dataPoint.Value, x, y, yZero, barWidth, barLength);
                         }
                         else
                         {
                             Children.Add(CreateLineVisual(pen, yZero, x, y, x));
-                            CreateTextDisplayIf(yIndex, yValue, y, x, yZero, barWidth, barLength);
+                            CreateTextDisplayIf(yIndex, dataPoint.Value, y, x, yZero, barWidth, barLength);
                         }
                     }
                     yIndex++;

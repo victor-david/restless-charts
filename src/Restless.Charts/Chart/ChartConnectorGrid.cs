@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -23,7 +18,6 @@ namespace Restless.Controls.Chart
         {
             if (e.Source is ChartBase chart)
             {
-                DebugHelper.DisplayRoutedEvent(sender, e);
                 foreach (var child in Children.OfType<IDataConnector>())
                 {
                     child.OnDataSeriesChanged(chart);

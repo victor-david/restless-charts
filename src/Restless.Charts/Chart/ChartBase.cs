@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
@@ -129,7 +128,6 @@ namespace Restless.Controls.Chart
             if (d is ChartBase c)
             {
                 // avoid reentrancy
-                Debug.WriteLine("NEW DATA");
                 if (!c.dataChangedEventInProgress)
                 {
                     c.dataChangedEventInProgress = true;

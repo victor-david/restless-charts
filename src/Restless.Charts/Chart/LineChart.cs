@@ -52,7 +52,7 @@ namespace Restless.Controls.Chart
 
         #region Constructor
         /// <summary>
-        /// Initializes a new instance of the <see cref="BarChart"/> class.
+        /// Initializes a new instance of the <see cref="LineChart"/> class.
         /// </summary>
         public LineChart()
         {
@@ -185,14 +185,14 @@ namespace Restless.Controls.Chart
 
         private void CreatePoints(double xMax, double yMax, Size desiredSize)
         {
-            foreach (DataPoint point in Data)
+            foreach (DataPointX point in Data)
             {
-                double x = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
+                double x = Owner.XAxis.GetCoordinateFromTick(point.Value, desiredSize);
                 double yZero = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
 
                 for (int yIdx = 0; yIdx < point.YValues.Count; yIdx++)
                 {
-                    double y = Owner.YAxis.GetCoordinateFromTick(point.YValues[yIdx], desiredSize);
+                    double y = Owner.YAxis.GetCoordinateFromTick(point.YValues[yIdx].Value, desiredSize);
 
                     if (IsVisualCreatable(x, y, yZero, xMax, yMax, PointSize))
                     {
@@ -230,14 +230,14 @@ namespace Restless.Controls.Chart
 
             for (int dpIdx = 0; dpIdx < Data.Count; dpIdx++)
             {
-                double yValue = Data[dpIdx].YValues[yIdx];
-                double xStart = Owner.XAxis.GetCoordinateFromTick(Data[dpIdx].XValue, desiredSize);
+                double yValue = Data[dpIdx].YValues[yIdx].Value;
+                double xStart = Owner.XAxis.GetCoordinateFromTick(Data[dpIdx].Value, desiredSize);
                 double yStart = Owner.YAxis.GetCoordinateFromTick(yValue, desiredSize);
 
                 if (dpIdx < Data.Count - 1)
                 {
-                    double yValueNext = Data[dpIdx + 1].YValues[yIdx];
-                    double xEnd = Owner.XAxis.GetCoordinateFromTick(Data[dpIdx + 1].XValue, desiredSize);
+                    double yValueNext = Data[dpIdx + 1].YValues[yIdx].Value;
+                    double xEnd = Owner.XAxis.GetCoordinateFromTick(Data[dpIdx + 1].Value, desiredSize);
                     double yEnd = Owner.YAxis.GetCoordinateFromTick(yValueNext, desiredSize);
 
                     if (IsVisualCreatable(xStart, yStart, yZero, xMax, yMax, LineThickness) || 
@@ -276,7 +276,7 @@ namespace Restless.Controls.Chart
 
             using (StreamGeometryContext gc = geo.Open())
             {
-                double x = Owner.XAxis.GetCoordinateFromTick(Data[0].XValue, desiredSize);
+                double x = Owner.XAxis.GetCoordinateFromTick(Data[0].Value, desiredSize);
                 double y = 0;
 
                 Point pt = new Point(x, yZero);
@@ -287,10 +287,10 @@ namespace Restless.Controls.Chart
 
                 gc.BeginFigure(pt, true, true);
 
-                foreach (DataPoint point in Data)
+                foreach (DataPointX point in Data)
                 {
-                    x = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
-                    y = Owner.YAxis.GetCoordinateFromTick(point.YValues[yIdx], desiredSize);
+                    x = Owner.XAxis.GetCoordinateFromTick(point.Value, desiredSize);
+                    y = Owner.YAxis.GetCoordinateFromTick(point.YValues[yIdx].Value, desiredSize);
 
                     pt.X = x;
                     pt.Y = y;

@@ -71,13 +71,14 @@
     <Compile Include="Chart\LineChartStyle.cs" />
     <Compile Include="Chart\PieChart.cs" />
     <Compile Include="Common\BrushUtility.cs" />
+    <Compile Include="Common\DataPointY.cs" />
     <Compile Include="Common\DataSeriesVisual.cs" />
     <Compile Include="Common\DataSeriesInfoCollection.cs" />
     <Compile Include="Common\DataSeriesInfo.cs" />
-    <Compile Include="Common\DataPoint.cs" />
+    <Compile Include="Common\DataPointX.cs" />
     <Compile Include="Common\DataRange.cs" />
     <Compile Include="Common\DataSeries.cs" />
-    <Compile Include="Common\DataSequence.cs" />
+    <Compile Include="Common\DataPointYCollection.cs" />
     <Compile Include="Common\DebugHelper.cs" />
     <Compile Include="Common\MathHelper.cs" />
     <Compile Include="Common\Range.cs" />
