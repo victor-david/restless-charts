@@ -133,23 +133,20 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Copies the data series information of this collection to another specified collection.
         /// </summary>
-        /// <param name="other">The other collection.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="other"/> is null.</exception>
-        public void CopyTo(DataSeriesInfoCollection other)
+        /// <param name="sourceIndex">The index of this collection</param>
+        /// <param name="destIndex">The index of <paramref name="destCollection"/>.</param>
+        /// <param name="destCollection">The destination collection.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="destCollection"/> is null.</exception>
+        /// <exception cref="IndexOutOfRangeException"><paramref name="sourceIndex"/> or <paramref name="destIndex"/> is out of range.</exception>
+        public void CopyTo(int sourceIndex, int destIndex, DataSeriesInfoCollection destCollection)
         {
-            if (other == null) throw new ArgumentNullException(nameof(other));
-
-            int maxIdx = Math.Min(Count, other.Count);
-            for (int idx = 0; idx < maxIdx; idx++)
-            {
-                other.SetInfo(idx, 
-                    this[idx].Name, 
-                    this[idx].Visual.Data, 
-                    this[idx].Visual.PrimaryText,
-                    this[idx].Visual.SecondaryText,
-                    this[idx].Visual.Border,
-                    this[idx].Visual.BorderThickness);
-            }
+            if (destCollection == null) throw new ArgumentNullException(nameof(destCollection));
+            // this[idx] validates index. So does c.SetInfo(...) - will throw IndexOutOfRange if needed.
+            DataSeriesInfo source = this[sourceIndex];
+            destCollection.SetInfo(
+                destIndex, source.Name, source.Visual.Data,
+                source.Visual.PrimaryText, source.Visual.SecondaryText,
+                source.Visual.Border, source.Visual.BorderThickness);
         }
         #endregion
 
@@ -182,7 +179,7 @@ namespace Restless.Controls.Chart
         /// <param name="index">The index.</param>
         private void ValidateIndex(int index)
         {
-            if (index <0 || index >= storage.Count)
+            if (index < 0 || index >= storage.Count)
             {
                 throw new IndexOutOfRangeException();
             }

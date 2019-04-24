@@ -59,16 +59,15 @@ namespace Restless.Controls.Chart
             Sum += value;
         }
 
-        internal List<int> GetSmallestValueIndices(int maxToGet)
+        internal List<DataPointY> GetSmallestValueDataPoints(int maxToGet)
         {
-            List<int> result = new List<int>();
-
+            List<DataPointY> result = new List<DataPointY>();
 
             foreach (DataPointY point in this.OrderBy((p) => p.Value))
             {
                 if (result.Count < maxToGet)
                 {
-                    result.Add(IndexOf(point));
+                    result.Add(point);
                 }
             }
 

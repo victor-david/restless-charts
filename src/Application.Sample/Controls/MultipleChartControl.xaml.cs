@@ -32,7 +32,7 @@ namespace Application.Sample
             Bar1.CreateChartData(dataSet);
             Line1.CreateChartData(dataSet);
             Line2.CreateChartData(Line2.DataSetCount-1);
-            Pie1.CreateChartData(Pie1.DataSetCount);
+            Pie1.CreateChartData(2);
         }
         #endregion
     }

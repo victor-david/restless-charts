@@ -43,5 +43,18 @@ namespace Restless.Controls.Chart
             get;
         }
         #endregion
+
+        /************************************************************************/
+
+        #region Public methods
+        /// <summary>
+        /// Gets a string representation of this object.
+        /// </summary>
+        /// <returns>A string that describes this object.</returns>
+        public override string ToString()
+        {
+            return $"Index: {SeriesIndex} Value: {Value}";
+        }
+        #endregion
     }
 }

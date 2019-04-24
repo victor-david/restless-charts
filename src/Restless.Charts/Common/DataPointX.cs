@@ -36,7 +36,20 @@
             get;
         }
         #endregion
-        
+
+        /************************************************************************/
+
+        #region Public methods
+        /// <summary>
+        /// Gets a string representation of this object.
+        /// </summary>
+        /// <returns>A string that describes this object.</returns>
+        public override string ToString()
+        {
+            return $"X: {Value} Y Capacity:{YValues.Capacity}";
+        }
+        #endregion
+
         /************************************************************************/
 
         #region Internal methods

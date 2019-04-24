@@ -91,7 +91,7 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Gets the default value for <see cref="MaxSlice"/>.
         /// </summary>
-        public const int DefaultMaxSlice = 10;
+        public const int DefaultMaxSlice = 12;
         #endregion
 
         /************************************************************************/
@@ -369,15 +369,26 @@ namespace Restless.Controls.Chart
 
             // too many slices.
             DataSeries adjData = DataSeries.Create(MaxSlice);
-            int extra = Data.MaxYSeries - MaxSlice;
+            double smallestSum = 0;
 
-            var smallestIdices = Data[0].YValues.GetSmallestValueIndices(extra);
-            foreach (int idx in smallestIdices)
+            var smallest = Data[0].YValues.GetSmallestValueDataPoints(Data.MaxYSeries - MaxSlice + 1);
+            smallest.ForEach((p) => smallestSum += p.Value);
+
+            int adjIdx = 0;
+            foreach (DataPointY point in Data[0].YValues)
             {
-                Debug.WriteLine($"{idx}. {Data[0].YValues[idx].Value}");
+                if (!smallest.Contains(point))
+                {
+                    adjData.Add(0, point.Value);
+                    Data.DataInfo.CopyTo(point.SeriesIndex, adjIdx, adjData.DataInfo);
+                    adjIdx++;
+                }
             }
-
-            Data.DataInfo.CopyTo(adjData.DataInfo);
+            // add the final value for the "other" slice,
+            adjData.Add(0, smallestSum);
+            // copy data info (name, colors) from the first smallest to the "other".
+            Data.DataInfo.CopyTo(smallest[0].SeriesIndex, MaxSlice - 1, adjData.DataInfo);
+            // don't want the name from the previous statement. set the name of the "other" to the property value.
             adjData.DataInfo.SetInfo(MaxSlice - 1, OtherSliceName);
 
             Data = adjData;
