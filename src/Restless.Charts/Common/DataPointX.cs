@@ -9,6 +9,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="DataPointX"/> class.
         /// </summary>
+        /// <param name="maxY">The maximum allowed for <see cref="YValues"/>.</param>
         /// <param name="value">The value for the Y data.</param>
         internal DataPointX(int maxY, double value)
         {

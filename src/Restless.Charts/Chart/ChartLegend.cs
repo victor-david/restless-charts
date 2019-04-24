@@ -151,7 +151,7 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Called when <see cref="DataSeries"/> has changed.
         /// </summary>
-        /// <param name="data">The data</param>
+        /// <param name="chart">The chart</param>
         public void OnDataSeriesChanged(ChartBase chart)
         {
             if (chart != null && chart.Data != null)

@@ -43,7 +43,7 @@ namespace Restless.Controls.Chart
 
         #region Constructors
         /// <summary>
-        /// Initializes new instance of <see cref="ChartBase"/> class
+        /// Initializes a new instance of <see cref="ChartBase"/> class
         /// </summary>
         protected ChartBase()
         {
@@ -149,7 +149,7 @@ namespace Restless.Controls.Chart
 
         #region Font
         /// <summary>
-        /// Gets or sets the name of the font family to use when <see cref="DisplayValues"/> is true.
+        /// Gets or sets the name of the font family to use.
         /// </summary>
         public string FontFamily
         {

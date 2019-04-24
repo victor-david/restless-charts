@@ -9,6 +9,9 @@ namespace Restless.Controls.Chart
     /// </summary>
     public class ChartConnectorGrid : Grid
     {
+        /// <summary>
+        /// Initializes a new instance of <see cref="ChartConnectorGrid"/> class
+        /// </summary>
         public ChartConnectorGrid()
         {
             AddHandler(ChartBase.DataChangedEvent, new RoutedEventHandler(DataPropertyChanged));

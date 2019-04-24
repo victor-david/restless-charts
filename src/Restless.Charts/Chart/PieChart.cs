@@ -255,6 +255,9 @@ namespace Restless.Controls.Chart
             set => SetValue(LabelDisplayProperty, value);
         }
         
+        /// <summary>
+        /// Identifies the <see cref="LabelDisplay"/> dependency property.
+        /// </summary>
         public static readonly DependencyProperty LabelDisplayProperty = DependencyProperty.Register
             (
                 nameof(LabelDisplay), typeof(LabelDisplay), typeof(PieChart), 

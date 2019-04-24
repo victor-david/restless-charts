@@ -91,18 +91,14 @@ namespace Restless.Controls.Chart
             }
         }
 
-        protected override void SetItem(int index, DataPointY item)
-        {
-            base.SetItem(index, item);
-        }
-
+        /// <summary>
+        /// Called by the base class when the collection is cleared.
+        /// </summary>
         protected override void ClearItems()
         {
             base.ClearItems();
             Sum = 0;
         }
         #endregion
-
-
     }
 }
