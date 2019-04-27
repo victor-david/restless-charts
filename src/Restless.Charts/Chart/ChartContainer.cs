@@ -1002,6 +1002,9 @@ namespace Restless.Controls.Chart
         /// <returns>The size that this element determines it needs during layout, based on its calculations of child element sizes.</returns>
         protected override Size MeasureOverride(Size constraint)
         {
+            if (!constraint.Height.IsFinite()) constraint.Height = 512;
+            if (!constraint.Width.IsFinite()) constraint.Height = 512;
+
             XAxis.Measure(constraint);
             YAxis.Measure(constraint);
             AxisGrid.Measure(constraint);

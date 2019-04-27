@@ -251,8 +251,8 @@ namespace Restless.Controls.Chart
         {
             Size desiredSize = new Size
                 (
-                    constraint.Width.IsFinite() ? constraint.Width : 128,
-                    constraint.Height.IsFinite() ? constraint.Height : 128
+                    constraint.Width.IsFinite() ? constraint.Width : 512,
+                    constraint.Height.IsFinite() ? constraint.Height : 512
                 );
 
             Children.Clear();

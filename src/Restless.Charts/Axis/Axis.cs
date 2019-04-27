@@ -505,10 +505,12 @@ namespace Restless.Controls.Chart
             // I also tried higher values, up to one trillion. Still okay. However, double.MaxValue and double.MaxValue minus one trillion
             // don't work. The cell is cut off under all conditions and switching to Orientation = Vertical causes an exception
             // during child.Measure(constraint) below.
+            //
+            // UPDATE: Now setting to 512. Also in ChartBase and ChartContainer.
             Size desiredSize = new Size
                 (
-                    constraint.Width.IsFinite() ? constraint.Width : 1024,
-                    constraint.Height.IsFinite() ? constraint.Height : 1024
+                    constraint.Width.IsFinite() ? constraint.Width : 512,
+                    constraint.Height.IsFinite() ? constraint.Height : 512
                 );
 
             ClearAll();
