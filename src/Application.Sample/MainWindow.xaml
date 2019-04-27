@@ -56,8 +56,9 @@
             Visibility="{Binding IsBarChartMenuVisible, Converter={StaticResource BoolToVisibility}}">
 
             <TextBlock Text="Data"/>
-            <Button Content="Single" Command="{Binding Commands[SetChartData]}" CommandParameter="1"/>
-            <Button Content="Multiple" Command="{Binding Commands[SetChartData]}" CommandParameter="2"/>
+            <Button Content="Single (1)" Command="{Binding Commands[SetChartData]}" CommandParameter="1"/>
+            <Button Content="Single (2)" Command="{Binding Commands[SetChartData]}" CommandParameter="2"/>
+            <Button Content="Multiple" Command="{Binding Commands[SetChartData]}" CommandParameter="3"/>
 
             <Border/>
 
@@ -72,9 +73,10 @@
             Visibility="{Binding IsLineChartMenuVisible, Converter={StaticResource BoolToVisibility}}">
 
             <TextBlock Text="Data"/>
-            <Button Content="Single" Command="{Binding Commands[SetChartData]}" CommandParameter="1"/>
-            <Button Content="Multiple" Command="{Binding Commands[SetChartData]}" CommandParameter="2"/>
-            <Button Content="Logarithm" Command="{Binding Commands[SetChartData]}" CommandParameter="3"/>
+            <Button Content="Single (1)" Command="{Binding Commands[SetChartData]}" CommandParameter="1"/>
+            <Button Content="Single (2)" Command="{Binding Commands[SetChartData]}" CommandParameter="2"/>
+            <Button Content="Multiple" Command="{Binding Commands[SetChartData]}" CommandParameter="3"/>
+            <Button Content="Logarithm" Command="{Binding Commands[SetChartData]}" CommandParameter="4"/>
 
             <Border/>
 

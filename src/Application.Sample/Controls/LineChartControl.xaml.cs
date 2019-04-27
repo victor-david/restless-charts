@@ -27,7 +27,7 @@ namespace Application.Sample
         /// <summary>
         /// Gets the count of data sets that this control supports.
         /// </summary>
-        public override int DataSetCount => 3;
+        public override int DataSetCount => 4;
 
         /// <summary>
         /// Gets the data.
@@ -66,6 +66,9 @@ namespace Application.Sample
                 case 3:
                     CreateChartData3();
                     break;
+                case 4:
+                    CreateChartData4();
+                    break;
             }
         }
         #endregion
@@ -99,10 +102,27 @@ namespace Application.Sample
             Data = data;
         }
 
+        private void CreateChartData2()
+        {
+            TopTitle.Text = "Line Chart With Irregularly Spaced X";
+
+            DataSeries data = DataSeries.Create();
+            data.Add(2, 53491);
+            data.Add(17, 109948);
+            data.Add(19, 74687);
+            data.Add(33, 67901);
+            data.Add(35, 87100);
+            data.MakeYAutoZero();
+            data.DataRange.Y.Include(120000);
+            data.ExpandX(4);
+            data.DataInfo.SetInfo(0, "Balance", Brushes.Blue, Brushes.DarkBlue);
+            Data = data;
+        }
+
         /// <summary>
         /// Creates data - multiple series.
         /// </summary>
-        private void CreateChartData2()
+        private void CreateChartData3()
         {
             TopTitle.Text = "Multiple Series Line Chart";
 
@@ -139,9 +159,8 @@ namespace Application.Sample
         /// <summary>
         /// Creates data - logarithms
         /// </summary>
-        private void CreateChartData3()
+        private void CreateChartData4()
         {
-            //LastDataSet = 3;
             TopTitle.Text = "Logarithms";
 
             int maxX = 25;

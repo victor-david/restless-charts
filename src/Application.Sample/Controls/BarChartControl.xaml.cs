@@ -23,7 +23,7 @@ namespace Application.Sample
         /// <summary>
         /// Gets the count of data sets that this control supports.
         /// </summary>
-        public override int DataSetCount => 2;
+        public override int DataSetCount => 3;
 
         /// <summary>
         /// Gets the data.
@@ -49,6 +49,9 @@ namespace Application.Sample
                     break;
                 case 2:
                     CreateChartData2();
+                    break;
+                case 3:
+                    CreateChartData3();
                     break;
             }
         }
@@ -85,6 +88,24 @@ namespace Application.Sample
         }
 
         private void CreateChartData2()
+        {
+            TopTitle.Text = "Bar Chart With Irregularly Spaced X";
+
+            DataSeries data = DataSeries.Create();
+            data.Add(2, 53491);
+            data.Add(17, 109948);
+            data.Add(19, 74687);
+            data.Add(33, 67901);
+            data.Add(35, 87100);
+            
+            data.MakeYAutoZero();
+            data.DataRange.Y.Include(120000);
+            data.ExpandX(4);
+            data.DataInfo.SetInfo(0, "Balance", Brushes.DodgerBlue, Brushes.DarkBlue);
+            Data = data;
+        }
+
+        private void CreateChartData3()
         {
             TopTitle.Text = "Bar Chart Multiple Data Series";
 
