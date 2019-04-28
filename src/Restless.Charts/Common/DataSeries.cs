@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Media;
 
 namespace Restless.Controls.Chart
 {
@@ -113,6 +112,24 @@ namespace Restless.Controls.Chart
         public int Count
         {
             get => storage.Count;
+        }
+
+        /// <summary>
+        /// Gets a projected count of items. See remarks for more.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// If all X values in this series are evenly spaced (0, 1 , 2, 3, 4, etc.),
+        /// this property returns the same value as <see cref="Count"/>.
+        /// </para>
+        /// <para>
+        /// If X values are not evenly spaced, this property returns a value that
+        /// represents what the count would be if all X values were evenly spaced.
+        /// </para>
+        /// </remarks>
+        public int ProjectedCount
+        {
+            get => GetProjectedCount();
         }
 
         /// <summary>
@@ -347,6 +364,31 @@ namespace Restless.Controls.Chart
                 }
             }
             return min;
+        }
+
+        private int GetProjectedCount()
+        {
+            if (Count <= 2) return Count;
+
+            double minDistance = GetMinimumXDistance();
+            int projCount = (int)(Math.Ceiling(MaxXValue) / minDistance);
+            return projCount;
+        }
+
+        private double GetMinimumXDistance()
+        {
+            double result = double.MaxValue;
+
+            for (int idx = 0; idx < Count; idx++)
+            {
+                if (idx < Count - 1)
+                {
+                    double distance = storage[idx + 1].Value - storage[idx].Value;
+                    result = Math.Min(result, distance);
+                }
+            }
+
+            return result;
         }
         #endregion
     }
