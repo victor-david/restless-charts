@@ -25,7 +25,6 @@ namespace Restless.Controls.Chart
         private readonly ChartContainer owner;
         private Path majorTickPath;
         private Path minorTickPath;
-        private DataTransform dataTransform;
         private DataSeries data;
         #endregion
 
@@ -87,8 +86,6 @@ namespace Restless.Controls.Chart
             MinorTicks = new MinorTickCollection();
 
             Range = Range.EmptyRange();
-
-            dataTransform = new IdentityDataTransform();
 
             majorTickPath = new Path()
             {
@@ -386,30 +383,6 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
-        #region DataTransform
-        /// <summary>
-        /// Gets or sets <see cref="DataTransform"/> for an axis.
-        /// </summary>
-        /// <remarks>
-        /// The default transform is <see cref="IdentityDataTransform"/>
-        /// DataTransform is used for transform plot coordinates from Range property to data values, which will be displayed on ticks
-        /// </remarks>
-        public DataTransform DataTransform
-        {
-            get => dataTransform;
-            set
-            {
-                if (value != dataTransform)
-                {
-                    dataTransform = value;
-                    InvalidateMeasure();
-                }
-            }
-        }
-        #endregion
-
-        /************************************************************************/
-
         #region Public methods
         /// <summary>
         /// Shifts the range of the axis by the specified percentage.
@@ -437,7 +410,7 @@ namespace Restless.Controls.Chart
         /// <returns>The translated value.</returns>
         public double GetCoordinateFromTick(double tick, Size layoutSize)
         {
-            return ValueToScreen(DataTransform.DataToPlot(tick), layoutSize, Range);
+            return ValueToScreen(tick, layoutSize, Range);
         }
 
         /// <summary>
@@ -612,7 +585,7 @@ namespace Restless.Controls.Chart
             minorTickPath.Data = null;
         }
 
-        private void CreateGeometry() // Size desiredSize)
+        private void CreateGeometry()
         {
             GeometryGroup majorTickGeometry = new GeometryGroup();
             GeometryGroup minorTickGeometry = new GeometryGroup();

@@ -90,9 +90,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
-    <Compile Include="Transform\DataTransform.cs" />
-    <Compile Include="Transform\IdentityDataTransform.cs" />
-    <Compile Include="Transform\LinearDataTransform.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="Themes\Generic.xaml">
