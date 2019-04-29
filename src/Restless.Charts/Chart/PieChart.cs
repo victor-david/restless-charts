@@ -420,6 +420,14 @@ namespace Restless.Controls.Chart
             double x = size.Width / 2.0;
             double y = size.Height / 2.0;
             Children.Add(CreateEllipseVisual(Data.DataInfo[0].Visual.Data, null, x, y, GetRadius(x, y)));
+            if (LabelDisplay != LabelDisplay.None)
+            {
+                // single slice - sum and value are the same.
+                string labelText = GetLabelText(Data.DataInfo[0].Name, Data[0].YValues[0].Value, Data[0].YValues[0].Value);
+                FormattedText text = GetFormattedText(labelText, FontFamily, FontSize, Data.DataInfo[0].Visual.PrimaryText);
+                x -= text.Width / 2.0;
+                Children.Add(CreateTextVisual(text, x, y, 0));
+            }
         }
 
         private void CreateMultiValueChart(Size size)
