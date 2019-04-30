@@ -371,7 +371,7 @@ namespace Restless.Controls.Chart
             if (Count <= 2) return Count;
 
             double minDistance = GetMinimumXDistance();
-            int projCount = (int)(Math.Ceiling(MaxXValue) / minDistance);
+            int projCount = (int)(Math.Ceiling(MaxXValue) / minDistance) + 1;
             return projCount;
         }
 
