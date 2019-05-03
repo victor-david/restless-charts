@@ -308,7 +308,6 @@ namespace Application.Sample
 
         /// <summary>
         /// Gets the text format for the X axis.
-        /// This property is not used if <see cref="XAxisTextProvider"/> is non null.
         /// </summary>
         public string XAxisTextFormat
         {
@@ -318,7 +317,6 @@ namespace Application.Sample
 
         /// <summary>
         /// Gets the text provider converter for the X axis.
-        /// When this property is non null, <see cref="XAxisTextFormat"/> is not used.
         /// </summary>
         public IDoubleConverter XAxisTextProvider
         {
@@ -359,7 +357,6 @@ namespace Application.Sample
 
         /// <summary>
         /// Gets the text format for the Y axis.
-        /// This property is not used if <see cref="xAxisTextProvider"/> is non null.
         /// </summary>
         public string YAxisTextFormat
         {
@@ -369,7 +366,6 @@ namespace Application.Sample
 
         /// <summary>
         /// Gets the text provider converter for the Y axis.
-        /// When this property is non null, <see cref="YAxisTextFormat"/> is not used.
         /// </summary>
         public IDoubleConverter YAxisTextProvider
         {
