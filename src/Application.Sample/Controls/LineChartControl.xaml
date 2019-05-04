@@ -24,12 +24,12 @@
             XAxisTickVisibility="{Binding XAxisTickVisibility}"
             XAxisTickAlignment="{Binding XAxisTickAlignment}"
             XAxisTextFormat="{Binding XAxisTextFormat}"
-            XAxisTextProvider="{Binding XAxisTextProvider}"
+            XAxisTextProvider="{Binding XAxisConverter, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
             IsXAxisValueReversed="{Binding IsXAxisValueReversed}"
             IsYAxisPlacementReversed="{Binding IsYAxisPlacementReversed}"
             YAxisTickVisibility="{Binding YAxisTickVisibility}"
             YAxisTextFormat="{Binding YAxisTextFormat}"
-            YAxisTextProvider="{Binding YAxisTextProvider}"
+            YAxisTextProvider="{Binding YAxisConverter, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
             IsYAxisValueReversed="{Binding IsYAxisValueReversed}">
 
             <conx:LineChart 

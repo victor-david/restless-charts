@@ -13,6 +13,8 @@ namespace Application.Sample
         #region Private
         private DataSeries data;
         private LineChartStyle chartStyle;
+        private MappedValueConverter xAxisConverter;
+        private IDoubleConverter yAxisConverter;
         #endregion
 
         #region Constructor
@@ -45,6 +47,24 @@ namespace Application.Sample
         {
             get => chartStyle;
             set => SetProperty(ref chartStyle, value);
+        }
+
+        /// <summary>
+        /// Gets the X axis converter.
+        /// </summary>
+        public MappedValueConverter XAxisConverter
+        {
+            get => xAxisConverter;
+            private set => SetProperty(ref xAxisConverter, value);
+        }
+
+        /// <summary>
+        /// Gets the Y axis converter.
+        /// </summary>
+        public IDoubleConverter YAxisConverter
+        {
+            get => yAxisConverter;
+            private set => SetProperty(ref yAxisConverter, value);
         }
         #endregion
 
@@ -79,25 +99,34 @@ namespace Application.Sample
         /// </summary>
         private void CreateChartData1()
         {
-            TopTitle.Text = "Single Series Line Chart";
-            int maxX = 14;
-            int minY = 100;
-            int maxY = 5000;
+            TopTitle.Text = "Exchange Rate USD to MXN";
+            XAxisConverter = new MappedValueConverter();
+            double divisor = 100.0;
+            YAxisConverter = new DivisionConverter(divisor);
+            int maxX = 120;
+            int minY = 18;
+            int maxY = 20;
 
             DataSeries data = DataSeries.Create();
-            RandomGenerator generator = new RandomGenerator(minY, maxY);
+
+            Random random = new Random();
 
             data.DataInfo.SetInfo(0, "Balance", Brushes.Red, Brushes.WhiteSmoke, Brushes.DarkRed);
 
-            for (int x = 1; x <= maxX; x++)
+            DateTime rateDate = DateTime.Now.AddDays(-maxX);
+
+            for (int x = 0; x <= maxX; x++)
             {
-                int y = generator.GetValue();
-                data.Add(x, y);
+                double yValue = random.Next(minY, maxY + 1);
+                yValue += random.NextDouble();
+                data.Add(x, yValue * divisor);
+                XAxisConverter.AddToMap(x, rateDate.ToString("MMM dd\nyyyy"));
+                rateDate = rateDate.AddDays(1);
             }
 
-            data.ExpandX(1.0);
-            data.DataRange.Y.Include(maxY);
-            data.MakeYAutoZero();
+            data.ExpandX(4);
+            data.DataRange.Y.IncreaseMaxBy(0.015);
+            data.DataRange.Y.DecreaseMinBy(0.010);
 
             Data = data;
         }
@@ -105,6 +134,8 @@ namespace Application.Sample
         private void CreateChartData2()
         {
             TopTitle.Text = "Line Chart With Irregularly Spaced X";
+            XAxisConverter = null;
+            YAxisConverter = null;
 
             DataSeries data = DataSeries.Create();
             data.Add(2, 53491);
@@ -125,6 +156,8 @@ namespace Application.Sample
         private void CreateChartData3()
         {
             TopTitle.Text = "Multiple Series Line Chart";
+            XAxisConverter = null;
+            YAxisConverter = null;
 
             int maxX = 20;
             int minY = 1000;
@@ -162,6 +195,9 @@ namespace Application.Sample
         private void CreateChartData4()
         {
             TopTitle.Text = "Logarithms";
+            double divisor = 10.0;
+            YAxisConverter = new DivisionConverter(divisor);
+
 
             int maxX = 25;
 
@@ -175,15 +211,15 @@ namespace Application.Sample
             {
                 // Base of Euler's number, about 2.71828.
                 double y = Math.Log(x);
-                data.Add(x, y);
+                data.Add(x, y * divisor);
 
                 // base 10
                 y = Math.Log10(x);
-                data.Add(x, y);
+                data.Add(x, y * divisor);
 
                 // base 16
                 y = Math.Log(x, 16);
-                data.Add(x, y);
+                data.Add(x, y *divisor);
             }
 
             data.ExpandX(1.0);
