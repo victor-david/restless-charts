@@ -12,6 +12,7 @@ namespace Restless.Controls.Chart
     {
         #region Private
         private ChartContainer owner;
+        private bool dataChangedEventInProgress;
         #endregion
 
         /************************************************************************/
@@ -23,17 +24,17 @@ namespace Restless.Controls.Chart
         public const string DefaultValueFontFamily = "Verdana";
 
         /// <summary>
-        /// Gets the minimum allowed value for <see cref="ValuesFontSize"/>.
+        /// Gets the minimum allowed value for <see cref="FontSize"/>.
         /// </summary>
         public const double MinValuesFontSize = 8.0;
 
         /// <summary>
-        /// Gets the maximum allowed value for <see cref="ValuesFontSize"/>.
+        /// Gets the maximum allowed value for <see cref="FontSize"/>.
         /// </summary>
         public const double MaxValuesFontSize = 32.0;
 
         /// <summary>
-        /// Gets the default value for <see cref="ValuesFontSize"/>.
+        /// Gets the default value for <see cref="FontSize"/>.
         /// </summary>
         public const double DefaultValuesFontSize = 13.0;
         #endregion
@@ -42,7 +43,7 @@ namespace Restless.Controls.Chart
 
         #region Constructors
         /// <summary>
-        /// Initializes new instance of <see cref="ChartBase"/> class
+        /// Initializes a new instance of <see cref="ChartBase"/> class
         /// </summary>
         protected ChartBase()
         {
@@ -101,20 +102,43 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty DataProperty = DependencyProperty.Register
             (
-                nameof(Data), typeof(DataSeries), typeof(ChartBase), new PropertyMetadata(null, OnDataChanged)
+                nameof(Data), typeof(DataSeries), typeof(ChartBase), new FrameworkPropertyMetadata(null, OnDataChanged)
+            );
+
+
+        /// <summary>
+        /// Provides notification when the <see cref="Data"/> property changes.
+        /// </summary>
+        public event RoutedEventHandler DataChanged
+        {
+            add => AddHandler(DataChangedEvent, value);
+            remove => RemoveHandler(DataChangedEvent, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="DataChanged"/> routed event.
+        /// </summary>
+        public static readonly RoutedEvent DataChangedEvent = EventManager.RegisterRoutedEvent
+            (
+                nameof(DataChanged), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(ChartBase)
             );
 
         private static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is ChartBase c && c.Data != null)
+            if (d is ChartBase c)
             {
-                if (TreeHelper.TrySetParent(c, ref c.owner))
+                // avoid reentrancy
+                if (!c.dataChangedEventInProgress)
+                {
+                    c.dataChangedEventInProgress = true;
+                    c.RaiseEvent(new RoutedEventArgs(DataChangedEvent));
+                    c.dataChangedEventInProgress = false;
+                }
+
+                if (c.Data != null && TreeHelper.TrySetParent(c, ref c.owner))
                 {
                     c.Owner.XAxis.SetData(c.Data);
                     c.Owner.YAxis.SetData(c.Data);
-                    //c.Owner.XAxis.Range.CreateSnapshot();
-                    //c.Owner.YAxis.Range.CreateSnapshot();
-                    c.Owner.CreateLegend(c.Data);
                     c.Owner.InvalidateMeasure();
                 }
             }
@@ -123,74 +147,73 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
-        #region DisplayValues
+        #region Font
         /// <summary>
-        /// Gets or sets a value that determines if Y axis values are displayed inside the chart.
+        /// Gets or sets the name of the font family to use.
         /// </summary>
-        public bool DisplayValues
+        public string FontFamily
         {
-            get => (bool)GetValue(DisplayValuesProperty);
-            set => SetValue(DisplayValuesProperty, value);
+            get => (string)GetValue(FontFamilyProperty);
+            set => SetValue(FontFamilyProperty, value);
         }
 
         /// <summary>
-        /// Identifies the <see cref="DisplayValues"/> dependency property.
+        /// Identifies the <see cref="FontFamily"/> dependency property.
         /// </summary>
-        public static readonly DependencyProperty DisplayValuesProperty = DependencyProperty.Register
+        public static readonly DependencyProperty FontFamilyProperty = DependencyProperty.Register
             (
-                nameof(DisplayValues), typeof(bool), typeof(ChartBase), new PropertyMetadata(false, OnDisplayValuesPropertyChanged)
+                nameof(FontFamily), typeof(string), typeof(ChartBase), 
+                new FrameworkPropertyMetadata(DefaultValueFontFamily, FrameworkPropertyMetadataOptions.AffectsMeasure)
             );
 
         /// <summary>
-        /// Gets or sets the name of the font family to use when <see cref="DisplayValues"/> is true.
-        /// </summary>
-        public string ValuesFontFamily
-        {
-            get => (string)GetValue(ValuesFontFamilyProperty);
-            set => SetValue(ValuesFontFamilyProperty, value);
-        }
-
-        /// <summary>
-        /// Identifies the <see cref="ValuesFontFamily"/> dependency property.
-        /// </summary>
-        public static readonly DependencyProperty ValuesFontFamilyProperty = DependencyProperty.Register
-            (
-                nameof(ValuesFontFamily), typeof(string), typeof(ChartBase), new PropertyMetadata(DefaultValueFontFamily, OnDisplayValuesPropertyChanged)
-            );
-
-        /// <summary>
-        /// Gets or sets the size of the font when <see cref="DisplayValues"/> is true.
+        /// Gets or sets the size of the font.
         /// </summary>
         /// <remarks>
         /// This value is clamped between <see cref="MinValuesFontSize"/> and <see cref="MaxValuesFontSize"/>.
         /// </remarks>
-        public double ValuesFontSize
+        public double FontSize
         {
-            get => (double)GetValue(ValuesFontSizeProperty);
-            set => SetValue(ValuesFontSizeProperty, value);
+            get => (double)GetValue(FontSizeProperty);
+            set => SetValue(FontSizeProperty, value);
         }
 
         /// <summary>
-        /// Identifies the <see cref="ValuesFontSize"/> dependency property.
+        /// Identifies the <see cref="FontSize"/> dependency property.
         /// </summary>
-        public static readonly DependencyProperty ValuesFontSizeProperty = DependencyProperty.Register
+        public static readonly DependencyProperty FontSizeProperty = DependencyProperty.Register
             (
-                nameof(ValuesFontSize), typeof(double), typeof(ChartBase), new PropertyMetadata(DefaultValuesFontSize, OnDisplayValuesPropertyChanged, OnCoerceValuesFontSize)
+                nameof(FontSize), typeof(double), typeof(ChartBase), 
+                new FrameworkPropertyMetadata(DefaultValuesFontSize, FrameworkPropertyMetadataOptions.AffectsMeasure, null, OnCoerceFontSize)
             );
 
-        private static object OnCoerceValuesFontSize(DependencyObject d, object value)
+        private static object OnCoerceFontSize(DependencyObject d, object value)
         {
             double dval = (double)value;
             return dval.Clamp(MinValuesFontSize, MaxValuesFontSize);
         }
+        #endregion
 
-        private static void OnDisplayValuesPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        /************************************************************************/
+
+        #region SelectedSeriesIndex
+        /// <summary>
+        /// Gets or sets the selected series index.
+        /// </summary>
+        public int SelectedSeriesIndex
         {
-            if (d is ChartBase c)
-            {
-                c.InvalidateMeasure();
-            }
+            get => (int)GetValue(SelectedSeriesIndexProperty);
+            set => SetValue(SelectedSeriesIndexProperty, value);
         }
+
+        /// <summary>
+        /// Identifies the <see cref="SelectedSeriesIndex"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty SelectedSeriesIndexProperty = DependencyProperty.Register
+            (
+                nameof(SelectedSeriesIndex), typeof(int), typeof(ChartBase), 
+                new FrameworkPropertyMetadata(-1, FrameworkPropertyMetadataOptions.AffectsMeasure)
+            );
         #endregion
 
         /************************************************************************/
@@ -228,8 +251,8 @@ namespace Restless.Controls.Chart
         {
             Size desiredSize = new Size
                 (
-                    constraint.Width.IsFinite() ? constraint.Width : 128,
-                    constraint.Height.IsFinite() ? constraint.Height : 128
+                    constraint.Width.IsFinite() ? constraint.Width : 512,
+                    constraint.Height.IsFinite() ? constraint.Height : 512
                 );
 
             Children.Clear();
@@ -257,10 +280,14 @@ namespace Restless.Controls.Chart
         /// <param name="startY">The Y start coordinate.</param>
         /// <param name="endX">The X end coordinate.</param>
         /// <param name="endY">The Y end coordinate.</param>
+        /// <param name="opacity">The opacity to apply to the visual.</param>
         /// <returns>The visual</returns>
-        protected DrawingVisual CreateLineVisual(Pen pen, double startX, double startY, double endX, double endY)
+        protected DrawingVisual CreateLineVisual(Pen pen, double startX, double startY, double endX, double endY, double opacity = 1.0)
         {
-            DrawingVisual visual = new DrawingVisual();
+            DrawingVisual visual = new DrawingVisual()
+            {
+                Opacity = opacity
+            };
 
             using (DrawingContext dc = visual.RenderOpen())
             {
@@ -277,10 +304,14 @@ namespace Restless.Controls.Chart
         /// <param name="x">The X center of the ellipse.</param>
         /// <param name="y">The Y center of the ellipse.</param>
         /// <param name="radius">The radius</param>
+        /// <param name="opacity">The opacity to apply to the visual.</param>
         /// <returns>A drawing visual.</returns>
-        protected DrawingVisual CreateEllipseVisual(Brush brush, Pen pen, double x, double y, double radius)
+        protected DrawingVisual CreateEllipseVisual(Brush brush, Pen pen, double x, double y, double radius, double opacity = 1.0)
         {
-            DrawingVisual visual = new DrawingVisual();
+            DrawingVisual visual = new DrawingVisual()
+            {
+                Opacity = opacity
+            };
 
             using (DrawingContext dc = visual.RenderOpen())
             {
@@ -308,10 +339,14 @@ namespace Restless.Controls.Chart
         /// <param name="y">The Y coordinate of the rectangle. The rectange will be centered on this value.</param>
         /// <param name="width">The width of the rectangle.</param>
         /// <param name="height">The height of the rectange.</param>
+        /// <param name="opacity">The opacity to apply to the visual.</param>
         /// <returns>A drawing visual.</returns>
-        protected DrawingVisual CreateRectangleVisual(Brush brush, Pen pen, double x, double y, double width, double height)
+        protected DrawingVisual CreateRectangleVisual(Brush brush, Pen pen, double x, double y, double width, double height, double opacity = 1.0)
         {
-            DrawingVisual visual = new DrawingVisual();
+            DrawingVisual visual = new DrawingVisual()
+            {
+                Opacity = opacity
+            };
 
             using (DrawingContext dc = visual.RenderOpen())
             {
@@ -340,10 +375,11 @@ namespace Restless.Controls.Chart
         /// <param name="x">The X coordinate of the rectangle. The rectange will be centered on this value.</param>
         /// <param name="y">The Y coordinate of the rectangle. The rectange will be centered on this value.</param>
         /// <param name="size">The width and height of the rectangle.</param>
+        /// <param name="opacity">The opacity to apply to the visual.</param>
         /// <returns>A drawing visual.</returns>
-        protected DrawingVisual CreateRectangleVisual(Brush brush, Pen pen, double x, double y, double size)
+        protected DrawingVisual CreateRectangleVisual(Brush brush, Pen pen, double x, double y, double size, double opacity = 1.0)
         {
-            return CreateRectangleVisual(brush, pen, x, y, size, size);
+            return CreateRectangleVisual(brush, pen, x, y, size, size, opacity);
         }
 
         /// <summary>
@@ -353,11 +389,15 @@ namespace Restless.Controls.Chart
         /// <param name="x">The X coordinate.</param>
         /// <param name="y">The Y coordinate.</param>
         /// <param name="rotation">The rotation.</param>
+        /// <param name="opacity">The opacity to apply to the visual.</param>
         /// <returns>A drawing visual.</returns>
-        protected DrawingVisual CreateTextVisual(FormattedText text, double x, double y, double rotation)
+        protected DrawingVisual CreateTextVisual(FormattedText text, double x, double y, double rotation, double opacity = 1.0)
         {
             if (text == null) throw new ArgumentNullException(nameof(text));
-            DrawingVisual visual = new DrawingVisual();
+            DrawingVisual visual = new DrawingVisual()
+            {
+                Opacity = opacity
+            };
 
             double rx = x + text.Width / 2.0;
             double ry = y + text.Height / 2.0;
@@ -367,7 +407,9 @@ namespace Restless.Controls.Chart
             using (DrawingContext dc = visual.RenderOpen())
             {
                 dc.PushTransform(rotateTransform);
+                // visual debugging aides
                 //dc.DrawEllipse(Brushes.Red, null, new Point(rx, ry), 3, 3);
+                //dc.DrawEllipse(Brushes.Red, null, new Point(x, y), 1, 1);
                 dc.DrawText(text, new Point(x, y));
                 dc.Pop();
             }
@@ -380,10 +422,14 @@ namespace Restless.Controls.Chart
         /// <param name="brush">The brush to fill the geometry</param>
         /// <param name="pen">A pen to outline the geometry, or null</param>
         /// <param name="geometry">The geometry to use to create the visual.</param>
+        /// <param name="opacity">The opacity to apply to the visual.</param>
         /// <returns>A drawing visual.</returns>
-        protected DrawingVisual CreateGeometryVisual(Brush brush, Pen pen, Geometry geometry)
+        protected DrawingVisual CreateGeometryVisual(Brush brush, Pen pen, Geometry geometry, double opacity = 1.0)
         {
-            DrawingVisual visual = new DrawingVisual();
+            DrawingVisual visual = new DrawingVisual()
+            {
+                Opacity = opacity
+            };
             using (DrawingContext dc = visual.RenderOpen())
             {
                 dc.DrawGeometry(brush, pen, geometry);
@@ -405,11 +451,6 @@ namespace Restless.Controls.Chart
             FormattedText ftext = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface(fontFamilyName), fontSize, brush);
             return ftext;
         }
-        #endregion
-
-        /************************************************************************/
-
-        #region Private methods
         #endregion
     }
 }

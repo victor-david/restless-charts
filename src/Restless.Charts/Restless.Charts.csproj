@@ -62,17 +62,25 @@
     <Compile Include="Chart\BarChart.cs" />
     <Compile Include="Chart\ChartContainer.cs" />
     <Compile Include="Chart\ChartBase.cs" />
+    <Compile Include="Chart\ChartLegend.cs" />
+    <Compile Include="Chart\ChartConnectorGrid.cs" />
+    <Compile Include="Chart\IDataConnector.cs" />
+    <Compile Include="Chart\LabelDisplay.cs" />
     <Compile Include="Chart\HelpControl.cs" />
     <Compile Include="Chart\LineChart.cs" />
     <Compile Include="Chart\LineChartStyle.cs" />
     <Compile Include="Chart\PieChart.cs" />
+    <Compile Include="Common\BrushUtility.cs" />
+    <Compile Include="Common\DivisionConverter.cs" />
+    <Compile Include="Common\MappedValueConverter.cs" />
+    <Compile Include="Common\DataPointY.cs" />
+    <Compile Include="Common\DataSeriesVisual.cs" />
     <Compile Include="Common\DataSeriesInfoCollection.cs" />
-    <Compile Include="Common\BrushCollection.cs" />
     <Compile Include="Common\DataSeriesInfo.cs" />
-    <Compile Include="Common\DataPoint.cs" />
+    <Compile Include="Common\DataPointX.cs" />
     <Compile Include="Common\DataRange.cs" />
     <Compile Include="Common\DataSeries.cs" />
-    <Compile Include="Common\DataSequence.cs" />
+    <Compile Include="Common\DataPointYCollection.cs" />
     <Compile Include="Common\DebugHelper.cs" />
     <Compile Include="Common\MathHelper.cs" />
     <Compile Include="Common\Range.cs" />
@@ -84,12 +92,13 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
-    <Compile Include="Transform\DataTransform.cs" />
-    <Compile Include="Transform\IdentityDataTransform.cs" />
-    <Compile Include="Transform\LinearDataTransform.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="Themes\Generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\Generic\ChartLegend.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

@@ -1,0 +1,54 @@
+﻿<con:ChartControlBase 
+    x:Class="Application.Sample.BarChartControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:con="clr-namespace:Application.Sample"
+    xmlns:conx="clr-namespace:Restless.Controls.Chart;assembly=Restless.Charts"
+    mc:Ignorable="d"
+    d:DesignHeight="450" d:DesignWidth="800">
+    <conx:ChartConnectorGrid>
+        <conx:ChartContainer
+            Background="{Binding ChartBackground}"
+            BorderBrush="DarkBlue"
+            IsAxisGridVisible="{Binding IsAxisGridVisible}"
+            BorderThickness="1"
+            TopTitle="{Binding TopTitle, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
+            BottomTitle="{Binding BottomTitle, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
+            LeftTitle="{Binding LeftTitle, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
+            RightTitle="{Binding RightTitle, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
+            Orientation="{Binding ChartOrientation}"
+            IsXAxisPlacementReversed="{Binding IsXAxisPlacementReversed}"
+            XAxisTickVisibility="{Binding XAxisTickVisibility}"
+            XAxisTickAlignment="{Binding XAxisTickAlignment}"
+            XAxisTextFormat="{Binding XAxisTextFormat}"
+            XAxisTextProvider="{Binding XAxisTextProvider}"
+            IsXAxisValueReversed="{Binding IsXAxisValueReversed}"
+            IsYAxisPlacementReversed="{Binding IsYAxisPlacementReversed}"
+            YAxisTickVisibility="{Binding YAxisTickVisibility}"
+            YAxisTextFormat="{Binding YAxisTextFormat}"
+            YAxisTextProvider="{Binding YAxisTextProvider}"
+            IsYAxisValueReversed="{Binding IsYAxisValueReversed}">
+
+            <conx:BarChart 
+                Data="{Binding Data, RelativeSource={RelativeSource AncestorType=con:ChartControlBase}}"
+                ValueDisplay="{Binding DisplayChartValues}"/>
+        </conx:ChartContainer>
+
+        <conx:ChartLegend
+            Width="220"
+            VerticalAlignment="Top"
+            HorizontalAlignment="Right"
+            Margin="5,10"
+            HeaderText="Legend"
+            HeaderTextForeground="DarkGray"
+            Foreground="DarkGray"
+            Background="LightYellow"
+            BorderBrush="LightGray"
+            BorderThickness="1"
+            Padding="10"
+            IsInteractive="False"/>
+        
+    </conx:ChartConnectorGrid>
+</con:ChartControlBase>

@@ -24,6 +24,7 @@ namespace Restless.Controls.Chart
         #region Private
         private readonly ChartContainer owner;
         private Point mouseStartPoint;
+        private bool isNavigationEnabled;
         private bool isKeyboardNavigationEnabled;
         private bool isPanning;
         #endregion
@@ -31,6 +32,10 @@ namespace Restless.Controls.Chart
         /************************************************************************/
 
         #region Public fields
+        /// <summary>
+        /// Gets the default value for <see cref="IsNavigationEnabled"/>.
+        /// </summary>
+        public const bool IsNavigationEnabledDefault = true;
         /// <summary>
         /// Gets the default value for <see cref="IsKeyboardNavigationEnabled"/>.
         /// </summary>
@@ -50,6 +55,7 @@ namespace Restless.Controls.Chart
             // need a background to intercept mouse wheel and clicks.
             Background = Brushes.Transparent;
             FocusVisualStyle = null;
+            IsNavigationEnabled = IsNavigationEnabledDefault;
             IsKeyboardNavigationEnabled = IsKeyboardNavigationEnabledDefault;
         }
         #endregion
@@ -57,6 +63,20 @@ namespace Restless.Controls.Chart
         /************************************************************************/
 
         #region Properties
+        /// <summary>
+        /// Gets or sets a value that determines if navigation is enabled.
+        /// When this property is false, all navigation is disabled.
+        /// </summary>
+        public bool IsNavigationEnabled
+        {
+            get => isNavigationEnabled;
+            set
+            {
+                isNavigationEnabled = value;
+                Visibility = isNavigationEnabled ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
         /// <summary>
         /// Gets or sets a value that determines if keyboard navigation is enabled.
         /// </summary>

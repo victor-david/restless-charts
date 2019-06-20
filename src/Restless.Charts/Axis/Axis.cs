@@ -25,7 +25,6 @@ namespace Restless.Controls.Chart
         private readonly ChartContainer owner;
         private Path majorTickPath;
         private Path minorTickPath;
-        private DataTransform dataTransform;
         private DataSeries data;
         #endregion
 
@@ -87,8 +86,6 @@ namespace Restless.Controls.Chart
             MinorTicks = new MinorTickCollection();
 
             Range = Range.EmptyRange();
-
-            dataTransform = new IdentityDataTransform();
 
             majorTickPath = new Path()
             {
@@ -386,30 +383,6 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
-        #region DataTransform
-        /// <summary>
-        /// Gets or sets <see cref="DataTransform"/> for an axis.
-        /// </summary>
-        /// <remarks>
-        /// The default transform is <see cref="IdentityDataTransform"/>
-        /// DataTransform is used for transform plot coordinates from Range property to data values, which will be displayed on ticks
-        /// </remarks>
-        public DataTransform DataTransform
-        {
-            get => dataTransform;
-            set
-            {
-                if (value != dataTransform)
-                {
-                    dataTransform = value;
-                    InvalidateMeasure();
-                }
-            }
-        }
-        #endregion
-
-        /************************************************************************/
-
         #region Public methods
         /// <summary>
         /// Shifts the range of the axis by the specified percentage.
@@ -437,7 +410,17 @@ namespace Restless.Controls.Chart
         /// <returns>The translated value.</returns>
         public double GetCoordinateFromTick(double tick, Size layoutSize)
         {
-            return ValueToScreen(DataTransform.DataToPlot(tick), layoutSize, Range);
+            return ValueToScreen(tick, layoutSize, Range);
+        }
+
+        /// <summary>
+        /// Gets the specified value formatted according to <see cref="TextProvider"/> and <see cref="TextFormat"/>.
+        /// </summary>
+        /// <param name="value">The value to format.</param>
+        /// <returns>A string representation of value.</returns>
+        public string GetFormattedValue(double value)
+        {
+            return TextProvider != null ? TextProvider.Convert(value, TextFormat) : value.ToString(TextFormat);
         }
         #endregion
 
@@ -465,8 +448,6 @@ namespace Restless.Controls.Chart
         #endregion
 
         /************************************************************************/
-
-        
 
         #region Protected methods
         /// <summary>
@@ -497,10 +478,12 @@ namespace Restless.Controls.Chart
             // I also tried higher values, up to one trillion. Still okay. However, double.MaxValue and double.MaxValue minus one trillion
             // don't work. The cell is cut off under all conditions and switching to Orientation = Vertical causes an exception
             // during child.Measure(constraint) below.
+            //
+            // UPDATE: Now setting to 512. Also in ChartBase and ChartContainer.
             Size desiredSize = new Size
                 (
-                    constraint.Width.IsFinite() ? constraint.Width : 1024,
-                    constraint.Height.IsFinite() ? constraint.Height : 1024
+                    constraint.Width.IsFinite() ? constraint.Width : 512,
+                    constraint.Height.IsFinite() ? constraint.Height : 512
                 );
 
             ClearAll();
@@ -602,7 +585,7 @@ namespace Restless.Controls.Chart
             minorTickPath.Data = null;
         }
 
-        private void CreateGeometry() // Size desiredSize)
+        private void CreateGeometry()
         {
             GeometryGroup majorTickGeometry = new GeometryGroup();
             GeometryGroup minorTickGeometry = new GeometryGroup();
@@ -855,7 +838,7 @@ namespace Restless.Controls.Chart
         {
             TickText tickText = new TickText()
             {
-                Text = (TextProvider != null) ? TextProvider.Convert(tickValue, TextFormat) : tickValue.ToString(TextFormat)
+                Text = GetFormattedValue(tickValue)
             };
             return tickText;
         }

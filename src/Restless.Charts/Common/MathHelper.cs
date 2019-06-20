@@ -29,45 +29,59 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
-        /// Clamps specified long value to specified interval.
+        /// Clamps the specified long value to be within the specified range inclusive.
         /// </summary>
         /// <param name="value">Value to clamp.</param>
-        /// <param name="min">Minimum of the interval.</param>
-        /// <param name="max">Maximum of the interval.</param>
-        /// <returns>Long value in range [min, max].</returns>
+        /// <param name="min">Minimum allowed value.</param>
+        /// <param name="max">Maximum allowed value.</param>
+        /// <returns><paramref name="value"/> clamped between <paramref name="min"/> and <paramref name="max"/> inclusive.</returns>
         public static long Clamp(this long value, long min, long max)
         {
             return Math.Max(min, Math.Min(value, max));
         }
 
         /// <summary>
-        /// Clamps specified double value to specified interval.
+        /// Clamps the specified double value to be within the specified range inclusive.
         /// </summary>
         /// <param name="value">Value to clamp.</param>
-        /// <param name="min">Minimum of the interval.</param>
-        /// <param name="max">Maximum of the interval.</param>
-        /// <returns>Double value in range [min, max].</returns>
+        /// <param name="min">Minimum allowed value.</param>
+        /// <param name="max">Maximum allowed value.</param>
+        /// <returns><paramref name="value"/> clamped between <paramref name="min"/> and <paramref name="max"/> inclusive.</returns>
         public static double Clamp(this double value, double min, double max)
         {
             return Math.Max(min, Math.Min(value, max));
         }
 
-        /// <summary>Clamps specified double value to [0,1].</summary>
+        /// <summary>
+        /// Clamps the specified double value to be within zero and one inclusive.
+        /// </summary>
         /// <param name="value">Value to clamp.</param>
-        /// <returns>Double value in range [0, 1].</returns>
+        /// <returns><paramref name="value"/> clamped between zero and one inclusive.</returns>
         public static double Clamp(double value)
         {
             return Math.Max(0, Math.Min(value, 1));
         }
 
         /// <summary>
-        /// Clamps specified integer value to specified interval.
+        /// Clamps the specified integer value to be within the specified range inclusive.
         /// </summary>
         /// <param name="value">Value to clamp.</param>
-        /// <param name="min">Minimum of the interval.</param>
-        /// <param name="max">Maximum of the interval.</param>
-        /// <returns>Integer value in range [min, max].</returns>
+        /// <param name="min">Minimum allowed value.</param>
+        /// <param name="max">Maximum allowed value.</param>
+        /// <returns><paramref name="value"/> clamped between <paramref name="min"/> and <paramref name="max"/> inclusive.</returns>
         public static int Clamp(this int value, int min, int max)
+        {
+            return Math.Max(min, Math.Min(value, max));
+        }
+
+        /// <summary>
+        /// Clamps the specified byte value to be within the specified range inclusive.
+        /// </summary>
+        /// <param name="value">Value to clamp.</param>
+        /// <param name="min">Minimum allowed value.</param>
+        /// <param name="max">Maximum allowed value.</param>
+        /// <returns><paramref name="value"/> clamped between <paramref name="min"/> and <paramref name="max"/> inclusive.</returns>
+        public static byte Clamp(this byte value, byte min, byte max)
         {
             return Math.Max(min, Math.Min(value, max));
         }
@@ -134,7 +148,7 @@ namespace Restless.Controls.Chart
         }
 
         /// <summary>
-        /// Converts an angle in radians to the angle in degrees.
+        /// Converts an angle in radians to an angle in degrees.
         /// </summary>
         /// <param name="angleInRadians">Angle in radians.</param>
         /// <returns>Angle in degrees.</returns>
@@ -143,22 +157,21 @@ namespace Restless.Controls.Chart
             return angleInRadians * 180 / Math.PI;
         }
 
-        ///// <summary>
-        ///// Sets the X and Y values of the specified point.
-        ///// </summary>
-        ///// <param name="point">The point.</param>
-        ///// <param name="x">The X value.</param>
-        ///// <param name="y">The Y value.</param>
-        //public static void SetXY(this Point point, double x, double y)
-        //{
-        //    point.X = x;
-        //    point.Y = y;
-        //}
+        /// <summary>
+        /// Converts an angle in degrees to an angle in radians.
+        /// </summary>
+        /// <param name="angleInDegrees">Angle in degrees.</param>
+        /// <returns>Angle in radians.</returns>
+        public static double ToRadians(this double angleInDegrees)
+        {
+            return Math.PI * angleInDegrees / 180.0;
+        }
 
         /// <summary>
         /// Gets a Point structure with vX and Y values reversed.
         /// </summary>
         /// <param name="point">The point.</param>
+        /// <returns><paramref name="point"/> with its X and Y values swapped.</returns>
         public static Point SwapXY(this Point point)
         {
             return new Point(point.Y, point.X);

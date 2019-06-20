@@ -5,6 +5,7 @@
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Restless.Charts;component/Themes/Generic/ChartContainer.xaml"/>
         <ResourceDictionary Source="pack://application:,,,/Restless.Charts;component/Themes/Generic/HelpControl.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/Restless.Charts;component/Themes/Generic/ChartLegend.xaml"/>
     </ResourceDictionary.MergedDictionaries>
     
 </ResourceDictionary>

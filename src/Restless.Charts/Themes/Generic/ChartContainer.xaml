@@ -68,103 +68,62 @@
             BorderBrush="{TemplateBinding BorderBrush}"
             BorderThickness="{TemplateBinding BorderThickness}"
             Padding="{TemplateBinding Padding}">
+
             <Grid>
-                <StackPanel
-                    Margin="{TemplateBinding IconMargin}"
-                    HorizontalAlignment="Right"
-                    Orientation="Horizontal">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
 
-                    <Button 
-                        Style="{StaticResource HelpButton}"
-                        Background="{StaticResource RedBrush}"
-                        Visibility="{Binding IsLegendHelpButtonVisible, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BoolToVisibilityConverter}}"
-                        ToolTip="{x:Static r:Strings.ToolTipLegendHelpButton}"
-                        Command="{x:Static con:ChartContainer.LegendHelpCommand}"/>
+                    <ColumnDefinition />
 
-                    <Button 
-                        Style="{StaticResource HelpButton}"
-                        Background="{StaticResource BlueBrush}"
-                        Visibility="{Binding IsNavigationHelpButtonVisible, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BoolToVisibilityConverter}}"
-                        ToolTip="{x:Static r:Strings.ToolTipNavigationHelpButton}"
-                        Command="{x:Static con:ChartContainer.NavigationHelpCommand}"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                </StackPanel>
-                
-                <!-- Navigation Help -->
-                <con:HelpControl
-                    Header="{x:Static r:Strings.HelpChartNavigationHeader}"
-                    Margin="4,6"
-                    IsHelpVisible="{Binding IsNavigationHelpVisible, RelativeSource={RelativeSource TemplatedParent}}">
-                    <con:HelpControl.HelpContent>
-                        <TextBlock 
-                            Style="{StaticResource TextBlockHelpContent}"
-                            Text="{x:Static r:Strings.HelpChartNavigation}"/>
-                    </con:HelpControl.HelpContent>
-                </con:HelpControl>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
 
-                <!-- Legend -->
-                <con:HelpControl
-                    Header="{x:Static r:Strings.HelpChartLegendHeader}"
-                    Margin="4,6"
-                    IsHelpVisible="{Binding IsLegendVisible, RelativeSource={RelativeSource TemplatedParent}}"
-                    HelpContent="{TemplateBinding LegendContent}"/>
-                
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
+                    <RowDefinition />
 
-                        <ColumnDefinition />
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <!-- Titles -->
+                <ContentPresenter Grid.Column="2" Grid.Row="0" HorizontalAlignment="Stretch" Content="{TemplateBinding TopTitle}"/>
+                <ContentPresenter Grid.Column="2" Grid.Row="4" HorizontalAlignment="Stretch" Content="{TemplateBinding BottomTitle}"/>
+                <ContentPresenter Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" Content="{TemplateBinding LeftTitle}">
+                    <ContentPresenter.LayoutTransform>
+                        <RotateTransform Angle="-90"/>
+                    </ContentPresenter.LayoutTransform>
+                </ContentPresenter>
+                <ContentPresenter Grid.Column="4" Grid.Row="2" VerticalAlignment="Center" Content="{TemplateBinding RightTitle}">
+                    <ContentPresenter.LayoutTransform>
+                        <RotateTransform Angle="-90"/>
+                    </ContentPresenter.LayoutTransform>
+                </ContentPresenter>
 
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
+                <!-- Border around the interior of the chart -->
+                <Border Grid.Column="2" Grid.Row="2" BorderBrush="{TemplateBinding GridBorderBrush}" BorderThickness="{TemplateBinding GridBorderThickness}">
+                    <Grid>
+                        <!-- Axis Grid -->
+                        <ContentPresenter Content="{TemplateBinding AxisGrid}" />
+                        <!-- Plot -->
+                        <Border ClipToBounds="True">
+                            <ContentPresenter />
+                        </Border>
+                        <!-- Navigation -->
+                        <ContentPresenter Content="{TemplateBinding Navigation}"/>
+                    </Grid>
+                </Border>
 
-                        <RowDefinition />
+                <!-- YAxis -->
+                <ContentPresenter Name="YAxis" Grid.Column="1" Grid.Row="2" Content="{TemplateBinding YAxis}"/>
 
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                <!-- XAxis -->
+                <ContentPresenter Name="XAxis" Grid.Column="2" Grid.Row="3" Content="{TemplateBinding XAxis}"/>
 
-                    <!-- Titles -->
-                    <ContentPresenter Grid.Column="2" Grid.Row="0" HorizontalAlignment="Center" Content="{TemplateBinding TopTitle}"/>
-                    <ContentPresenter Grid.Column="2" Grid.Row="4" HorizontalAlignment="Center" Content="{TemplateBinding BottomTitle}"/>
-                    <ContentPresenter Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" Content="{TemplateBinding LeftTitle}">
-                        <ContentPresenter.LayoutTransform>
-                            <RotateTransform Angle="-90"/>
-                        </ContentPresenter.LayoutTransform>
-                    </ContentPresenter>
-                    <ContentPresenter Grid.Column="4" Grid.Row="2" VerticalAlignment="Center" Content="{TemplateBinding RightTitle}">
-                        <ContentPresenter.LayoutTransform>
-                            <RotateTransform Angle="-90"/>
-                        </ContentPresenter.LayoutTransform>
-                    </ContentPresenter>
-
-                    <!-- Border around the interior of the chart -->
-                    <Border Grid.Column="2" Grid.Row="2" BorderBrush="{TemplateBinding GridBorderBrush}" BorderThickness="{TemplateBinding GridBorderThickness}">
-                        <Grid>
-                            <!-- Axis Grid -->
-                            <ContentPresenter Content="{TemplateBinding AxisGrid}" />
-                            <!-- Plot -->
-                            <Border ClipToBounds="True">
-                                <ContentPresenter />
-                            </Border>
-                            <!-- Navigation -->
-                            <ContentPresenter Content="{TemplateBinding Navigation}"/>
-                        </Grid>
-                    </Border>
-
-                    <!-- YAxis -->
-                    <ContentPresenter Name="YAxis" Grid.Column="1" Grid.Row="2" Content="{TemplateBinding YAxis}"/>
-
-                    <!-- XAxis -->
-                    <ContentPresenter Name="XAxis" Grid.Column="2" Grid.Row="3" Content="{TemplateBinding XAxis}"/>
-
-                </Grid>
             </Grid>
         </Border>
 

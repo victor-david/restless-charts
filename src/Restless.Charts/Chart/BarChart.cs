@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -95,6 +94,28 @@ namespace Restless.Controls.Chart
 
         /************************************************************************/
 
+        #region DisplayValues
+        /// <summary>
+        /// Gets or sets a value that determines if Y axis values are displayed inside the chart.
+        /// </summary>
+        public bool ValueDisplay
+        {
+            get => (bool)GetValue(ValueDisplayProperty);
+            set => SetValue(ValueDisplayProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="ValueDisplay"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty ValueDisplayProperty = DependencyProperty.Register
+            (
+                nameof(ValueDisplay), typeof(bool), typeof(BarChart),
+                new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsMeasure)
+            );
+        #endregion
+
+        /************************************************************************/
+
         #region Protected methods
         /// <summary>
         /// Called by <see cref="ChartBase"/> to create child visuals.
@@ -108,17 +129,17 @@ namespace Restless.Controls.Chart
 
             textVisuals.Clear();
 
-            foreach (DataPoint point in Data)
+            foreach (DataPointX point in Data)
             {
                 int yIndex = 0;
-                double x = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
+                double x = Owner.XAxis.GetCoordinateFromTick(point.Value, desiredSize);
                 double yZero = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
 
-                foreach (double yValue in point.YValues.OrderByDescending((v) => Math.Abs(v)))
+                foreach (DataPointY dataPoint in point.YValues.OrderByDescending((v) => Math.Abs(v.Value)))
                 {
-                    Pen pen = new Pen(Data.DataInfo[yIndex].DataBrush, barWidth);
+                    Pen pen = new Pen(Data.DataInfo[yIndex].Visual.Data, barWidth);
                     
-                    double y = Owner.YAxis.GetCoordinateFromTick(yValue, desiredSize);
+                    double y = Owner.YAxis.GetCoordinateFromTick(dataPoint.Value, desiredSize);
                     
                     double barLength = Math.Abs(y - yZero);
 
@@ -127,12 +148,12 @@ namespace Restless.Controls.Chart
                         if (Owner.Orientation == Orientation.Vertical)
                         {
                             Children.Add(CreateLineVisual(pen, x, yZero, x, y));
-                            CreateTextDisplayIf(yIndex, yValue, x, y, yZero, barWidth, barLength);
+                            CreateTextDisplayIf(yIndex, dataPoint.Value, x, y, yZero, barWidth, barLength);
                         }
                         else
                         {
                             Children.Add(CreateLineVisual(pen, yZero, x, y, x));
-                            CreateTextDisplayIf(yIndex, yValue, y, x, yZero, barWidth, barLength);
+                            CreateTextDisplayIf(yIndex, dataPoint.Value, y, x, yZero, barWidth, barLength);
                         }
                     }
                     yIndex++;
@@ -150,15 +171,15 @@ namespace Restless.Controls.Chart
 
         private void CreateTextDisplayIf(int yIndex, double yValue, double x, double y, double yZero, double barWidth, double barLength)
         {
-            if (DisplayValues && yIndex == 0)
+            if (ValueDisplay && yIndex == 0)
             {
-                FormattedText text = GetFormattedText(Owner.GetFormattedYValue(yValue), ValuesFontFamily, ValuesFontSize, Data.PrimaryTextBrushes.GetBrush(yIndex));
+                FormattedText text = GetFormattedText(Owner.GetFormattedYValue(yValue), FontFamily, FontSize, Data.DataInfo[yIndex].Visual.PrimaryText);
 
                 if (TextFitsInWidth(text, barWidth))
                 {
                     if (!TextFitsInLength(text, barLength))
                     {
-                        text.SetForegroundBrush(Data.SecondaryTextBrushes.GetBrush(yIndex));
+                        text.SetForegroundBrush(Data.DataInfo[yIndex].Visual.SecondaryText);
                     }
                     bool isNegative = Owner.Orientation == Orientation.Vertical ? y > yZero : x < yZero;
                     x = GetAdjustedTextX(x, barLength, isNegative, text);
@@ -247,7 +268,8 @@ namespace Restless.Controls.Chart
                 double sx = Owner.XAxis.GetCoordinateFromTick(series.MaxXValue, desiredSize);
                 double distance = sx - s1;
                 if (distance == 0.0) return Owner.XAxis.IsHorizontal ? desiredSize.Width / 2.0 : desiredSize.Height / 2.0;
-                result = Math.Abs(distance / series.Count);
+
+                result = Math.Abs(distance / series.ProjectedCount);
             }
             return result.IsFinite() ? result : 10.0;
         }

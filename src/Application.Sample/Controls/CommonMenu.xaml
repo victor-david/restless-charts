@@ -1,0 +1,82 @@
+﻿<UserControl 
+    x:Class="Application.Sample.CommonMenu"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:con="clr-namespace:Application.Sample"
+    xmlns:conx="clr-namespace:Restless.Controls.Chart;assembly=Restless.Charts"
+    mc:Ignorable="d" 
+    d:DesignHeight="52" d:DesignWidth="1200">
+    
+    <ToolBarTray HorizontalAlignment="Stretch">
+        <ToolBar Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ToolBarTray}}}">
+
+            <!-- Chart type -->
+            <HeaderedItemsControl Style="{StaticResource MenuButtonGroup}" Header="Chart Type">
+                <Button Content="Bar" Command="{Binding Commands[ChartBar]}"/>
+                <Button Content="Line" Command="{Binding Commands[ChartLine]}"/>
+                <Button Content="Pie" Command="{Binding Commands[ChartPie]}"/>
+                <Button Content="Multiple" Command="{Binding Commands[ChartMultiple]}"/>
+            </HeaderedItemsControl>
+            
+            <Separator/>
+            
+            <!-- Orientation -->
+            <HeaderedItemsControl Style="{StaticResource MenuButtonGroup}" Header="Orientation" IsEnabled="{Binding IsOrientationMenuEnabled}">
+                <Button Content="Vertical" Command="{Binding Commands[OrientationVert]}"/>
+                <Button Content="Horizontal" Command="{Binding Commands[OrientationHorz]}"/>
+            </HeaderedItemsControl>
+            
+            <Separator/>
+
+            <!-- Grid lines -->
+            <HeaderedItemsControl Style="{StaticResource MenuButtonGroup}" Header="Grid Lines" IsEnabled="{Binding IsGridLineMenuEnabled}">
+                <Button Content="Toggle" Command="{Binding Commands[ToggleGridLines]}"/>
+            </HeaderedItemsControl>
+
+            <Separator/>
+
+            <!-- X axis -->
+            <HeaderedItemsControl Style="{StaticResource MenuButtonGroup}" Header="X Axis" IsEnabled="{Binding IsAxisMenuEnabled}">
+
+                <con:DropDownMenuButton Content="Ticks">
+                    <con:DropDownMenuButton.Menu>
+                        <ContextMenu>
+                            <MenuItem Header="None" Command="{Binding Commands[SetXTicks]}" CommandParameter="{StaticResource TickNone}"/>
+                            <MenuItem Header="Major" Command="{Binding Commands[SetXTicks]}" CommandParameter="{StaticResource TickMajor}"/>
+                            <MenuItem Header="Major/Minor" Command="{Binding Commands[SetXTicks]}" CommandParameter="{StaticResource TickMajorMinor}"/>
+                            <MenuItem Header="Major/Minor/Edge" Command="{Binding Commands[SetXTicks]}" CommandParameter="{StaticResource TickMajorMinorEdge}"/>
+                        </ContextMenu>
+                    </con:DropDownMenuButton.Menu>
+                </con:DropDownMenuButton>
+
+                <Button Content="Placement" Command="{Binding Commands[ToggleXPlacement]}"/>
+                <Button Content="Alignment" Command="{Binding Commands[ToggleXAlignment]}"/>
+                <Button Content="Reverse" Command="{Binding Commands[ToggleXReverse]}"/>
+            </HeaderedItemsControl>
+            
+            <Separator/>
+            
+            <!-- Y axis -->
+            <HeaderedItemsControl Style="{StaticResource MenuButtonGroup}" Header="Y Axis" IsEnabled="{Binding IsAxisMenuEnabled}">
+                <con:DropDownMenuButton Content="Ticks">
+                    <con:DropDownMenuButton.Menu>
+                        <ContextMenu>
+                            <MenuItem Header="None" Command="{Binding Commands[SetYTicks]}" CommandParameter="{StaticResource TickNone}"/>
+                            <MenuItem Header="Major" Command="{Binding Commands[SetYTicks]}" CommandParameter="{StaticResource TickMajor}"/>
+                            <MenuItem Header="Major/Minor" Command="{Binding Commands[SetYTicks]}" CommandParameter="{StaticResource TickMajorMinor}"/>
+                            <MenuItem Header="Major/Minor/Edge" Command="{Binding Commands[SetYTicks]}" CommandParameter="{StaticResource TickMajorMinorEdge}"/>
+                            <Separator/>
+                            <MenuItem Header="Numeric Format" Command="{Binding Commands[SetYTicksFormat]}"/>
+                            <MenuItem Header="Currency Format" Command="{Binding Commands[SetYTicksFormat]}" CommandParameter="C2"/>
+                        </ContextMenu>
+                    </con:DropDownMenuButton.Menu>
+                </con:DropDownMenuButton>
+
+                <Button Content="Placement" Command="{Binding Commands[ToggleYPlacement]}"/>
+                <Button Content="Reverse" Command="{Binding Commands[ToggleYReverse]}"/>
+            </HeaderedItemsControl>
+        </ToolBar>
+    </ToolBarTray>
+</UserControl>

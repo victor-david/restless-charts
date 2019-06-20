@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 
 namespace Restless.Controls.Chart
 {
@@ -12,6 +13,7 @@ namespace Restless.Controls.Chart
         /// </summary>
         public TickText()
         {
+            TextAlignment = TextAlignment.Center;
         }
     }
 }

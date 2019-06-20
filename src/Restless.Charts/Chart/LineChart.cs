@@ -52,7 +52,7 @@ namespace Restless.Controls.Chart
 
         #region Constructor
         /// <summary>
-        /// Initializes a new instance of the <see cref="BarChart"/> class.
+        /// Initializes a new instance of the <see cref="LineChart"/> class.
         /// </summary>
         public LineChart()
         {
@@ -185,27 +185,30 @@ namespace Restless.Controls.Chart
 
         private void CreatePoints(double xMax, double yMax, Size desiredSize)
         {
-            foreach (DataPoint point in Data)
+            foreach (DataPointX point in Data)
             {
-                double x = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
+                double x = Owner.XAxis.GetCoordinateFromTick(point.Value, desiredSize);
                 double yZero = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
 
                 for (int yIdx = 0; yIdx < point.YValues.Count; yIdx++)
                 {
-                    double y = Owner.YAxis.GetCoordinateFromTick(point.YValues[yIdx], desiredSize);
+                    double y = Owner.YAxis.GetCoordinateFromTick(point.YValues[yIdx].Value, desiredSize);
 
                     if (IsVisualCreatable(x, y, yZero, xMax, yMax, PointSize))
                     {
                         double xc = Owner.Orientation == Orientation.Vertical ? x : y;
                         double yc = Owner.Orientation == Orientation.Vertical ? y : x;
 
+                        double pointSize = GetPointSize(yIdx);
+                        double opacity = GetOpacity(yIdx);
+
                         if (ChartStyle == LineChartStyle.StandardSquarePoint)
                         {
-                            Children.Add(CreateRectangleVisual(Data.DataInfo[yIdx].DataBrush, null, xc, yc, PointSize));
+                            Children.Add(CreateRectangleVisual(Data.DataInfo[yIdx].Visual.Data, null, xc, yc, pointSize, opacity));
                         }
                         else
                         {
-                            Children.Add(CreateEllipseVisual(Data.DataInfo[yIdx].DataBrush, null, xc, yc, PointSize / 2.0));
+                            Children.Add(CreateEllipseVisual(Data.DataInfo[yIdx].Visual.Data, null, xc, yc, pointSize / 2.0, opacity));
                         }
                     }
                 }
@@ -222,31 +225,33 @@ namespace Restless.Controls.Chart
 
         private void CreateLines(int yIdx, double xMax, double yMax, Size desiredSize)
         {
-            Pen pen = new Pen(Data.DataInfo[yIdx].DataBrush, LineThickness);
+            Pen pen = new Pen(Data.DataInfo[yIdx].Visual.Data, GetLineThickness(yIdx));
             double yZero = Owner.YAxis.GetCoordinateFromTick(0, desiredSize);
 
             for (int dpIdx = 0; dpIdx < Data.Count; dpIdx++)
             {
-                double yValue = Data[dpIdx].YValues[yIdx];
-                double xStart = Owner.XAxis.GetCoordinateFromTick(Data[dpIdx].XValue, desiredSize);
+                double yValue = Data[dpIdx].YValues[yIdx].Value;
+                double xStart = Owner.XAxis.GetCoordinateFromTick(Data[dpIdx].Value, desiredSize);
                 double yStart = Owner.YAxis.GetCoordinateFromTick(yValue, desiredSize);
 
                 if (dpIdx < Data.Count - 1)
                 {
-                    double yValueNext = Data[dpIdx + 1].YValues[yIdx];
-                    double xEnd = Owner.XAxis.GetCoordinateFromTick(Data[dpIdx + 1].XValue, desiredSize);
+                    double yValueNext = Data[dpIdx + 1].YValues[yIdx].Value;
+                    double xEnd = Owner.XAxis.GetCoordinateFromTick(Data[dpIdx + 1].Value, desiredSize);
                     double yEnd = Owner.YAxis.GetCoordinateFromTick(yValueNext, desiredSize);
 
                     if (IsVisualCreatable(xStart, yStart, yZero, xMax, yMax, LineThickness) || 
                         IsVisualCreatable(xEnd, yEnd, yZero, xMax, yMax, LineThickness))
                     {
+                        double opacity = GetOpacity(yIdx);
+
                         if (Owner.Orientation == Orientation.Vertical)
                         {
-                            Children.Add(CreateLineVisual(pen, xStart, yStart, xEnd, yEnd));
+                            Children.Add(CreateLineVisual(pen, xStart, yStart, xEnd, yEnd, opacity));
                         }
                         else
                         {
-                            Children.Add(CreateLineVisual(pen, yStart, xStart, yEnd, xEnd));
+                            Children.Add(CreateLineVisual(pen, yStart, xStart, yEnd, xEnd, opacity));
                         }
                     }
                 }
@@ -271,7 +276,7 @@ namespace Restless.Controls.Chart
 
             using (StreamGeometryContext gc = geo.Open())
             {
-                double x = Owner.XAxis.GetCoordinateFromTick(Data[0].XValue, desiredSize);
+                double x = Owner.XAxis.GetCoordinateFromTick(Data[0].Value, desiredSize);
                 double y = 0;
 
                 Point pt = new Point(x, yZero);
@@ -282,10 +287,10 @@ namespace Restless.Controls.Chart
 
                 gc.BeginFigure(pt, true, true);
 
-                foreach (DataPoint point in Data)
+                foreach (DataPointX point in Data)
                 {
-                    x = Owner.XAxis.GetCoordinateFromTick(point.XValue, desiredSize);
-                    y = Owner.YAxis.GetCoordinateFromTick(point.YValues[yIdx], desiredSize);
+                    x = Owner.XAxis.GetCoordinateFromTick(point.Value, desiredSize);
+                    y = Owner.YAxis.GetCoordinateFromTick(point.YValues[yIdx].Value, desiredSize);
 
                     pt.X = x;
                     pt.Y = y;
@@ -307,14 +312,36 @@ namespace Restless.Controls.Chart
 
             geo.Freeze();
 
-            DrawingVisual visual = new DrawingVisual();
+            DrawingVisual visual = new DrawingVisual()
+            {
+                Opacity = GetOpacity(yIdx)
+            };
 
             using (DrawingContext dc = visual.RenderOpen())
             {
-                dc.DrawGeometry(Data.DataInfo[yIdx].DataBrush, null, geo);
+                dc.DrawGeometry(Data.DataInfo[yIdx].Visual.Data, null, geo);
             }
 
             Children.Add(visual);
+        }
+
+        private double GetLineThickness(int yIdx)
+        {
+            return yIdx == SelectedSeriesIndex ? LineThickness * 2.0 : LineThickness;
+        }
+
+        private double GetPointSize(int yIdx)
+        {
+            return yIdx == SelectedSeriesIndex ? PointSize * 1.5 : PointSize;
+        }
+
+        private double GetOpacity(int yIdx)
+        {
+            if (SelectedSeriesIndex != -1)
+            {
+                return yIdx == SelectedSeriesIndex ? 1.0 : 0.125;
+            }
+            return 1.0;
         }
 
         private bool IsVisualCreatable(double xc, double yc, double ycz, double xMax, double yMax, double lineWidth)

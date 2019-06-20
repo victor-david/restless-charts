@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 
@@ -9,8 +10,8 @@ namespace Restless.Controls.Chart
     /// </summary>
     /// <remarks>
     /// As with other charts, a PieChart uses a <see cref="DataSeries"/> object to obtains its values.
-    /// However, unlike other charts, PieChart uses only the <see cref="DataSequence"/> provided by the first
-    /// <see cref="DataPoint"/>. The value of <see cref="DataPoint.XValue"/> is not used. To create data for
+    /// However, unlike other charts, PieChart uses only the <see cref="DataPointYCollection"/> provided by the first
+    /// <see cref="DataPointX"/>. The value of <see cref="DataPointX.Value"/> is not used. To create data for
     /// PieChart, create a <see cref="DataSeries"/> with the number of Y series set to the number of pie slices needed.
     /// Call <see cref="DataSeries.Add(double, double)"/> for each pie value, passing the same X value each time.
     /// </remarks>
@@ -46,6 +47,51 @@ namespace Restless.Controls.Chart
         /// Gets the default value for <see cref="StartAngle"/>.
         /// </summary>
         public const double DefaultStartAngle = 45.0;
+
+        /// <summary>
+        /// Gets the minimum allowed value for <see cref="HoleSize"/>.
+        /// </summary>
+        public const double MinHoleSize = 0.0;
+
+        /// <summary>
+        /// Gets the maximum allowed value for <see cref="HoleSize"/>.
+        /// </summary>
+        public const double MaxHoleSize = 0.9;
+
+        /// <summary>
+        /// Gets the default value for <see cref="HoleSize"/>.
+        /// </summary>
+        public const double DefaultHoleSize = 0.10;
+
+        /// <summary>
+        /// Gets the minimum allowed value for <see cref="SelectedOffset"/>.
+        /// </summary>
+        public const double MinSelectedOffset = 10.0;
+
+        /// <summary>
+        /// Gets the maximum allowed value for <see cref="SelectedOffset"/>.
+        /// </summary>
+        public const double MaxSelectedOffset = 50.0;
+
+        /// <summary>
+        /// Gets the default value for <see cref="SelectedOffset"/>.
+        /// </summary>
+        public const double DefaultSelectedOffset = 35.0;
+
+        /// <summary>
+        /// Gets the minimum allowed value for <see cref="MaxSlice"/>.
+        /// </summary>
+        public const int MinMaxSlice = 6;
+
+        /// <summary>
+        /// Gets the maximum allowed value for <see cref="MaxSlice"/>.
+        /// </summary>
+        public const int MaxMaxSlice = 72;
+
+        /// <summary>
+        /// Gets the default value for <see cref="MaxSlice"/>.
+        /// </summary>
+        public const int DefaultMaxSlice = 12;
         #endregion
 
         /************************************************************************/
@@ -120,7 +166,7 @@ namespace Restless.Controls.Chart
             (
                 nameof(StartAngle), typeof(double), typeof(PieChart), 
                 new FrameworkPropertyMetadata(DefaultStartAngle,
-                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsParentMeasure,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender,
                     null, OnCoerceStartAngle)
             );
 
@@ -128,6 +174,155 @@ namespace Restless.Controls.Chart
         {
             return ((double)value).Clamp(MinStartAngle, MaxStartAngle);
         }
+        #endregion
+
+        /************************************************************************/
+
+        #region HoleSize
+        /// <summary>
+        /// Gets or sets the inner hole size expressed as a percentage.
+        /// This value is clamped between <see cref="MinHoleSize"/> and <see cref="MaxHoleSize"/>.
+        /// </summary>
+        public double HoleSize
+        {
+            get => (double)GetValue(HoleSizeProperty);
+            set => SetValue(HoleSizeProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="HoleSize"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty HoleSizeProperty = DependencyProperty.Register
+            (
+                nameof(HoleSize), typeof(double), typeof(PieChart), 
+                new FrameworkPropertyMetadata(DefaultHoleSize,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender, 
+                    null, OnCoerceHoleSize)
+            );
+
+        private static object OnCoerceHoleSize(DependencyObject d, object value)
+        {
+            return ((double)value).Clamp(MinHoleSize, MaxHoleSize);
+        }
+        #endregion
+
+        /************************************************************************/
+
+        #region SelectedOffset
+        /// <summary>
+        /// Gets the amount that a pie piece is offset when selected.
+        /// See remarks for more. This is a dependency property.
+        /// </summary>
+        /// <remarks>
+        /// This property controls how far pushed out from the center a selected pie piece is.
+        /// A pie piece may be selected by using a <see cref="ChartLegend"/> with its <see cref="ChartLegend.IsInteractive"/>
+        /// property set to true, and appropiate handlers established that react to a legend selection
+        /// by setting the <see cref="ChartBase.SelectedSeriesIndex"/> property.
+        /// This value is clamped between <see cref="MinSelectedOffset"/> and <see cref="MaxSelectedOffset"/>.
+        /// </remarks>
+        public double SelectedOffset
+        {
+            get => (double)GetValue(SelectedOffsetProperty);
+            set => SetValue(SelectedOffsetProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="SelectedOffset"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty SelectedOffsetProperty = DependencyProperty.Register
+            (
+                nameof(SelectedOffset), typeof(double), typeof(PieChart), 
+                new FrameworkPropertyMetadata(DefaultSelectedOffset,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender,
+                    null, OnCoerceSelectedOffset)
+            );
+
+        private static object OnCoerceSelectedOffset(DependencyObject d, object value)
+        {
+            return ((double)value).Clamp(MinSelectedOffset, MaxSelectedOffset);
+        }
+        #endregion
+
+        /************************************************************************/
+
+        #region LabelDisplay
+        /// <summary>
+        /// Gets or sets a value that determines how labels are placed on the chart.
+        /// </summary>
+        public LabelDisplay LabelDisplay
+        {
+            get => (LabelDisplay)GetValue(LabelDisplayProperty);
+            set => SetValue(LabelDisplayProperty, value);
+        }
+        
+        /// <summary>
+        /// Identifies the <see cref="LabelDisplay"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty LabelDisplayProperty = DependencyProperty.Register
+            (
+                nameof(LabelDisplay), typeof(LabelDisplay), typeof(PieChart), 
+                new FrameworkPropertyMetadata(LabelDisplay.NameValue,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender)
+            );
+        #endregion
+
+        /************************************************************************/
+
+        #region MaxSlice
+        /// <summary>
+        /// Gets or sets a value that determines the maximum number of slices allowed on the chart. 
+        /// This property is clamped between <see cref="MinMaxSlice"/> and <see cref="MaxMaxSlice"/>.
+        /// </summary>
+        /// <remarks>
+        /// This property controls the maximum number of slices that the chart may have.
+        /// If the data has more slices than this property specifies, slices with the smallest
+        /// percentages of the total are combined in an "Other" slice. The name used by the "Other"
+        /// slice is specified by the <see cref="OtherSliceName"/> property.
+        /// </remarks>
+        public int MaxSlice
+        {
+            get => (int)GetValue(MaxSliceProperty);
+            set => SetValue(MaxSliceProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="MaxSlice"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty MaxSliceProperty = DependencyProperty.Register
+            (
+                nameof(MaxSlice), typeof(int), typeof(PieChart),
+                new FrameworkPropertyMetadata(DefaultMaxSlice,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsMeasure,
+                    null, OnCoerceMaxSlice)
+            );
+
+        private static object OnCoerceMaxSlice(DependencyObject d, object value)
+        {
+            return ((int)value).Clamp(MinMaxSlice, MaxMaxSlice);
+        }
+        #endregion
+
+        /************************************************************************/
+
+        #region OtherSliceName
+        /// <summary>
+        /// Gets or sets a value that determines the name of the slice
+        /// that is used when <see cref="MaxSlice"/> is exceeded.
+        /// The default value is "Other"
+        /// </summary>
+        public string OtherSliceName
+        {
+            get => (string)GetValue(OtherSliceNameProperty);
+            set => SetValue(OtherSliceNameProperty, value);
+        }
+
+        /// <summary>
+        /// Identifies the <see cref="OtherSliceName"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty OtherSliceNameProperty = DependencyProperty.Register
+            (
+                nameof(OtherSliceName), typeof(string), typeof(PieChart), new PropertyMetadata("Other")
+            );
         #endregion
 
         /************************************************************************/
@@ -147,7 +342,7 @@ namespace Restless.Controls.Chart
 
             if (Data[0].YValues.Sum == 0)
             {
-                CreateNoDataChart(size, "Zero", Data.DataInfo[0].DataBrush);
+                CreateNoDataChart(size, "Zero", Data.DataInfo[0].Visual.Data);
                 return;
             }
 
@@ -160,6 +355,46 @@ namespace Restless.Controls.Chart
             // most common code path.
             CreateMultiValueChart(size);
 
+        }
+        #endregion
+
+        /************************************************************************/
+
+        #region Internal methods
+        /// <summary>
+        /// Adjusts <see cref="ChartBase.Data"/> according to <see cref="MaxSlice"/> if needed.
+        /// </summary>
+        internal void AdjustDataSeriesIf()
+        {
+            // no adjustment needed
+            if (Data == null) return;
+            if (Data.MaxYSeries <= MaxSlice) return;
+
+            // too many slices.
+            DataSeries adjData = DataSeries.Create(MaxSlice);
+            double smallestSum = 0;
+
+            var smallest = Data[0].YValues.GetSmallestValueDataPoints(Data.MaxYSeries - MaxSlice + 1);
+            smallest.ForEach((p) => smallestSum += p.Value);
+
+            int adjIdx = 0;
+            foreach (DataPointY point in Data[0].YValues)
+            {
+                if (!smallest.Contains(point))
+                {
+                    adjData.Add(0, point.Value);
+                    Data.DataInfo.CopyTo(point.SeriesIndex, adjIdx, adjData.DataInfo);
+                    adjIdx++;
+                }
+            }
+            // add the final value for the "other" slice,
+            adjData.Add(0, smallestSum);
+            // copy data info (name, colors) from the first smallest to the "other".
+            Data.DataInfo.CopyTo(smallest[0].SeriesIndex, MaxSlice - 1, adjData.DataInfo);
+            // don't want the name from the previous statement. set the name of the "other" to the property value.
+            adjData.DataInfo.SetInfo(MaxSlice - 1, OtherSliceName);
+
+            Data = adjData;
         }
         #endregion
 
@@ -184,58 +419,132 @@ namespace Restless.Controls.Chart
         {
             double x = size.Width / 2.0;
             double y = size.Height / 2.0;
-            Children.Add(CreateEllipseVisual(Data.DataInfo[0].DataBrush, null, x, y, GetRadius(x, y)));
+            Children.Add(CreateEllipseVisual(Data.DataInfo[0].Visual.Data, null, x, y, GetRadius(x, y)));
+            if (LabelDisplay != LabelDisplay.None)
+            {
+                // single slice - sum and value are the same.
+                string labelText = GetLabelText(Data.DataInfo[0].Name, Data[0].YValues[0].Value, Data[0].YValues[0].Value);
+                FormattedText text = GetFormattedText(labelText, FontFamily, FontSize, Data.DataInfo[0].Visual.PrimaryText);
+                x -= text.Width / 2.0;
+                Children.Add(CreateTextVisual(text, x, y, 0));
+            }
         }
 
         private void CreateMultiValueChart(Size size)
         {
             double sum = Data[0].YValues.Sum;
-            double angle = DegreeToRadian(StartAngle - 90);
-
             double radius = GetRadius(size);
             Point center = new Point(size.Width / 2.0, size.Height / 2.0);
 
+            double innerRadius = radius * HoleSize;
+            double rotationAngle = StartAngle - 90;
+
             int yIdx = 0;
 
-            // Data[0] exists or this method is not called.
-            foreach (double value in Data[0].YValues)
+            foreach (DataPointY dataPoint in Data[0].YValues)
             {
-                // PathFigure and segments are created in a way that puts the chart in the upper left of the available space.
-                // PathGeometry gets a transform that pushes the geometry into the center of the space.
-                PathGeometry pathGeometry = new PathGeometry()
+                double wedgeAngle = dataPoint.Value * 360 / sum;
+
+                double pushOffset = yIdx == SelectedSeriesIndex ? SelectedOffset : 0;
+                MakeOneSlice(yIdx, center, radius, innerRadius, wedgeAngle, rotationAngle, pushOffset);
+                if (LabelDisplay != LabelDisplay.None)
                 {
-                    Transform = new TranslateTransform(center.X - radius, center.Y - radius)
-                };
+                    double lineAngle = GetNormalizedAngle(rotationAngle + wedgeAngle / 2.0);
+                    MakeOneSliceLabel(sum, dataPoint.Value, Data.DataInfo[yIdx], center, radius + pushOffset, lineAngle);
+                }
 
-                PathFigure figure = new PathFigure()
-                {
-                    IsClosed = true,
-                    StartPoint = new Point(radius, radius)
-                };
-
-                double x = Math.Cos(angle) * radius + radius;
-                double y = Math.Sin(angle) * radius + radius;
-
-                // 1. Line segment from center of pie to its outer limit. 
-                figure.Segments.Add(new LineSegment(new Point(x, y), true));
-
-                // 2. Arc segment to curve around the outer limit of the pie.
-                double angleShare = value / sum * 360;
-                angle += DegreeToRadian(angleShare);
-                x = Math.Cos(angle) * radius + radius;
-                y = Math.Sin(angle) * radius + radius;
-                ArcSegment arcSeg = new ArcSegment(new Point(x, y), new Size(radius, radius), angleShare, angleShare > 180, SweepDirection.Clockwise, true);
-                figure.Segments.Add(arcSeg);
-
-                // 3. Line segment back to center
-                figure.Segments.Add(new LineSegment(new Point(radius, radius), true));
-               
-                // add the figure and create the child visual.
-                pathGeometry.Figures.Add(figure);
-                Children.Add(CreateGeometryVisual(Data.DataInfo[yIdx].DataBrush, null, pathGeometry));
-
+                rotationAngle += wedgeAngle;
                 yIdx++;
             }
+        }
+
+        private void MakeOneSlice(int yIdx, Point center, double radius, double innerRadius, double wedgeAngle, double rotationAngle, double pushOffset)
+        {
+            Point innerArcStartPoint = GetCartesianCoordinate(rotationAngle, innerRadius);
+            innerArcStartPoint.Offset(center.X, center.Y);
+
+            Point innerArcEndPoint = GetCartesianCoordinate(rotationAngle + wedgeAngle, innerRadius);
+            innerArcEndPoint.Offset(center.X, center.Y);
+
+            Point outerArcStartPoint = GetCartesianCoordinate(rotationAngle, radius);
+            outerArcStartPoint.Offset(center.X, center.Y);
+
+            Point outerArcEndPoint = GetCartesianCoordinate(rotationAngle + wedgeAngle, radius);
+            outerArcEndPoint.Offset(center.X, center.Y);
+
+            bool largeArc = wedgeAngle > 180.0;
+
+            if (pushOffset > 0)
+            {
+                Point offset = GetCartesianCoordinate(rotationAngle + wedgeAngle / 2.0, pushOffset);
+                innerArcStartPoint.Offset(offset.X, offset.Y);
+                innerArcEndPoint.Offset(offset.X, offset.Y);
+                outerArcStartPoint.Offset(offset.X, offset.Y);
+                outerArcEndPoint.Offset(offset.X, offset.Y);
+            }
+
+            Size outerArcSize = new Size(radius, radius);
+            Size innerArcSize = new Size(innerRadius, innerRadius);
+
+            StreamGeometry streamGeometry = new StreamGeometry();
+
+            using (var context = streamGeometry.Open())
+            {
+                context.BeginFigure(innerArcStartPoint, true, true);
+                context.LineTo(outerArcStartPoint, true, true);
+                context.ArcTo(outerArcEndPoint, outerArcSize, 0, largeArc, SweepDirection.Clockwise, true, true);
+                context.LineTo(innerArcEndPoint, true, true);
+                context.ArcTo(innerArcStartPoint, innerArcSize, 0, largeArc, SweepDirection.Counterclockwise, true, true);
+            }
+
+            Pen pen = Data.DataInfo[yIdx].Visual.GetBorderPen();
+            Children.Add(CreateGeometryVisual(Data.DataInfo[yIdx].Visual.Data, pen, streamGeometry));
+        }
+
+        private void MakeOneSliceLabel(double sum, double value, DataSeriesInfo info, Point center, double radius, double lineAngle)
+        {
+            Point startPoint = GetCartesianCoordinate(lineAngle, radius + (info.Visual.BorderThickness / 2.0) + 2.0);
+            startPoint.Offset(center.X, center.Y);
+            Point endPoint = GetCartesianCoordinate(lineAngle, radius * 1.075);
+            endPoint.Offset(center.X, center.Y);
+
+            StreamGeometry streamGeometry = new StreamGeometry();
+            using (var context = streamGeometry.Open())
+            {
+                context.BeginFigure(startPoint, false, false);
+                context.LineTo(endPoint, true, true);
+            }
+
+            Pen pen = info.Visual.GetPrimaryTextPen(2.0);
+            Children.Add(CreateGeometryVisual(null, pen, streamGeometry));
+
+            string labelText = GetLabelText(info.Name, sum, value);
+            FormattedText text = GetFormattedText(labelText, FontFamily, FontSize, info.Visual.PrimaryText);
+            text.LineHeight = text.Baseline / 2.0;
+            Point offset = GetTextLabelOffset(text, lineAngle);
+            endPoint.Offset(offset.X, offset.Y);
+            Children.Add(CreateTextVisual(text, endPoint.X, endPoint.Y, 0));
+        }
+
+        private string GetLabelText(string seriesName, double sum, double value)
+        {
+            switch (LabelDisplay)
+            {
+                case LabelDisplay.NameValue:
+                    return $"{seriesName} ({Owner.YAxis.GetFormattedValue(value)})";
+                case LabelDisplay.NamePercentage:
+                    return $"{seriesName} ({Owner.YAxis.GetFormattedValue(value / sum)})";
+                default:
+                    return seriesName;
+            }
+        }
+
+        private Point GetCartesianCoordinate(double angle, double radius)
+        {
+            double angleRad = angle.ToRadians();
+            double x = radius * Math.Cos(angleRad);
+            double y = radius * Math.Sin(angleRad);
+            return new Point(x, y);
         }
 
         private double GetRadius(double x, double y)
@@ -248,14 +557,32 @@ namespace Restless.Controls.Chart
             return GetRadius(size.Width / 2.0, size.Height / 2.0);
         }
 
-        private double RadianToDegree(double angle)
+        private Point GetTextLabelOffset(FormattedText text, double lineAngle)
         {
-            return angle * (180.0 / Math.PI);
+            Point point = new Point();
+            if (IsWithin(lineAngle, 0, 90)) point.Offset(4, 0);
+            if (IsWithin(lineAngle, 90, 180)) point.Offset(-4 - text.Width, 0);
+            if (IsWithin(lineAngle, 180, 270)) point.Offset(-4 - text.Width, -text.Height / 2.0);
+            if (IsWithin(lineAngle, 270, 360)) point.Offset(4, -text.Height / 2.0);
+            return point;
         }
 
-        private double DegreeToRadian(double angle)
+        private bool IsWithin(double value, double min, double max)
         {
-            return Math.PI * angle / 180.0;
+            return value > min && value <= max;
+        }
+
+        /// <summary>
+        /// Gets a normalized angle. Although it doesn't matter to geometry (10 and 370 are the same)
+        /// this enables us to identify the quadrant that a label is in, as that affects how we place that label.
+        /// </summary>
+        /// <param name="angle">The angle.</param>
+        /// <returns>Angle between 0 and 360.</returns>
+        private double GetNormalizedAngle(double angle)
+        {
+            while (angle < 0.0) angle += 360.0;
+            while (angle > 360.0) angle -= 360.0;
+            return angle;
         }
         #endregion
     }

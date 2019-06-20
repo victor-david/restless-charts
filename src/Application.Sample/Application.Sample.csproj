@@ -58,10 +58,50 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="CategoryRow.cs" />
-    <Compile Include="CategoryTable.cs" />
-    <Compile Include="DoubleToLookupConverter.cs" />
-    <Compile Include="RandomGenerator.cs" />
+    <Compile Include="ActiveChartType.cs" />
+    <Compile Include="Controls\DropDownMenuButton.cs" />
+    <Compile Include="Controls\PieChartControl.xaml.cs">
+      <DependentUpon>PieChartControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MultipleChartControl.xaml.cs">
+      <DependentUpon>MultipleChartControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\LineChartControl.xaml.cs">
+      <DependentUpon>LineChartControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\BarChartControl.xaml.cs">
+      <DependentUpon>BarChartControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Commands\CommandDictionary.cs" />
+    <Compile Include="Controls\ChartControlBase.cs" />
+    <Compile Include="Controls\CommonMenu.xaml.cs">
+      <DependentUpon>CommonMenu.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\CategoryRow.cs" />
+    <Compile Include="Data\CategoryTable.cs" />
+    <Compile Include="Converters\DoubleToLookupConverter.cs" />
+    <Compile Include="Data\RandomGenerator.cs" />
+    <Compile Include="Commands\RelayCommand.cs" />
+    <Page Include="Controls\PieChartControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\MultipleChartControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\LineChartControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\BarChartControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\CommonMenu.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -70,7 +110,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DoubleToDateConverter.cs" />
+    <Compile Include="Converters\DoubleToDateConverter.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -115,5 +155,6 @@
   <ItemGroup>
     <Resource Include="Application.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
