@@ -23,7 +23,7 @@ namespace Restless.Controls.Chart
         /// <summary>
         /// Initializes a new instance of the <see cref="MappedValueConverter"/> class.
         /// </summary>
-        /// <param name="divisior">The amount to divide the value to be converted by.</param>
+        /// <param name="divisor">The amount to divide the value to be converted by.</param>
         public DivisionConverter(double divisor)
         {
             if (divisor == 0) throw new ArgumentException("Divisor cannot be zero");
