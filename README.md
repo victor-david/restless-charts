@@ -1,4 +1,5 @@
 # Restless Charts
+[![Nuget](https://img.shields.io/nuget/v/Restless.Charts.svg?style=flat-square)](https://www.nuget.org/packages/Restless.Charts/)
 
 This library provides charting capabilities for your application. The following features are supported:
 
