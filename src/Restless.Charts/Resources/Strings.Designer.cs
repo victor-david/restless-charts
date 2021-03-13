@@ -19,10 +19,10 @@ namespace Restless.Controls.Chart.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class Strings {
+    internal class Strings {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace Restless.Controls.Chart.Resources {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Resources.ResourceManager ResourceManager {
+        internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Restless.Controls.Chart.Resources.Strings", typeof(Strings).Assembly);
@@ -51,7 +51,7 @@ namespace Restless.Controls.Chart.Resources {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Globalization.CultureInfo Culture {
+        internal static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace Restless.Controls.Chart.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Legend.
         /// </summary>
-        public static string HelpChartLegendHeader {
+        internal static string HelpChartLegendHeader {
             get {
                 return ResourceManager.GetString("HelpChartLegendHeader", resourceCulture);
             }
@@ -79,7 +79,7 @@ namespace Restless.Controls.Chart.Resources {
         ///Left button down drag with Control key pressed - pan Y only.
         ///Left button down drag with Shift key pressed - pan X only..
         /// </summary>
-        public static string HelpChartNavigation {
+        internal static string HelpChartNavigation {
             get {
                 return ResourceManager.GetString("HelpChartNavigation", resourceCulture);
             }
@@ -88,7 +88,7 @@ namespace Restless.Controls.Chart.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Chart Navigation.
         /// </summary>
-        public static string HelpChartNavigationHeader {
+        internal static string HelpChartNavigationHeader {
             get {
                 return ResourceManager.GetString("HelpChartNavigationHeader", resourceCulture);
             }
@@ -97,7 +97,7 @@ namespace Restless.Controls.Chart.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Display the chart legend.
         /// </summary>
-        public static string ToolTipLegendHelpButton {
+        internal static string ToolTipLegendHelpButton {
             get {
                 return ResourceManager.GetString("ToolTipLegendHelpButton", resourceCulture);
             }
@@ -106,7 +106,7 @@ namespace Restless.Controls.Chart.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Display information about chart navigation.
         /// </summary>
-        public static string ToolTipNavigationHelpButton {
+        internal static string ToolTipNavigationHelpButton {
             get {
                 return ResourceManager.GetString("ToolTipNavigationHelpButton", resourceCulture);
             }

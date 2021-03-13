@@ -448,7 +448,9 @@ namespace Restless.Controls.Chart
         protected FormattedText GetFormattedText(string text, string fontFamilyName, double fontSize, Brush brush)
         {
             if (string.IsNullOrEmpty(fontFamilyName)) fontFamilyName = DefaultValueFontFamily;
+#pragma warning disable CS0618 // Type or member is obsolete
             FormattedText ftext = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface(fontFamilyName), fontSize, brush);
+#pragma warning restore CS0618 // Type or member is obsolete
             return ftext;
         }
         #endregion
