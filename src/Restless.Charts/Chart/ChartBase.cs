@@ -13,7 +13,7 @@ namespace Restless.Controls.Chart
         #region Private
         private ChartContainer owner;
         private bool dataChangedEventInProgress;
-        private DataSeries deferredData;
+        private bool setDataOnLoad;
         #endregion
 
         /************************************************************************/
@@ -55,11 +55,11 @@ namespace Restless.Controls.Chart
 
         private void OnChartBaseLoaded(object sender, RoutedEventArgs e)
         {
-            TreeHelper.TrySetParent(this, ref owner);
-            if (deferredData != null)
+            _ = TreeHelper.TrySetParent(this, ref owner);
+
+            if (setDataOnLoad)
             {
-                Data = deferredData;
-                deferredData = null;
+                SetChartData();
             }
         }
         #endregion
@@ -116,7 +116,6 @@ namespace Restless.Controls.Chart
                 nameof(Data), typeof(DataSeries), typeof(ChartBase), new FrameworkPropertyMetadata()
                 {
                     DefaultValue = null,
-                    CoerceValueCallback = OnCoerceData,
                     PropertyChangedCallback = OnDataChanged,
                 }
             );
@@ -138,37 +137,34 @@ namespace Restless.Controls.Chart
                 nameof(DataChanged), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(ChartBase)
             );
 
-        private static object OnCoerceData(DependencyObject d, object baseValue)
-        {
-            if (d is ChartBase chart)
-            {
-                if (chart.IsLoaded)
-                {
-                    return baseValue;
-                }
-                chart.deferredData = baseValue as DataSeries;
-            }
-            return null;
-        }
-
         private static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is ChartBase chart)
             {
-                // avoid reentrancy
-                if (!chart.dataChangedEventInProgress)
-                {
-                    chart.dataChangedEventInProgress = true;
-                    chart.RaiseEvent(new RoutedEventArgs(DataChangedEvent));
-                    chart.dataChangedEventInProgress = false;
-                }
+                chart.setDataOnLoad = !chart.IsLoaded;
 
-                if (chart.Data != null && TreeHelper.TrySetParent(chart, ref chart.owner))
+                if (chart.IsLoaded)
                 {
-                    chart.Owner.XAxis.SetData(chart.Data);
-                    chart.Owner.YAxis.SetData(chart.Data);
-                    chart.Owner.InvalidateMeasure();
+                    chart.SetChartData();
                 }
+            }
+        }
+
+        private void SetChartData()
+        {
+            // avoid reentrancy
+            if (!dataChangedEventInProgress)
+            {
+                dataChangedEventInProgress = true;
+                RaiseEvent(new RoutedEventArgs(DataChangedEvent));
+                dataChangedEventInProgress = false;
+            }
+
+            if (Data != null && TreeHelper.TrySetParent(this, ref owner))
+            {
+                Owner.XAxis.SetData(Data);
+                Owner.YAxis.SetData(Data);
+                Owner.InvalidateMeasure();
             }
         }
         #endregion
