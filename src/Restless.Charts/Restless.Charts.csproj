@@ -7,12 +7,12 @@
     <PackageId>Restless.Charts</PackageId>
     <AssemblyName>Restless.Charts</AssemblyName>
     <RootNamespace>Restless.Controls.Chart</RootNamespace>
-    <Description>Provides core services for use in a WPF application such as base classes for sqlite database, and various utilities.</Description>
+    <Description>Provides charting capabilities.</Description>
     <PackageProjectUrl>https://github.com/victor-david/restless-charts</PackageProjectUrl>
     <RepositoryUrl>https://github.com/victor-david/restless-charts</RepositoryUrl>
     <Authors>Restless Animal Development</Authors>
     <Company>Restless Animal Development</Company>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Product>Restless Charts</Product>
     <Title>Restless Charts</Title>
     <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>

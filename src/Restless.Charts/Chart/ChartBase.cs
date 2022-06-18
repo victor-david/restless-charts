@@ -13,6 +13,7 @@ namespace Restless.Controls.Chart
         #region Private
         private ChartContainer owner;
         private bool dataChangedEventInProgress;
+        private DataSeries deferredData;
         #endregion
 
         /************************************************************************/
@@ -49,7 +50,17 @@ namespace Restless.Controls.Chart
         {
             RenderTransformOrigin = new Point(0.5, 0.5);
             Children = new VisualCollection(this);
-            Loaded += (s, e) => TreeHelper.TrySetParent(this, ref owner);
+            AddHandler(LoadedEvent, new RoutedEventHandler(OnChartBaseLoaded));
+        }
+
+        private void OnChartBaseLoaded(object sender, RoutedEventArgs e)
+        {
+            TreeHelper.TrySetParent(this, ref owner);
+            if (deferredData != null)
+            {
+                Data = deferredData;
+                deferredData = null;
+            }
         }
         #endregion
 
@@ -102,9 +113,13 @@ namespace Restless.Controls.Chart
         /// </summary>
         public static readonly DependencyProperty DataProperty = DependencyProperty.Register
             (
-                nameof(Data), typeof(DataSeries), typeof(ChartBase), new FrameworkPropertyMetadata(null, OnDataChanged)
+                nameof(Data), typeof(DataSeries), typeof(ChartBase), new FrameworkPropertyMetadata()
+                {
+                    DefaultValue = null,
+                    CoerceValueCallback = OnCoerceData,
+                    PropertyChangedCallback = OnDataChanged,
+                }
             );
-
 
         /// <summary>
         /// Provides notification when the <see cref="Data"/> property changes.
@@ -123,23 +138,36 @@ namespace Restless.Controls.Chart
                 nameof(DataChanged), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(ChartBase)
             );
 
+        private static object OnCoerceData(DependencyObject d, object baseValue)
+        {
+            if (d is ChartBase chart)
+            {
+                if (chart.IsLoaded)
+                {
+                    return baseValue;
+                }
+                chart.deferredData = baseValue as DataSeries;
+            }
+            return null;
+        }
+
         private static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is ChartBase c)
+            if (d is ChartBase chart)
             {
                 // avoid reentrancy
-                if (!c.dataChangedEventInProgress)
+                if (!chart.dataChangedEventInProgress)
                 {
-                    c.dataChangedEventInProgress = true;
-                    c.RaiseEvent(new RoutedEventArgs(DataChangedEvent));
-                    c.dataChangedEventInProgress = false;
+                    chart.dataChangedEventInProgress = true;
+                    chart.RaiseEvent(new RoutedEventArgs(DataChangedEvent));
+                    chart.dataChangedEventInProgress = false;
                 }
 
-                if (c.Data != null && TreeHelper.TrySetParent(c, ref c.owner))
+                if (chart.Data != null && TreeHelper.TrySetParent(chart, ref chart.owner))
                 {
-                    c.Owner.XAxis.SetData(c.Data);
-                    c.Owner.YAxis.SetData(c.Data);
-                    c.Owner.InvalidateMeasure();
+                    chart.Owner.XAxis.SetData(chart.Data);
+                    chart.Owner.YAxis.SetData(chart.Data);
+                    chart.Owner.InvalidateMeasure();
                 }
             }
         }
@@ -234,7 +262,7 @@ namespace Restless.Controls.Chart
         {
             if (index < 0 || index >= Children.Count)
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(index));
             }
             return Children[index];
         }
